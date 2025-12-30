@@ -343,7 +343,7 @@
             const username = sessionStorage.getItem('loggedInUserUsername');
             if (!username) {
                 alert("Session expired or user not logged in. Redirecting to home.");
-                window.location.href = '../index.html';
+                window.location.href = './index.html';
                 return;
             }
             fetchListings(username);
