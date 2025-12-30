@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultant Profile - RealEstate Partner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(to bottom, rgba(30, 64, 175, 0.05), rgba(30, 64, 175, 0.05)),
+                repeating-linear-gradient(0deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px),
+                repeating-linear-gradient(90deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px);
+            background-size: 100% 100%, 80px 80px, 80px 80px;
+            min-height: 100vh;
+        }
+        
+        .stat-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .property-select-card {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .property-select-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-lg border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center shadow-md">
+                <span class="text-white font-bold text-lg">R</span>
+            </div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-500 bg-clip-text text-transparent">Consultant Profile</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button onclick="goBack()" class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-150 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 md:p-10">
+        <!-- Consultant Profile Header -->
+        <div class="profile-header rounded-xl shadow-lg p-8 mb-8 text-white">
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="w-32 h-32 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                    <img id="consultant-photo" class="w-full h-full object-cover" style="display: none;" alt="Profile">
+                    <span id="consultant-initials" class="text-5xl font-bold text-teal-600">C</span>
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <h2 id="consultant-name" class="text-4xl font-extrabold mb-2">Consultant Name</h2>
+                    <p class="text-xl opacity-90 mb-3">Real Estate Consultant</p>
+                    <div class="flex flex-wrap gap-4 justify-center md:justify-start text-sm">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <span id="consultant-email">email@example.com</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <span id="consultant-phone">+91 1234567890</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button onclick="contactConsultant()" class="bg-white border-2 border-white text-teal-600 hover:bg-teal-50 hover:border-teal-200 font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-150 whitespace-nowrap flex items-center justify-center gap-2 hover:scale-105">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        Contact Consultant
+                    </button>
+                    <button onclick="requestVisit()" class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-150 whitespace-nowrap flex items-center justify-center gap-2 hover:scale-105">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Request Visit
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg border-2 border-blue-400 text-white">
+                <div class="flex items-center justify-between mb-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <div class="text-4xl font-bold" id="total-clients">0</div>
+                <div class="text-sm opacity-90 mt-2">Total Clients Served</div>
+            </div>
+            
+            <div class="stat-card bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-lg border-2 border-green-400 text-white">
+                <div class="flex items-center justify-between mb-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="text-4xl font-bold" id="completed-visits">0</div>
+                <div class="text-sm opacity-90 mt-2">Completed Visits</div>
+            </div>
+            
+            <div class="stat-card bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg border-2 border-purple-400 text-white">
+                <div class="flex items-center justify-between mb-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+                <div class="text-4xl font-bold" id="portfolio-count">0</div>
+                <div class="text-sm opacity-90 mt-2">Portfolio Properties</div>
+            </div>
+            
+            <div class="stat-card bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg border-2 border-orange-400 text-white">
+                <div class="flex items-center justify-between mb-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                    </svg>
+                </div>
+                <div class="text-4xl font-bold" id="rating">5.0</div>
+                <div class="text-sm opacity-90 mt-2">Average Rating</div>
+            </div>
+        </div>
+
+        <!-- Expertise Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border-2 border-indigo-200 hover:border-indigo-400">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-bold text-gray-700">Expert Localities</div>
+                </div>
+                <div id="expert-localities" class="text-xs text-gray-600 max-h-20 overflow-y-auto">Loading...</div>
+            </div>
+            
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border-2 border-cyan-200 hover:border-cyan-400">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-bold text-gray-700">Expert Price Range</div>
+                </div>
+                <div id="expert-price-range" class="text-xs text-gray-600 max-h-20 overflow-y-auto">Loading...</div>
+            </div>
+            
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border-2 border-pink-200 hover:border-pink-400">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-bold text-gray-700">Expert Square Footage</div>
+                </div>
+                <div id="expert-sqft" class="text-xs text-gray-600 max-h-20 overflow-y-auto">Loading...</div>
+            </div>
+            
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border-2 border-amber-200 hover:border-amber-400">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-bold text-gray-700">Expert BHK</div>
+                </div>
+                <div id="expert-bhk" class="text-xs text-gray-600 max-h-20 overflow-y-auto">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Portfolio Properties -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-2 border-gray-200">
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-6 flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                Portfolio Properties
+            </h3>
+            <div id="portfolio-properties" class="space-y-4">
+                <div class="text-gray-500 text-center py-8">Loading portfolio...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Property Selection Modal -->
+    <div id="property-selection-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Select Property to Visit</h3>
+                <button onclick="closePropertySelectionModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <p class="text-gray-600 mb-6">Choose a property from <span id="consultant-name-modal" class="font-semibold"></span>'s portfolio:</p>
+            
+            <div id="property-selection-container" class="space-y-3 max-h-96 overflow-y-auto">
+                <div class="text-gray-500 text-center py-8">Loading properties...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expert Visit Scheduling Modal -->
+    <div id="expert-visit-schedule-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">📅 Schedule Expert Assisted Visit</h3>
+                <button onclick="closeExpertVisitScheduleModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <!-- Expert Details Card -->
+            <div class="bg-gradient-to-r from-teal-50 to-teal-100 border-l-4 border-teal-500 p-5 rounded-lg mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full bg-teal-600 flex items-center justify-center text-white text-2xl font-bold">
+                        <span id="expert-initial">C</span>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-lg font-semibold text-gray-800" id="expert-visit-expert-name">Expert Name</h4>
+                        <p class="text-sm text-gray-600">Real Estate Consultant</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Property Details Card -->
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 p-5 rounded-lg mb-6">
+                <h4 class="font-semibold text-gray-800 mb-2">📍 Property Details</h4>
+                <p class="text-gray-700"><span class="font-medium">Property:</span> <span id="expert-visit-property-name">Property Name</span></p>
+                <p class="text-gray-700"><span class="font-medium">Location:</span> <span id="expert-visit-property-location">Location</span></p>
+            </div>
+            
+            <!-- Visit Details Form -->
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Preferred Visit Date</label>
+                    <input type="date" id="expert-visit-date" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">⏰ Preferred Visit Time</label>
+                    <select id="expert-visit-time" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                        <option value="">Select a time</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📝 Additional Notes (Optional)</label>
+                    <textarea id="expert-visit-notes" rows="3" 
+                              placeholder="Any specific requirements or questions..."
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"></textarea>
+                </div>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p class="text-sm text-blue-800">
+                        <span class="font-semibold">ℹ️ Note:</span> Your expert will contact you to confirm the visit details within 24 hours.
+                    </p>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button onclick="closeExpertVisitScheduleModal()" 
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-150">
+                        Cancel
+                    </button>
+                    <button onclick="confirmExpertVisit()" 
+                            class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150">
+                        Confirm Visit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let consultantUsername = null;
+        let consultantData = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Get consultant username from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            consultantUsername = urlParams.get('username');
+            
+            if (!consultantUsername) {
+                alert('No consultant specified!');
+                window.history.back();
+                return;
+            }
+
+            await loadConsultantProfile();
+            await loadPortfolioData();
+            await loadPortfolioProperties();
+        });
+
+        async function loadConsultantProfile() {
+            try {
+                // Load user data to get consultant info
+                const response = await fetch('user_data.csv');
+                const text = await response.text();
+                const rows = text.trim().split('\n').slice(1);
+
+                let found = false;
+                for (const row of rows) {
+                    const cols = parseCSVRow(row);
+                    // CSV format: role,username,password,email,firstname,lastname,contact,created_date
+                    
+                    if (cols[1]?.trim() === consultantUsername.trim() && cols[0]?.trim() === 'consultant') {
+                        consultantData = {
+                            role: cols[0].trim(),
+                            username: cols[1].trim(),
+                            password: cols[2],
+                            email: cols[3],
+                            firstName: cols[4],
+                            lastName: cols[5],
+                            phone: cols[6]
+                        };
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    console.error('Consultant not found:', consultantUsername);
+                    document.getElementById('consultant-name').textContent = 'Consultant Not Found';
+                    document.getElementById('portfolio-properties').innerHTML = '<div class="text-red-500 text-center py-8">Consultant not found</div>';
+                    return;
+                }
+
+                // Display consultant info
+                const fullName = `${consultantData.firstName} ${consultantData.lastName}`;
+                document.getElementById('consultant-name').textContent = fullName;
+                document.getElementById('consultant-email').textContent = consultantData.email;
+                document.getElementById('consultant-phone').textContent = consultantData.phone;
+                
+                // Set initials
+                const initials = (consultantData.firstName.charAt(0) + consultantData.lastName.charAt(0)).toUpperCase();
+                document.getElementById('consultant-initials').textContent = initials;
+
+                // Load profile photo if exists
+                const savedPhoto = localStorage.getItem(`profilePhoto_${consultantUsername}`);
+                if (savedPhoto) {
+                    const profilePhoto = document.getElementById('consultant-photo');
+                    const profileInitials = document.getElementById('consultant-initials');
+                    profilePhoto.src = savedPhoto;
+                    profilePhoto.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Error loading consultant profile:', error);
+                alert('Error loading consultant profile');
+            }
+        }
+
+        async function loadPortfolioData() {
+            try {
+                // Load client served count from localStorage
+                const clientCountKey = `consultantClientsServed_${consultantUsername}`;
+                const clientsServed = parseInt(localStorage.getItem(clientCountKey) || '0');
+                document.getElementById('total-clients').textContent = clientsServed;
+                
+                // Load action log to get consultant statistics
+                const response = await fetch('action_log.csv');
+                const text = await response.text();
+                const rows = text.trim().split('\n').slice(1);
+
+                const consultantActivities = [];
+                const uniqueClients = new Set();
+                let completedVisits = 0;
+
+                const now = new Date();
+
+                for (const row of rows) {
+                    const cols = parseCSVRow(row);
+                    if (cols.length < 6) continue;
+
+                    const [timestamp, action, customer_email, builder_username, consultant_email, status, property_timestamp, notes, visit_date, visit_time] = cols;
+
+                    // Filter for this consultant's activities
+                    if (consultant_email !== consultantData.email) continue;
+
+                    consultantActivities.push({
+                        timestamp,
+                        action,
+                        customer_email,
+                        builder_username,
+                        status,
+                        visit_date,
+                        visit_time
+                    });
+
+                    // Count unique clients
+                    if (customer_email) {
+                        uniqueClients.add(customer_email);
+                    }
+
+                    // Count completed visits
+                    if (action === 'expert_visit_scheduled' && visit_date) {
+                        const visitDateTime = new Date(visit_date);
+                        if (visitDateTime < now) {
+                            completedVisits++;
+                        }
+                    }
+                }
+
+                // Update statistics
+                // Total clients already set from localStorage above
+                document.getElementById('completed-visits').textContent = completedVisits;
+
+            } catch (error) {
+                console.error('Error loading portfolio data:', error);
+            }
+        }
+
+        async function loadPortfolioProperties() {
+            try {
+                // Get portfolio from localStorage
+                const portfolio = JSON.parse(localStorage.getItem(`consultantPortfolio_${consultantUsername}`) || '[]');
+                
+                // Update portfolio count
+                document.getElementById('portfolio-count').textContent = portfolio.length;
+
+                if (portfolio.length === 0) {
+                    document.getElementById('portfolio-properties').innerHTML = '<div class="text-gray-500 text-center py-8">No properties in portfolio yet</div>';
+                    return;
+                }
+
+                // Load user data for builder names
+                const userResponse = await fetch('user_data.csv');
+                const userText = await userResponse.text();
+                const userRows = userText.trim().split('\n').slice(1);
+                
+                const builderNames = {};
+                for (const row of userRows) {
+                    const cols = parseCSVRow(row);
+                    if (cols[0] === 'builder') {
+                        builderNames[cols[1]] = `${cols[4]} ${cols[5]}`.trim();
+                    }
+                }
+
+                // Load property details
+                const buildersResponse = await fetch('builder_listings.csv');
+                const buildersText = await buildersResponse.text();
+                const builderRows = buildersText.trim().split('\n').slice(1);
+
+                const detailsResponse = await fetch('live_listing_details.csv');
+                const detailsText = await detailsResponse.text();
+                const detailRows = detailsText.trim().split('\n').slice(1);
+
+                const properties = [];
+                for (const item of portfolio) {
+                    // Find property in builder listings
+                    for (const row of builderRows) {
+                        const cols = parseCSVRow(row);
+                        if (cols[6] === item.timestamp) {
+                            const propertyInfo = {
+                                builder_username: cols[0],
+                                property_name: cols[1],
+                                location: cols[2],
+                                unit_type: cols[3],
+                                listing_price: cols[4],
+                                status: cols[5],
+                                created_timestamp: cols[6],
+                                addedOn: item.addedOn,
+                                builder_name: builderNames[cols[0]] || cols[0]
+                            };
+
+                            // Find matching details
+                            const matchingDetail = detailRows.find(detailRow => {
+                                const detailCols = parseCSVRow(detailRow);
+                                return detailCols[0] === item.timestamp;
+                            });
+
+                            if (matchingDetail) {
+                                const detailCols = parseCSVRow(matchingDetail);
+                                propertyInfo.sq_ft = detailCols[1];
+                                propertyInfo.num_bedrooms = detailCols[2];
+                                propertyInfo.apartment_name = detailCols[6];
+                                propertyInfo.furnishing_status = detailCols[15];
+                            }
+
+                            properties.push(propertyInfo);
+                            break;
+                        }
+                    }
+                }
+
+                displayPortfolioProperties(properties);
+                updateExpertiseStats(properties);
+
+            } catch (error) {
+                console.error('Error loading portfolio properties:', error);
+                document.getElementById('portfolio-properties').innerHTML = '<div class="text-red-500 text-center py-4">Error loading portfolio</div>';
+                updateExpertiseStats([]);
+            }
+        }
+
+        function updateExpertiseStats(properties) {
+            // Expert Localities
+            const localities = [...new Set(properties.map(p => p.location).filter(Boolean))];
+            const localitiesEl = document.getElementById('expert-localities');
+            if (localities.length === 0) {
+                localitiesEl.innerHTML = '<span class="text-gray-400">No data</span>';
+            } else {
+                localitiesEl.innerHTML = localities.map(loc => `<span class="inline-block bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full mr-1 mb-1">${loc}</span>`).join('');
+            }
+
+            // Expert Price Range
+            const prices = properties.map(p => parseFloat(p.listing_price)).filter(p => !isNaN(p));
+            const priceRangeEl = document.getElementById('expert-price-range');
+            if (prices.length === 0) {
+                priceRangeEl.innerHTML = '<span class="text-gray-400">No data</span>';
+            } else {
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                priceRangeEl.innerHTML = `
+                    <div class="font-semibold text-cyan-600">${formatPrice(minPrice)} - ${formatPrice(maxPrice)}</div>
+                    <div class="text-gray-500 mt-1">${prices.length} properties</div>
+                `;
+            }
+
+            // Expert Square Footage
+            const sqfts = [...new Set(properties.map(p => p.sq_ft).filter(Boolean))].sort((a, b) => parseFloat(a) - parseFloat(b));
+            const sqftEl = document.getElementById('expert-sqft');
+            if (sqfts.length === 0) {
+                sqftEl.innerHTML = '<span class="text-gray-400">No data</span>';
+            } else {
+                sqftEl.innerHTML = sqfts.map(sqft => `<span class="inline-block bg-pink-100 text-pink-800 px-2 py-1 rounded-full mr-1 mb-1">${sqft} sq.ft</span>`).join('');
+            }
+
+            // Expert BHK
+            const bhks = [...new Set(properties.map(p => p.num_bedrooms).filter(Boolean))].sort((a, b) => parseInt(a) - parseInt(b));
+            const bhkEl = document.getElementById('expert-bhk');
+            if (bhks.length === 0) {
+                bhkEl.innerHTML = '<span class="text-gray-400">No data</span>';
+            } else {
+                bhkEl.innerHTML = bhks.map(bhk => `<span class="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded-full mr-1 mb-1">${bhk} BHK</span>`).join('');
+            }
+        }
+
+        function displayPortfolioProperties(properties) {
+            const container = document.getElementById('portfolio-properties');
+            
+            if (properties.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No properties found</div>';
+                return;
+            }
+
+            container.innerHTML = properties.map(property => {
+                return `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition duration-200">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-800">${property.property_name}</h4>
+                                <p class="text-sm text-gray-600">${property.builder_name}</p>
+                                <p class="text-sm text-gray-500">📍 ${property.location}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${property.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                ${property.status}
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-sm">
+                            <div>
+                                <span class="text-gray-500">BHK:</span>
+                                <span class="font-medium ml-1">${property.num_bedrooms || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Sq.Ft:</span>
+                                <span class="font-medium ml-1">${property.sq_ft || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Price:</span>
+                                <span class="font-medium ml-1">${formatPrice(property.listing_price)}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Furnishing:</span>
+                                <span class="font-medium ml-1">${property.furnishing_status || 'N/A'}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end pt-3 border-t border-gray-200">
+                            <button onclick="viewProperty('${property.created_timestamp}')" class="bg-teal-500 hover:bg-teal-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-150">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewProperty(timestamp) {
+            window.location.href = `property_details.html?timestamp=${timestamp}`;
+        }
+
+        function contactConsultant() {
+            if (!consultantData) {
+                alert('Consultant information not available');
+                return;
+            }
+
+            const customerFirstName = sessionStorage.getItem('loggedInUserFirstName') || 'Customer';
+            const customerLastName = sessionStorage.getItem('loggedInUserLastName') || '';
+            const customerName = `${customerFirstName} ${customerLastName}`.trim();
+            const customerPhone = sessionStorage.getItem('loggedInUserPhone') || '';
+            const customerEmail = sessionStorage.getItem('loggedInUserEmail') || '';
+
+            if (!customerEmail) {
+                alert('Please login to contact consultant');
+                window.location.href = 'customer/login.html';
+                return;
+            }
+
+            // Create consultant connect request
+            const request = {
+                id: Date.now(),
+                consultantName: `${consultantData.firstName} ${consultantData.lastName}`,
+                consultantPhone: consultantData.phone,
+                consultantEmail: consultantData.email,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                customerEmail: customerEmail,
+                requestType: 'Profile Contact',
+                status: 'Pending',
+                timestamp: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            const consultantRequests = JSON.parse(localStorage.getItem('consultantConnectRequests') || '[]');
+            consultantRequests.push(request);
+            localStorage.setItem('consultantConnectRequests', JSON.stringify(consultantRequests));
+
+            alert(`Contact request sent!\n\n${consultantData.firstName} ${consultantData.lastName} will reach out to you shortly.`);
+        }
+
+        let selectedPropertyForVisit = null;
+
+        function requestVisit() {
+            if (!consultantData) {
+                alert('Consultant information not available');
+                return;
+            }
+
+            const customerEmail = sessionStorage.getItem('loggedInUserEmail');
+            if (!customerEmail) {
+                alert('Please login to request a visit');
+                window.location.href = 'customer/login.html';
+                return;
+            }
+
+            // Open property selection modal
+            openPropertySelectionModal();
+        }
+
+        function openPropertySelectionModal() {
+            const modal = document.getElementById('property-selection-modal');
+            const container = document.getElementById('property-selection-container');
+            const consultantNameModal = document.getElementById('consultant-name-modal');
+            
+            // Set consultant name in modal
+            consultantNameModal.textContent = `${consultantData.firstName} ${consultantData.lastName}`;
+            
+            // Get portfolio from localStorage
+            const portfolio = JSON.parse(localStorage.getItem(`consultantPortfolio_${consultantUsername}`) || '[]');
+            
+            if (portfolio.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">This consultant has no properties in their portfolio yet.</div>';
+                modal.classList.add('active');
+                return;
+            }
+
+            // Display properties from the already loaded properties array
+            const propertiesContainer = document.getElementById('portfolio-properties');
+            
+            // Get properties from the displayed portfolio
+            container.innerHTML = '';
+            
+            // Fetch properties again for selection
+            loadPropertiesForSelection(portfolio);
+            
+            modal.classList.add('active');
+        }
+
+        async function loadPropertiesForSelection(portfolio) {
+            const container = document.getElementById('property-selection-container');
+            
+            try {
+                // Load user data for builder names
+                const userResponse = await fetch('user_data.csv');
+                const userText = await userResponse.text();
+                const userRows = userText.trim().split('\n').slice(1);
+                
+                const builderNames = {};
+                for (const row of userRows) {
+                    const cols = parseCSVRow(row);
+                    if (cols[0] === 'builder') {
+                        builderNames[cols[1]] = `${cols[4]} ${cols[5]}`.trim();
+                    }
+                }
+
+                // Load property details
+                const buildersResponse = await fetch('builder_listings.csv');
+                const buildersText = await buildersResponse.text();
+                const builderRows = buildersText.trim().split('\n').slice(1);
+
+                const detailsResponse = await fetch('live_listing_details.csv');
+                const detailsText = await detailsResponse.text();
+                const detailRows = detailsText.trim().split('\n').slice(1);
+
+                const properties = [];
+                for (const item of portfolio) {
+                    for (const row of builderRows) {
+                        const cols = parseCSVRow(row);
+                        if (cols[6] === item.timestamp) {
+                            const propertyInfo = {
+                                builder_username: cols[0],
+                                property_name: cols[1],
+                                location: cols[2],
+                                unit_type: cols[3],
+                                listing_price: cols[4],
+                                status: cols[5],
+                                created_timestamp: cols[6],
+                                builder_name: builderNames[cols[0]] || cols[0]
+                            };
+
+                            const matchingDetail = detailRows.find(detailRow => {
+                                const detailCols = parseCSVRow(detailRow);
+                                return detailCols[0] === item.timestamp;
+                            });
+
+                            if (matchingDetail) {
+                                const detailCols = parseCSVRow(matchingDetail);
+                                propertyInfo.sq_ft = detailCols[1];
+                                propertyInfo.num_bedrooms = detailCols[2];
+                                propertyInfo.apartment_name = detailCols[6];
+                            }
+
+                            properties.push(propertyInfo);
+                            break;
+                        }
+                    }
+                }
+
+                // Display properties as selectable cards
+                container.innerHTML = properties.map(property => `
+                    <div class="property-select-card border border-gray-200 rounded-lg p-4 hover:border-teal-500" 
+                         onclick='selectPropertyForVisit(${JSON.stringify(property).replace(/'/g, "&#39;")})'>
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-800">${property.property_name}</h4>
+                                <p class="text-sm text-gray-600">${property.builder_name}</p>
+                                <p class="text-sm text-gray-500">📍 ${property.location}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${property.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                ${property.status}
+                            </span>
+                        </div>
+                        <div class="mt-3 flex gap-4 text-sm text-gray-600">
+                            <span>🏠 ${property.num_bedrooms || 'N/A'} BHK</span>
+                            <span>📐 ${property.sq_ft || 'N/A'} sq.ft</span>
+                            <span>💰 ${formatPrice(property.listing_price)}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading properties for selection:', error);
+                container.innerHTML = '<div class="text-red-500 text-center py-4">Error loading properties</div>';
+            }
+        }
+
+        function closePropertySelectionModal() {
+            document.getElementById('property-selection-modal').classList.remove('active');
+        }
+
+        function selectPropertyForVisit(property) {
+            selectedPropertyForVisit = property;
+            closePropertySelectionModal();
+            openExpertVisitScheduleModal();
+        }
+
+        function openExpertVisitScheduleModal() {
+            if (!selectedPropertyForVisit || !consultantData) return;
+
+            // Populate expert details
+            const expertInitial = (consultantData.firstName.charAt(0) + consultantData.lastName.charAt(0)).toUpperCase();
+            document.getElementById('expert-initial').textContent = expertInitial;
+            document.getElementById('expert-visit-expert-name').textContent = `${consultantData.firstName} ${consultantData.lastName}`;
+            
+            // Populate property details
+            document.getElementById('expert-visit-property-name').textContent = selectedPropertyForVisit.property_name;
+            document.getElementById('expert-visit-property-location').textContent = selectedPropertyForVisit.location;
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('expert-visit-date').setAttribute('min', today);
+            
+            // Clear form
+            document.getElementById('expert-visit-date').value = '';
+            document.getElementById('expert-visit-time').value = '';
+            document.getElementById('expert-visit-notes').value = '';
+            
+            // Open modal
+            document.getElementById('expert-visit-schedule-modal').classList.add('active');
+        }
+
+        function closeExpertVisitScheduleModal() {
+            document.getElementById('expert-visit-schedule-modal').classList.remove('active');
+            selectedPropertyForVisit = null;
+        }
+
+        function confirmExpertVisit() {
+            const visitDate = document.getElementById('expert-visit-date').value;
+            const visitTime = document.getElementById('expert-visit-time').value;
+            const visitNotes = document.getElementById('expert-visit-notes').value;
+            
+            if (!visitDate || !visitTime) {
+                alert('Please select both date and time for your visit.');
+                return;
+            }
+            
+            // Get customer info
+            const customerFirstName = sessionStorage.getItem('loggedInUserFirstName') || 'Customer';
+            const customerLastName = sessionStorage.getItem('loggedInUserLastName') || '';
+            const customerName = `${customerFirstName} ${customerLastName}`.trim();
+            const customerPhone = sessionStorage.getItem('loggedInUserPhone') || '';
+            const customerEmail = sessionStorage.getItem('loggedInUserEmail') || '';
+            
+            // Create visit request
+            const visitRequest = {
+                id: Date.now(),
+                customerName: customerName,
+                customerPhone: customerPhone,
+                customerEmail: customerEmail,
+                expertName: `${consultantData.firstName} ${consultantData.lastName}`,
+                expertPhone: consultantData.phone,
+                expertEmail: consultantData.email,
+                propertyName: selectedPropertyForVisit.property_name,
+                propertyLocation: selectedPropertyForVisit.location,
+                propertyTimestamp: selectedPropertyForVisit.created_timestamp,
+                builderUsername: selectedPropertyForVisit.builder_username,
+                builderName: selectedPropertyForVisit.builder_name,
+                propertyDetails: {
+                    propertyName: selectedPropertyForVisit.property_name,
+                    name: selectedPropertyForVisit.property_name,
+                    location: selectedPropertyForVisit.location,
+                    timestamp: selectedPropertyForVisit.created_timestamp,
+                    apartmentName: selectedPropertyForVisit.apartment_name,
+                    sqFt: selectedPropertyForVisit.sq_ft,
+                    numBedrooms: selectedPropertyForVisit.num_bedrooms,
+                    bhk: selectedPropertyForVisit.num_bedrooms,
+                    price: selectedPropertyForVisit.listing_price
+                },
+                visitDate: visitDate,
+                visitTime: visitTime,
+                notes: visitNotes,
+                requestType: 'Expert Assisted Visit from Profile',
+                expertAssignment: 'Selected by Customer',
+                status: 'pending',
+                timestamp: new Date().toISOString()
+            };
+            
+            // Save to localStorage
+            const visitRequests = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            visitRequests.push(visitRequest);
+            localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(visitRequests));
+            
+            closeExpertVisitScheduleModal();
+            
+            alert(`Visit scheduled successfully!\n\nProperty: ${selectedPropertyForVisit.property_name}\nDate: ${new Date(visitDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\nTime: ${visitTime}\nExpert: ${consultantData.firstName} ${consultantData.lastName}\n\nYour expert will contact you to confirm the visit details.`);
+            
+            selectedPropertyForVisit = null;
+        }
+
+        function formatPrice(price) {
+            if (!price) return 'N/A';
+            const numPrice = parseFloat(price);
+            if (numPrice >= 10000000) {
+                return `₹${(numPrice / 10000000).toFixed(2)} Cr`;
+            } else if (numPrice >= 100000) {
+                return `₹${(numPrice / 100000).toFixed(2)} L`;
+            }
+            return `₹${numPrice.toLocaleString('en-IN')}`;
+        }
+
+        function parseCSVRow(row) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        function goBack() {
+            // Since this page opens in a new tab, redirect to browse experts page
+            window.location.href = 'browse_experts.html';
+        }
+    </script>
+</body>
+</html>

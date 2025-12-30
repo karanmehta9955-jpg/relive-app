@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Your True RealEstate Partner - Login</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      max-width: 1000px;
+      width: 100%;
+      display: flex;
+      min-height: 600px;
+    }
+
+    .login-left {
+      flex: 1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 60px 40px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .login-left .logo {
+      width: 150px;
+      height: 150px;
+      margin-bottom: 30px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+    
+    .login-left .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .login-left h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .login-left p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      line-height: 1.6;
+    }
+
+    .login-right {
+      flex: 1;
+      padding: 60px 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .form-header {
+      margin-bottom: 40px;
+    }
+
+    .form-header h2 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .form-header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: all 0.3s;
+      background: #f8f9fa;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .form-footer {
+      margin-top: 30px;
+      text-align: center;
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .form-footer a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .signup-form {
+      display: none;
+    }
+
+    .role-dropdown {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .role-dropdown .dropdown-toggle {
+      width: 100%;
+      padding: 14px 16px;
+      background: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .role-dropdown .dropdown-toggle:hover {
+      border-color: #667eea;
+      background: white;
+    }
+
+    .role-dropdown .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      margin-top: 5px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .role-dropdown .dropdown-menu.show {
+      display: block;
+    }
+
+    .role-dropdown .dropdown-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .role-dropdown .dropdown-item:hover {
+      background: #f8f9fa;
+    }
+
+    .role-dropdown .dropdown-item.selected {
+      background: #667eea;
+      color: white;
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .success-message {
+      color: #28a745;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .login-container {
+        flex-direction: column;
+      }
+
+      .login-left {
+        padding: 40px 30px;
+      }
+
+      .login-left h1 {
+        font-size: 1.8rem;
+      }
+
+      .login-right {
+        padding: 40px 30px;
+      }
+    }
+
+    /* Fancy Notification Popup */
+    .notification-popup {
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 25px 35px;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      min-width: 350px;
+      max-width: 500px;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .notification-popup.show {
+      top: 30px;
+      animation: slideInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .notification-popup.success {
+      border-left: 5px solid #28a745;
+    }
+
+    .notification-popup.error {
+      border-left: 5px solid #dc3545;
+    }
+
+    .notification-popup .icon {
+      font-size: 2.5rem;
+      animation: scaleIn 0.4s ease-out 0.2s both;
+    }
+
+    .notification-popup .content {
+      flex: 1;
+    }
+
+    .notification-popup .content h3 {
+      margin: 0 0 5px 0;
+      font-size: 1.2rem;
+      color: #333;
+    }
+
+    .notification-popup .content p {
+      margin: 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .notification-popup .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #999;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .notification-popup .close-btn:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    @keyframes slideInBounce {
+      0% {
+        top: -200px;
+        opacity: 0;
+      }
+      60% {
+        top: 40px;
+        opacity: 1;
+      }
+      80% {
+        top: 25px;
+      }
+      100% {
+        top: 30px;
+      }
+    }
+
+    @keyframes scaleIn {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .notification-popup {
+        min-width: 90%;
+        left: 5%;
+        right: 5%;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Notification Popup -->
+  <div id="notification-popup" class="notification-popup">
+    <div class="icon" id="notification-icon">✓</div>
+    <div class="content">
+      <h3 id="notification-title">Success</h3>
+      <p id="notification-message">Operation completed successfully</p>
+    </div>
+    <button class="close-btn" onclick="hideNotification()">×</button>
+  </div>
+  <div class="login-container">
+    <!-- Left Side - Branding -->
+    <div class="login-left">
+      <div class="logo">
+        <img src="images/Relive.png" alt="Brand Logo">
+      </div>
+      <h1>Your True RealEstate Partner</h1>
+      <p>Find your dream property with expert guidance and comprehensive real estate solutions.</p>
+    </div>
+
+    <!-- Right Side - Login/Signup Forms -->
+    <div class="login-right">
+      <!-- Login Form -->
+      <form id="login-form" class="login-form" onsubmit="return handleUnifiedLogin()">
+        <div class="form-header">
+          <h2>Sign In</h2>
+          <p>Access your account and explore opportunities</p>
+        </div>
+
+        <div class="form-group">
+          <label for="login-username">👤 Username or Email</label>
+          <input type="text" id="login-username" placeholder="Enter your username or email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">🔒 Password</label>
+          <input type="password" id="login-password" placeholder="Enter your password" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Login</button>
+
+        <div class="form-footer">
+          Don't have an account? <a onclick="toggleToSignup()">Sign up</a>
+        </div>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signup-form" class="signup-form" onsubmit="return handleUnifiedSignup()">
+        <div class="form-header">
+          <h2>Create Account</h2>
+          <p>Sign up to get started</p>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-role">Select Role *</label>
+          <div class="role-dropdown">
+            <div class="dropdown-toggle" onclick="toggleRoleDropdown()">
+              <span id="selected-role-text">Select your role</span>
+              <span>▼</span>
+            </div>
+            <div class="dropdown-menu" id="role-dropdown-menu">
+              <div class="dropdown-item" onclick="selectRole('customer')">
+                <span>👤</span>
+                <div>
+                  <strong>Customer</strong>
+                  <div style="font-size: 0.85rem; color: #666;">Explore and book properties</div>
+                </div>
+              </div>
+              <div class="dropdown-item" onclick="selectRole('builder')">
+                <span>🏗️</span>
+                <div>
+                  <strong>Builder</strong>
+                  <div style="font-size: 0.85rem; color: #666;">Manage construction projects</div>
+                </div>
+              </div>
+              <div class="dropdown-item" onclick="selectRole('consultant')">
+                <span>💼</span>
+                <div>
+                  <strong>Consultant</strong>
+                  <div style="font-size: 0.85rem; color: #666;">Provide expert guidance</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="signup-role-value" required>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-firstname">First Name *</label>
+          <input type="text" id="signup-firstname" placeholder="Enter your first name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-lastname">Last Name *</label>
+          <input type="text" id="signup-lastname" placeholder="Enter your last name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-email">Email *</label>
+          <input type="email" id="signup-email" placeholder="Enter your email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-contact">Contact Number *</label>
+          <input type="tel" id="signup-contact" placeholder="Enter your contact number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-new-username">Username *</label>
+          <input type="text" id="signup-new-username" placeholder="Choose a username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-new-password">Password *</label>
+          <input type="password" id="signup-new-password" placeholder="Choose a strong password" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Sign Up</button>
+
+        <div class="form-footer">
+          Already have an account? <a onclick="toggleToLogin()">Login</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

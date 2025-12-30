@@ -1,0 +1,3098 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Properties - RealEstate Partner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #f8fafc;
+            background-image: 
+                linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 80px 80px;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
+        }
+        /* Sticky Search & Filter Icons */
+        .sticky-search-icons {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+        }
+        .sticky-search-icons.visible {
+            display: flex;
+        }
+        .icon-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            font-size: 1.1rem;
+        }
+        .icon-button:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .icon-button.expanded {
+            width: 400px;
+            border-radius: 0.75rem;
+            justify-content: flex-start;
+            padding-left: 1rem;
+            background: white;
+            color: #374151;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e5e7eb;
+        }
+        .icon-button.expanded:hover {
+            transform: none;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+        .search-input-wrapper {
+            display: none;
+            flex: 1;
+            margin-left: 0.5rem;
+        }
+        .search-input-wrapper.active {
+            display: block;
+        }
+        .search-input-wrapper input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        /* Sticky Expanded Controls */
+        .sticky-controls {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+            padding: 1.5rem;
+            max-width: 90%;
+            width: 600px;
+            animation: slideDown 0.3s ease-out;
+        }
+        .sticky-controls.active {
+            display: block;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        .sticky-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 998;
+        }
+        .sticky-overlay.active {
+            display: block;
+        }
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+        .property-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .property-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+        .filter-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .filter-section.open {
+            max-height: 1000px;
+        }
+        .image-carousel {
+            position: relative;
+            overflow: hidden;
+        }
+        .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-button:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .carousel-button.prev { left: 10px; }
+        .carousel-button.next { right: 10px; }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Fancy Notification Popup */
+        .notification-popup {
+            position: fixed;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 25px 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 350px;
+            max-width: 500px;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .notification-popup.show {
+            top: 30px;
+            animation: slideInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .notification-popup.success {
+            border-left: 5px solid #28a745;
+        }
+
+        .notification-popup.error {
+            border-left: 5px solid #dc3545;
+        }
+
+        .notification-popup.info {
+            border-left: 5px solid #3b82f6;
+        }
+
+        .notification-popup .icon {
+            font-size: 2.5rem;
+            animation: scaleIn 0.4s ease-out 0.2s both;
+        }
+
+        .notification-popup .content {
+            flex: 1;
+        }
+
+        .notification-popup .content h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .notification-popup .content p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .notification-popup .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .notification-popup .close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        @keyframes slideInBounce {
+            0% {
+                top: -200px;
+                opacity: 0;
+            }
+            60% {
+                top: 40px;
+                opacity: 1;
+            }
+            80% {
+                top: 25px;
+            }
+            100% {
+                top: 30px;
+            }
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification Popup -->
+    <div id="notification-popup" class="notification-popup">
+        <div class="icon" id="notification-icon">✓</div>
+        <div class="content">
+            <h3 id="notification-title">Success</h3>
+            <p id="notification-message">Operation completed successfully</p>
+        </div>
+        <button class="close-btn" onclick="hideNotification()">×</button>
+    </div>
+    <header class="bg-white shadow-lg border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md">
+                R
+            </div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">Search Properties</h1>
+            <div class="sticky-search-icons" id="sticky-search-icons">
+                <button class="icon-button" id="sticky-search-button" onclick="toggleStickySearch()" title="Search Properties">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <div class="search-input-wrapper" id="search-input-wrapper">
+                        <input type="text" id="sticky-inline-search" placeholder="Search by property name, apartment, or location..." 
+                            onkeyup="searchPropertiesSticky()" onclick="event.stopPropagation()">
+                    </div>
+                </button>
+                <button class="icon-button" onclick="toggleStickyFilters()" title="Show Filters">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome!</span>
+            <div class="profile-dropdown">
+                <div class="profile-icon" onclick="toggleProfileMenu()" id="profile-icon">
+                    <span id="profile-initials">U</span>
+                    <img id="profile-image" style="display: none;" alt="Profile">
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="goBack()" style="color: #dc2626;">
+                        <span>🚪 Logout</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="goBack()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                ← Back
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-600 text-white py-12 shadow-xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full -mr-48 -mt-48"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-white opacity-5 rounded-full -ml-40 -mb-40"></div>
+        <div class="container mx-auto px-4 md:px-8 relative z-10">
+            <div class="max-w-3xl">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Find Your Dream Property</h2>
+                <p class="text-xl text-blue-50 mb-6">Explore thousands of premium listings across top locations</p>
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full backdrop-blur-sm">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span id="hero-property-count">Loading...</span> Properties Available
+                    </div>
+                    <div class="flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full backdrop-blur-sm">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                        </svg>
+                        Premium Locations
+                    </div>
+                    <div class="flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full backdrop-blur-sm">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        Verified Listings
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Search Control -->
+    <div class="sticky-overlay" id="sticky-overlay" onclick="closeStickyControls()"></div>
+    <div class="sticky-controls" id="sticky-search-control">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-800">Search Properties</h3>
+            <button onclick="closeStickyControls()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        <div class="relative">
+            <input type="text" id="sticky-search-bar" placeholder="Search by property name, apartment, or location..." 
+                class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                onkeyup="searchPropertiesSticky()">
+            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">🔍</span>
+        </div>
+    </div>
+
+    <!-- Sticky Filter Control -->
+    <div class="sticky-controls" id="sticky-filter-control" style="width: 900px; max-width: 95%;">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-800">Filter Properties</h3>
+            <button onclick="closeStickyControls()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 max-h-96 overflow-y-auto pr-2">
+            <!-- Location Filter -->
+            <div class="relative">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                <button type="button" onclick="toggleStickyLocationDropdown()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex justify-between items-center">
+                    <span id="sticky-location-display">Select locations...</span>
+                    <span>▼</span>
+                </button>
+                <div id="sticky-location-dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    <div id="sticky-location-options" class="p-2 space-y-2">
+                        <!-- Location checkboxes will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- BHK Filter -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">BHK</label>
+                <select id="sticky-filter-bhk" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All</option>
+                    <option value="1">1 BHK</option>
+                    <option value="2">2 BHK</option>
+                    <option value="3">3 BHK</option>
+                    <option value="4">4 BHK</option>
+                    <option value="5">5+ BHK</option>
+                </select>
+            </div>
+
+            <!-- Price Range -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Min Price (₹)</label>
+                <input type="number" id="sticky-filter-min-price" placeholder="Min Price" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Max Price (₹)</label>
+                <input type="number" id="sticky-filter-max-price" placeholder="Max Price" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <!-- Size Range -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Min Size (sq.ft.)</label>
+                <input type="number" id="sticky-filter-min-sqft" placeholder="Min Sqft" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Max Size (sq.ft.)</label>
+                <input type="number" id="sticky-filter-max-sqft" placeholder="Max Sqft" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <!-- Furnishing -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Furnishing</label>
+                <select id="sticky-filter-furnishing" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All</option>
+                    <option value="Furnished">Furnished</option>
+                    <option value="Semi-Furnished">Semi-Furnished</option>
+                    <option value="Unfurnished">Unfurnished</option>
+                </select>
+            </div>
+
+            <!-- Status -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                <select id="sticky-filter-status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All</option>
+                    <option value="Available">Available</option>
+                    <option value="Booked">Booked</option>
+                </select>
+            </div>
+
+            <!-- Parking -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Parking</label>
+                <select id="sticky-filter-parking" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All</option>
+                    <option value="Covered">Covered</option>
+                    <option value="Open">Open</option>
+                    <option value="None">None</option>
+                </select>
+            </div>
+
+            <!-- Facing -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Facing</label>
+                <select id="sticky-filter-facing" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All</option>
+                    <option value="North">North</option>
+                    <option value="South">South</option>
+                    <option value="East">East</option>
+                    <option value="West">West</option>
+                    <option value="North-East">North-East</option>
+                    <option value="North-West">North-West</option>
+                    <option value="South-East">South-East</option>
+                    <option value="South-West">South-West</option>
+                </select>
+            </div>
+
+            <!-- Gated Security -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Gated Security</label>
+                <select id="sticky-filter-security" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+
+            <!-- Possession -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Possession</label>
+                <select id="sticky-filter-possession" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All</option>
+                    <option value="Ready Possession">Ready Possession</option>
+                    <option value="2025">Within 2025</option>
+                    <option value="2026">Within 2026</option>
+                    <option value="2027">Within 2027</option>
+                    <option value="2028">Within 2028</option>
+                    <option value="2029+">2029 & Beyond</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Amenities Filter -->
+        <div class="mb-4 border-t pt-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Amenities</label>
+            <div id="sticky-amenities-filter" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto p-2 bg-gray-50 rounded-lg">
+                <!-- Amenities checkboxes will be populated here -->
+            </div>
+        </div>
+
+        <div class="flex space-x-4 pt-4 border-t">
+            <button onclick="applyStickyFilters()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-150">
+                Apply Filters
+            </button>
+            <button onclick="clearStickyFilters()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg transition duration-150">
+                Clear
+            </button>
+        </div>
+    </div>
+
+    <main class="container mx-auto p-4 md:p-8 relative z-10">
+        <!-- Search & Filter Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                Search & Filter
+            </h3>
+            <div class="flex items-center gap-4 mb-4">
+                <div class="flex-1 relative">
+                    <input 
+                        type="text" 
+                        id="search-bar" 
+                        placeholder="Search by property name, location, or builder..." 
+                        onkeyup="searchProperties()"
+                        class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-400 transition-all"
+                    >
+                    <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <button onclick="toggleFilters()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition-all whitespace-nowrap flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                    <span id="filter-toggle-text">Filters</span>
+                </button>
+            </div>
+            
+            <div id="filter-section" class="filter-section">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <!-- Location Filter -->
+                    <div class="relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                        <button type="button" onclick="toggleLocationDropdown()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex justify-between items-center">
+                            <span id="location-display">Select locations...</span>
+                            <span>▼</span>
+                        </button>
+                        <div id="location-dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            <div id="location-options" class="p-2 space-y-2">
+                                <!-- Location checkboxes will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BHK Filter -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">BHK</label>
+                        <select id="filter-bhk" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All</option>
+                            <option value="1">1 BHK</option>
+                            <option value="2">2 BHK</option>
+                            <option value="3">3 BHK</option>
+                            <option value="4">4 BHK</option>
+                            <option value="5">5+ BHK</option>
+                        </select>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Min Price (₹)</label>
+                        <input type="number" id="filter-min-price" placeholder="Min" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Max Price (₹)</label>
+                        <input type="number" id="filter-max-price" placeholder="Max" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Square Feet -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Min Sq. Ft.</label>
+                        <input type="number" id="filter-min-sqft" placeholder="Min Sq. Ft." 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Max Sq. Ft.</label>
+                        <input type="number" id="filter-max-sqft" placeholder="Max Sq. Ft." 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Furnishing Status -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Furnishing</label>
+                        <select id="filter-furnishing" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All</option>
+                            <option value="Furnished">Furnished</option>
+                            <option value="Semi-Furnished">Semi-Furnished</option>
+                            <option value="Unfurnished">Unfurnished</option>
+                        </select>
+                    </div>
+
+                    <!-- Property Status -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                        <select id="filter-status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All</option>
+                            <option value="Active">Active</option>
+                            <option value="Sold">Sold</option>
+                            <option value="Under Offer">Under Offer</option>
+                        </select>
+                    </div>
+
+                    <!-- Parking -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Parking</label>
+                        <select id="filter-parking" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All</option>
+                            <option value="Bike">Bike</option>
+                            <option value="Car">Car</option>
+                            <option value="Bike and Car">Bike and Car</option>
+                        </select>
+                    </div>
+
+                    <!-- Facing -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Facing</label>
+                        <select id="filter-facing" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All</option>
+                            <option value="North">North</option>
+                            <option value="South">South</option>
+                            <option value="East">East</option>
+                            <option value="West">West</option>
+                            <option value="North-East">North-East</option>
+                            <option value="North-West">North-West</option>
+                            <option value="South-East">South-East</option>
+                            <option value="South-West">South-West</option>
+                        </select>
+                    </div>
+
+                    <!-- Gated Security -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Gated Security</label>
+                        <select id="filter-security" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <!-- Possession Date -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Possession</label>
+                        <select id="filter-possession" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All</option>
+                            <option value="Ready Possession">Ready Possession</option>
+                            <option value="2025">Within 2025</option>
+                            <option value="2026">Within 2026</option>
+                            <option value="2027">Within 2027</option>
+                            <option value="2028">Within 2028</option>
+                            <option value="2029">Within 2029</option>
+                            <option value="2030">Within 2030</option>
+                            <option value="2031+">2031 & Beyond</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Amenities Filter -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Amenities</label>
+                    <div id="amenities-filter" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                        <!-- Amenities will be loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-4">
+                    <button onclick="applyFilters()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-150">
+                        Apply Filters
+                    </button>
+                    <button onclick="clearFilters()" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-semibold py-3 px-6 rounded-lg transition duration-150">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Filters Display -->
+        <div id="active-filters" class="hidden bg-white rounded-lg shadow-md p-4 mb-4">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-semibold text-gray-700">Active Filters:</h3>
+                <button onclick="clearFilters()" class="text-xs text-red-600 hover:text-red-800 font-semibold">
+                    Clear All ✕
+                </button>
+            </div>
+            <div id="active-filters-container" class="flex flex-wrap gap-2">
+                <!-- Filter tags will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl shadow-md border border-gray-100">
+            <div>
+                <p id="results-count" class="text-lg font-bold text-gray-800">Loading properties...</p>
+                <p class="text-sm text-gray-500 mt-1">Find your perfect property from our premium listings</p>
+            </div>
+            <select id="sort-by" onchange="sortProperties()" class="px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-medium text-gray-700">
+                <option value="default">Sort By</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="sqft-low">Size: Small to Large</option>
+                <option value="sqft-high">Size: Large to Small</option>
+                <option value="newest">Newest First</option>
+            </select>
+        </div>
+
+        <!-- Properties Grid -->
+        <div id="properties-container" class="space-y-6">
+            <!-- Properties will be loaded here dynamically -->
+        </div>
+
+        <!-- No Results Message -->
+        <div id="no-results" class="hidden text-center py-12">
+            <div class="text-gray-400 text-6xl mb-4">🏠</div>
+            <h3 class="text-2xl font-bold text-gray-700 mb-2">No Properties Found</h3>
+            <p class="text-gray-500">Try adjusting your filters to see more results.</p>
+        </div>
+    </main>
+
+    <!-- Contact Builder Modal -->
+    <div id="contact-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Contact Builder</h3>
+                <button onclick="closeContactModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <div id="builder-info" class="space-y-4">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-600 mb-2">Builder Name</p>
+                    <p id="builder-name" class="text-xl font-bold text-gray-800">Loading...</p>
+                </div>
+                
+                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Phone Number</p>
+                        <p id="builder-phone" class="text-lg font-semibold text-gray-800">Loading...</p>
+                    </div>
+                    <a id="builder-phone-link" href="tel:" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full transition duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Email Address</p>
+                        <p id="builder-email" class="text-lg font-semibold text-gray-800 break-all">Loading...</p>
+                    </div>
+                    <a id="builder-email-link" href="mailto:" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </a>
+                </div>
+                
+                <button onclick="requestCallback()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-150 mt-4">
+                    📞 Request Call Back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expert Selection Modal -->
+    <div id="expert-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Contact Expert</h3>
+                <button onclick="closeExpertModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <p class="text-gray-600 mb-6">Choose how you'd like to connect with a real estate expert:</p>
+            
+            <div class="space-y-4">
+                <button onclick="autoAssignExpert()" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-150 flex items-center justify-between">
+                    <div class="text-left">
+                        <p class="text-lg font-bold">🤖 Auto Assign an Expert</p>
+                        <p class="text-sm text-blue-100 mt-1">We'll match you with the best available expert</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                
+                <button onclick="browseExperts()" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-150 flex items-center justify-between">
+                    <div class="text-left">
+                        <p class="text-lg font-bold">📋 Browse Experts List</p>
+                        <p class="text-sm text-green-100 mt-1">View profiles and choose your preferred expert</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Browse Experts Modal -->
+    <div id="browse-experts-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Browse Expert Consultants</h3>
+                <button onclick="closeBrowseExpertsModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <p class="text-gray-600 mb-6">Choose from our experienced real estate consultants:</p>
+            
+            <div id="experts-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                <!-- Expert cards will be loaded here -->
+            </div>
+            
+            <div id="no-experts" class="hidden text-center py-8">
+                <p class="text-gray-500">No consultants available at the moment.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Visit Modal -->
+    <div id="book-visit-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Book Property Visit</h3>
+                <button onclick="closeBookVisitModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <p class="text-gray-600 mb-6">Choose how you'd like to visit this property:</p>
+            
+            <div class="space-y-4">
+                <button onclick="bookDirectVisit()" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-150 flex items-center justify-between">
+                    <div class="text-left">
+                        <div class="font-bold text-lg">📅 Book Direct Visit</div>
+                        <div class="text-sm opacity-90">Schedule a visit directly with the builder</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                
+                <button onclick="bookExpertAssistedVisit()" class="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-150 flex items-center justify-between">
+                    <div class="text-left">
+                        <div class="font-bold text-lg">👨‍💼 Book Expert Assistance For Visit</div>
+                        <div class="text-sm opacity-90">Get accompanied by a real estate expert</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expert Assisted Visit Modal -->
+    <div id="expert-assisted-visit-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">👨‍💼 Expert Assisted Visit</h3>
+                <button onclick="closeExpertAssistedVisitModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <p class="text-gray-600 mb-6">Get help from a real estate expert for your property visit. Choose an option:</p>
+            
+            <div class="space-y-4">
+                <button onclick="autoAssignExpertForVisit()" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-150 flex items-center justify-between">
+                    <div class="text-left">
+                        <div class="font-bold text-lg">🎯 Auto Assign Expert</div>
+                        <div class="text-sm text-blue-100">Let us assign the best expert for you</div>
+                    </div>
+                    <span class="text-2xl">→</span>
+                </button>
+                
+                <button onclick="browseExpertsForVisit()" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-150 flex items-center justify-between">
+                    <div class="text-left">
+                        <div class="font-bold text-lg">📋 Browse Experts</div>
+                        <div class="text-sm text-green-100">Choose from our list of consultants</div>
+                    </div>
+                    <span class="text-2xl">→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Direct Visit Booking Modal -->
+    <div id="direct-visit-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">📅 Schedule Direct Visit</h3>
+                <button onclick="closeDirectVisitModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <!-- Builder Details Card -->
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 p-5 rounded-lg mb-6">
+                <p class="text-sm text-purple-600 font-semibold mb-2">Booking Visit With</p>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-purple-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
+                        <span id="builder-initial">B</span>
+                    </div>
+                    <div>
+                        <p id="direct-visit-builder-name" class="text-xl font-bold text-gray-800">Builder Name</p>
+                        <p class="text-sm text-gray-600">Property Builder</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visit Details Form -->
+            <div class="space-y-5">
+                <!-- Visit Date -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Select Visit Date
+                    </label>
+                    <input type="date" id="visit-date" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        min="" required>
+                </div>
+                
+                <!-- Visit Time -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Select Visit Time
+                    </label>
+                    <select id="visit-time" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                        <option value="">Choose a time slot</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="12:30 PM">12:30 PM</option>
+                        <option value="01:00 PM">01:00 PM</option>
+                        <option value="01:30 PM">01:30 PM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="02:30 PM">02:30 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="03:30 PM">03:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="05:30 PM">05:30 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                    </select>
+                </div>
+                
+                <!-- Property Info -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-xs text-gray-500 mb-1">Property Details</p>
+                    <p id="visit-property-name" class="font-semibold text-gray-800">Property Name</p>
+                    <p id="visit-property-location" class="text-sm text-gray-600">Location</p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex space-x-3 pt-2">
+                    <button onclick="closeDirectVisitModal()" 
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-150">
+                        Cancel
+                    </button>
+                    <button onclick="confirmDirectVisit()" 
+                        class="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-150">
+                        Confirm Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expert Assisted Visit Scheduling Modal -->
+    <div id="expert-visit-schedule-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">📅 Schedule Expert Assisted Visit</h3>
+                <button onclick="closeExpertVisitScheduleModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <!-- Expert Details Card -->
+            <div class="bg-gradient-to-r from-teal-50 to-teal-100 border-l-4 border-teal-500 p-5 rounded-lg mb-6">
+                <p class="text-sm text-teal-600 font-semibold mb-2">Expert Consultant Assigned</p>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-teal-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
+                        <span id="expert-initial">E</span>
+                    </div>
+                    <div>
+                        <p id="expert-visit-expert-name" class="text-xl font-bold text-gray-800">Expert Name</p>
+                        <p class="text-sm text-gray-600">Real Estate Consultant</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visit Details Form -->
+            <div class="space-y-5">
+                <!-- Visit Date -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Select Visit Date
+                    </label>
+                    <input type="date" id="expert-visit-date" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        min="" required>
+                </div>
+                
+                <!-- Visit Time -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Select Visit Time
+                    </label>
+                    <select id="expert-visit-time" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" required>
+                        <option value="">Choose a time slot</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="12:30 PM">12:30 PM</option>
+                        <option value="01:00 PM">01:00 PM</option>
+                        <option value="01:30 PM">01:30 PM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="02:30 PM">02:30 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="03:30 PM">03:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="05:30 PM">05:30 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                    </select>
+                </div>
+                
+                <!-- Property Info -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-xs text-gray-500 mb-1">Property Details</p>
+                    <p id="expert-visit-property-name" class="font-semibold text-gray-800">Property Name</p>
+                    <p id="expert-visit-property-location" class="text-sm text-gray-600">Location</p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex space-x-3 pt-2">
+                    <button onclick="closeExpertVisitScheduleModal()" 
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-150">
+                        Cancel
+                    </button>
+                    <button onclick="confirmExpertVisit()" 
+                        class="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-150">
+                        Confirm Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allProperties = [];
+        let filteredProperties = [];
+        let allAmenities = new Set();
+        let expertModalContext = 'contact'; // 'contact' or 'visit'
+        let selectedExpert = null; // Store selected expert details
+        
+        // Track viewed properties in this session (unique views)
+        let viewedPropertiesThisSession = new Set();
+        
+        // Notification timeout reference
+        let notificationTimeout = null;
+
+        // Fancy notification popup functions
+        function showNotification(title, message, type = 'success') {
+            const popup = document.getElementById('notification-popup');
+            const icon = document.getElementById('notification-icon');
+            const titleEl = document.getElementById('notification-title');
+            const messageEl = document.getElementById('notification-message');
+            
+            // Clear any existing timeout
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+            }
+            
+            // Set content
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            // Set icon and style based on type
+            if (type === 'success') {
+                icon.textContent = '✓';
+                popup.className = 'notification-popup success';
+            } else if (type === 'error') {
+                icon.textContent = '✗';
+                popup.className = 'notification-popup error';
+            } else if (type === 'info') {
+                icon.textContent = 'ℹ';
+                popup.className = 'notification-popup info';
+            }
+            
+            // Show popup
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 10);
+            
+            // Auto hide after 2 seconds
+            notificationTimeout = setTimeout(() => {
+                hideNotification();
+            }, 2000);
+            
+            // Pause auto-close on hover
+            popup.onmouseenter = () => {
+                if (notificationTimeout) {
+                    clearTimeout(notificationTimeout);
+                    notificationTimeout = null;
+                }
+            };
+            
+            // Close on mouse leave
+            popup.onmouseleave = () => {
+                hideNotification();
+            };
+        }
+
+        function hideNotification() {
+            const popup = document.getElementById('notification-popup');
+            popup.classList.remove('show');
+            
+            // Clear timeout if manually closed
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+                notificationTimeout = null;
+            }
+            
+            // Remove hover listeners
+            popup.onmouseenter = null;
+            popup.onmouseleave = null;
+        }
+
+        // Load properties on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            displayUserName();
+            await loadProperties();
+            populateAmenitiesFilter();
+            setupScrollListener();
+            setupPropertyViewTracking();
+            updateHeroCount();
+        });
+
+        function updateHeroCount() {
+            const count = allProperties.length;
+            const heroCount = document.getElementById('hero-property-count');
+            if (heroCount) {
+                heroCount.textContent = count;
+            }
+        }
+
+        function displayUserName() {
+            const firstName = sessionStorage.getItem('loggedInUserFirstName');
+            const lastName = sessionStorage.getItem('loggedInUserLastName');
+            const userDisplayElement = document.getElementById('user-display');
+
+            if (userDisplayElement) {
+                if (firstName && lastName) {
+                    userDisplayElement.textContent = `Welcome, ${firstName} ${lastName}!`;
+                    const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                    document.getElementById('profile-initials').textContent = initials;
+                    document.getElementById('profile-name').textContent = `${firstName} ${lastName}`;
+                    
+                    // Load profile photo if exists
+                    const username = sessionStorage.getItem('loggedInUserUsername');
+                    loadProfilePhoto(username);
+                } else {
+                    userDisplayElement.textContent = `Welcome, Customer!`;
+                    document.getElementById('profile-initials').textContent = 'U';
+                    document.getElementById('profile-name').textContent = 'Customer';
+                }
+            }
+        }
+
+        function loadProfilePhoto(username) {
+            if (!username) {
+                console.log('No username provided to loadProfilePhoto');
+                return;
+            }
+            console.log('Loading profile photo for:', username);
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            console.log('Saved photo found:', savedPhoto ? 'Yes' : 'No');
+            if (savedPhoto) {
+                const profileIcon = document.getElementById('profile-icon');
+                const profileImage = document.getElementById('profile-image');
+                const profileInitials = document.getElementById('profile-initials');
+                
+                if (profileImage && profileInitials && profileIcon) {
+                    profileImage.src = savedPhoto;
+                    profileImage.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                    profileIcon.style.background = 'white';
+                    console.log('Profile photo loaded successfully');
+                }
+            }
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            menu.classList.toggle('show');
+        }
+
+        function viewProfile() {
+            window.location.href = 'manage_profile.html';
+        }
+
+        function viewSettings() {
+            alert('Settings page coming soon!');
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function setupScrollListener() {
+            const stickyIcons = document.getElementById('sticky-search-icons');
+            const filterSection = document.querySelector('.bg-white.rounded-xl.shadow-lg.p-6.mb-6');
+            const button = document.getElementById('sticky-search-button');
+            
+            window.addEventListener('scroll', () => {
+                if (!filterSection) return;
+                
+                const filterRect = filterSection.getBoundingClientRect();
+                const isFilterVisible = filterRect.top > 0 && filterRect.top < window.innerHeight;
+                
+                // Don't hide icons if search is expanded
+                if (!isFilterVisible && filterRect.top < 0) {
+                    stickyIcons.classList.add('visible');
+                } else if (!button.classList.contains('expanded')) {
+                    // Only hide if search is not expanded
+                    stickyIcons.classList.remove('visible');
+                }
+            });
+        }
+
+        function toggleStickySearch() {
+            const button = document.getElementById('sticky-search-button');
+            const inputWrapper = document.getElementById('search-input-wrapper');
+            const input = document.getElementById('sticky-inline-search');
+            
+            if (button.classList.contains('expanded')) {
+                // Collapse
+                button.classList.remove('expanded');
+                inputWrapper.classList.remove('active');
+                input.value = '';
+                // Show all properties when clearing search
+                filteredProperties = [...allProperties];
+                displayProperties();
+            } else {
+                // Expand
+                button.classList.add('expanded');
+                inputWrapper.classList.add('active');
+                setTimeout(() => input.focus(), 300);
+            }
+        }
+
+        // Close expanded search when clicking outside
+        document.addEventListener('click', function(event) {
+            const button = document.getElementById('sticky-search-button');
+            const inputWrapper = document.getElementById('search-input-wrapper');
+            const stickyIcons = document.getElementById('sticky-search-icons');
+            
+            if (button && button.classList.contains('expanded') && 
+                !stickyIcons.contains(event.target)) {
+                button.classList.remove('expanded');
+                inputWrapper.classList.remove('active');
+                document.getElementById('sticky-inline-search').value = '';
+                // Show all properties when closing search
+                filteredProperties = [...allProperties];
+                displayProperties();
+            }
+        });
+
+        function toggleStickyFilters() {
+            closeStickyControls();
+            populateStickyLocationFilter();
+            populateStickyAmenitiesFilter();
+            const control = document.getElementById('sticky-filter-control');
+            const overlay = document.getElementById('sticky-overlay');
+            control.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function closeStickyControls() {
+            document.getElementById('sticky-search-control').classList.remove('active');
+            document.getElementById('sticky-filter-control').classList.remove('active');
+            document.getElementById('sticky-overlay').classList.remove('active');
+            const dropdown = document.getElementById('sticky-location-dropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+
+        function searchPropertiesSticky() {
+            const searchTerm = document.getElementById('sticky-inline-search').value;
+            // Don't sync to main search bar to avoid scrolling
+            // document.getElementById('search-bar').value = searchTerm;
+            
+            if (!searchTerm) {
+                // If search is empty, show all properties
+                filteredProperties = [...allProperties];
+                displayProperties();
+                return;
+            }
+
+            // Search by property name, apartment name, or location
+            filteredProperties = allProperties.filter(property => {
+                const matchesSearch = 
+                    property.property_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    property.apartment_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    property.location?.toLowerCase().includes(searchTerm.toLowerCase());
+                
+                return matchesSearch;
+            });
+
+            displayProperties();
+        }
+
+        function populateStickyLocationFilter() {
+            const container = document.getElementById('sticky-location-options');
+            const sortedLocations = Array.from(allLocations).sort();
+            
+            container.innerHTML = sortedLocations.map(location => `
+                <label class="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded">
+                    <input type="checkbox" value="${location}" class="sticky-location-checkbox rounded" onchange="updateStickyLocationDisplay()">
+                    <span>${location}</span>
+                </label>
+            `).join('');
+        }
+
+        function populateStickyAmenitiesFilter() {
+            const container = document.getElementById('sticky-amenities-filter');
+            const sortedAmenities = Array.from(allAmenities).sort();
+            
+            container.innerHTML = sortedAmenities.map(amenity => `
+                <label class="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded">
+                    <input type="checkbox" value="${amenity}" class="sticky-amenity-checkbox rounded">
+                    <span>${amenity}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleStickyLocationDropdown() {
+            const dropdown = document.getElementById('sticky-location-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function updateStickyLocationDisplay() {
+            const selectedLocations = Array.from(document.querySelectorAll('.sticky-location-checkbox:checked'));
+            const display = document.getElementById('sticky-location-display');
+            
+            if (!display) return;
+            
+            if (selectedLocations.length === 0) {
+                display.textContent = 'Select locations...';
+            } else if (selectedLocations.length === 1) {
+                display.textContent = selectedLocations[0].value;
+            } else {
+                display.textContent = `${selectedLocations.length} locations selected`;
+            }
+        }
+
+        function applyStickyFilters() {
+            // Sync sticky filters to main filters
+            const stickyLocations = Array.from(document.querySelectorAll('.sticky-location-checkbox:checked'));
+            document.querySelectorAll('.location-checkbox').forEach(cb => cb.checked = false);
+            stickyLocations.forEach(stickyCheckbox => {
+                const mainCheckbox = Array.from(document.querySelectorAll('.location-checkbox'))
+                    .find(cb => cb.value === stickyCheckbox.value);
+                if (mainCheckbox) mainCheckbox.checked = true;
+            });
+            updateLocationDisplay();
+
+            document.getElementById('filter-bhk').value = document.getElementById('sticky-filter-bhk').value;
+            document.getElementById('filter-min-price').value = document.getElementById('sticky-filter-min-price').value;
+            document.getElementById('filter-max-price').value = document.getElementById('sticky-filter-max-price').value;
+            document.getElementById('filter-min-sqft').value = document.getElementById('sticky-filter-min-sqft').value;
+            document.getElementById('filter-max-sqft').value = document.getElementById('sticky-filter-max-sqft').value;
+            document.getElementById('filter-furnishing').value = document.getElementById('sticky-filter-furnishing').value;
+            document.getElementById('filter-status').value = document.getElementById('sticky-filter-status').value;
+            document.getElementById('filter-parking').value = document.getElementById('sticky-filter-parking').value;
+            document.getElementById('filter-facing').value = document.getElementById('sticky-filter-facing').value;
+            document.getElementById('filter-security').value = document.getElementById('sticky-filter-security').value;
+            document.getElementById('filter-possession').value = document.getElementById('sticky-filter-possession').value;
+
+            // Sync amenities
+            const stickyAmenities = Array.from(document.querySelectorAll('.sticky-amenity-checkbox:checked'));
+            document.querySelectorAll('.amenity-checkbox').forEach(cb => cb.checked = false);
+            stickyAmenities.forEach(stickyCheckbox => {
+                const mainCheckbox = Array.from(document.querySelectorAll('.amenity-checkbox'))
+                    .find(cb => cb.value === stickyCheckbox.value);
+                if (mainCheckbox) mainCheckbox.checked = true;
+            });
+
+            closeStickyControls();
+            applyFilters();
+        }
+
+        function clearStickyFilters() {
+            document.querySelectorAll('.sticky-location-checkbox').forEach(cb => cb.checked = false);
+            updateStickyLocationDisplay();
+            document.getElementById('sticky-filter-bhk').value = '';
+            document.getElementById('sticky-filter-min-price').value = '';
+            document.getElementById('sticky-filter-max-price').value = '';
+            document.getElementById('sticky-filter-min-sqft').value = '';
+            document.getElementById('sticky-filter-max-sqft').value = '';
+            document.getElementById('sticky-filter-furnishing').value = '';
+            document.getElementById('sticky-filter-status').value = '';
+            document.getElementById('sticky-filter-parking').value = '';
+            document.getElementById('sticky-filter-facing').value = '';
+            document.getElementById('sticky-filter-security').value = '';
+            document.getElementById('sticky-filter-possession').value = '';
+            document.querySelectorAll('.sticky-amenity-checkbox').forEach(cb => cb.checked = false);
+        }
+
+        function toggleFilters() {
+            const filterSection = document.getElementById('filter-section');
+            const toggleText = document.getElementById('filter-toggle-text');
+            
+            if (filterSection.classList.contains('open')) {
+                filterSection.classList.remove('open');
+                toggleText.textContent = 'Show Filters ▼';
+            } else {
+                filterSection.classList.add('open');
+                toggleText.textContent = 'Hide Filters ▲';
+            }
+        }
+
+        async function loadProperties() {
+            try {
+                // Load user data to get builder names
+                const usersResponse = await fetch('user_data.csv');
+                const usersText = await usersResponse.text();
+                const userRows = usersText.trim().split('\n').slice(1);
+                
+                // Create builder name map (username -> full name)
+                const builderNames = {};
+                for (const row of userRows) {
+                    const cols = parseCSVRow(row);
+                    if (cols[0] === 'builder') { // role is at index 0
+                        const username = cols[1];
+                        const firstName = cols[4];
+                        const lastName = cols[5];
+                        builderNames[username] = `${firstName} ${lastName}`.trim();
+                    }
+                }
+
+                // Load builder listings
+                const buildersResponse = await fetch('builder_listings.csv');
+                const buildersText = await buildersResponse.text();
+                const builderRows = buildersText.trim().split('\n').slice(1);
+
+                // Load live listing details
+                const detailsResponse = await fetch('live_listing_details.csv');
+                const detailsText = await detailsResponse.text();
+                const detailRows = detailsText.trim().split('\n').slice(1);
+
+                // Parse data and merge
+                allProperties = [];
+                
+                for (const row of builderRows) {
+                    const cols = parseCSVRow(row);
+                    if (cols.length < 7) continue;
+
+                    const [builder_username, property_name, location, unit_type, listing_price, status, created_timestamp, expiry_date] = cols;
+                    
+                    // Only show Active listings
+                    if (status !== 'Active') continue;
+
+                    // Find matching details
+                    const matchingDetail = detailRows.find(detailRow => {
+                        const detailCols = parseCSVRow(detailRow);
+                        return detailCols[0] === created_timestamp;
+                    });
+
+                    let propertyDetails = {};
+                    if (matchingDetail) {
+                        const detailCols = parseCSVRow(matchingDetail);
+                        propertyDetails = {
+                            sq_ft: detailCols[1],
+                            num_bedrooms: detailCols[2],
+                            num_bathrooms: detailCols[3],
+                            num_balcony: detailCols[4],
+                            possession_on: detailCols[5],
+                            apartment_name: detailCols[6],
+                            parking: detailCols[7],
+                            power_backup: detailCols[8],
+                            age_of_building: detailCols[9],
+                            ownership_type: detailCols[10],
+                            maintenance_charges: detailCols[11],
+                            flooring: detailCols[12],
+                            built_up_area: detailCols[13],
+                            carpet_area: detailCols[14],
+                            furnishing_status: detailCols[15],
+                            facing: detailCols[16],
+                            floor: detailCols[17],
+                            gated_security: detailCols[18],
+                            description: detailCols[19],
+                            amenities_json: detailCols[24] || '[]'
+                        };
+
+                        // Parse amenities
+                        try {
+                            const amenities = JSON.parse(propertyDetails.amenities_json);
+                            amenities.forEach(a => allAmenities.add(a.name));
+                            propertyDetails.amenities = amenities;
+                        } catch (e) {
+                            propertyDetails.amenities = [];
+                        }
+                    }
+
+                    // Load images for this property
+                    const images = await loadPropertyImages(created_timestamp);
+
+                    allProperties.push({
+                        builder_username,
+                        builder_name: builderNames[builder_username] || builder_username,
+                        property_name,
+                        location,
+                        unit_type,
+                        listing_price: parseFloat(listing_price),
+                        status,
+                        created_timestamp,
+                        images,
+                        ...propertyDetails
+                    });
+                }
+
+                // Collect all unique locations
+                allProperties.forEach(property => {
+                    if (property.location) {
+                        allLocations.add(property.location);
+                    }
+                });
+
+                filteredProperties = [...allProperties];
+                populateLocationFilter();
+                displayProperties();
+            } catch (error) {
+                console.error('Error loading properties:', error);
+                document.getElementById('properties-container').innerHTML = 
+                    '<div class="text-center text-red-500 py-8">Error loading properties. Please try again later.</div>';
+            }
+        }
+
+        async function loadPropertyImages(timestamp) {
+            try {
+                const logResponse = await fetch('listing_profile_log.csv');
+                const logText = await logResponse.text();
+                const logRows = logText.trim().split('\n').slice(1);
+
+                // Convert timestamp format: replace colons with hyphens for folder name
+                const folderTimestamp = timestamp.replace(/:/g, '-');
+
+                // Find the LAST (most recent) media upload for this property
+                let lastMediaUpload = null;
+                for (const row of logRows) {
+                    const cols = parseCSVRow(row);
+                    if (cols[1] === timestamp && cols[2] === 'Media') {
+                        lastMediaUpload = cols[5]; // Keep overwriting to get the last one
+                    }
+                }
+
+                const images = [];
+                if (lastMediaUpload) {
+                    const fileMatches = lastMediaUpload.match(/\d+_[^,]+\.(jpg|jpeg|png|gif)/gi);
+                    if (fileMatches) {
+                        fileMatches.forEach(file => {
+                            const imagePath = `media/${folderTimestamp}/${file.trim()}`;
+                            images.push(imagePath);
+                        });
+                    }
+                }
+                
+                return images;
+            } catch (error) {
+                console.error('Error loading images:', error);
+                return [];
+            }
+        }
+
+        function parseCSVRow(row) {
+            const cols = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    cols.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            cols.push(current.trim());
+            return cols;
+        }
+
+        let allLocations = new Set();
+
+        function populateLocationFilter() {
+            const container = document.getElementById('location-options');
+            const sortedLocations = Array.from(allLocations).sort();
+            
+            container.innerHTML = sortedLocations.map(location => `
+                <label class="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded">
+                    <input type="checkbox" value="${location}" class="location-checkbox rounded" onchange="updateLocationDisplay()">
+                    <span>${location}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleLocationDropdown() {
+            const dropdown = document.getElementById('location-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function updateLocationDisplay() {
+            const selectedLocations = Array.from(document.querySelectorAll('.location-checkbox:checked'));
+            const display = document.getElementById('location-display');
+            
+            if (selectedLocations.length === 0) {
+                display.textContent = 'Select locations...';
+            } else if (selectedLocations.length === 1) {
+                display.textContent = selectedLocations[0].value;
+            } else {
+                display.textContent = `${selectedLocations.length} locations selected`;
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('location-dropdown');
+            const button = event.target.closest('button[onclick="toggleLocationDropdown()"]');
+            const dropdownElement = document.getElementById('location-dropdown');
+            
+            if (!button && dropdownElement && !dropdownElement.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        function populateAmenitiesFilter() {
+            const container = document.getElementById('amenities-filter');
+            const sortedAmenities = Array.from(allAmenities).sort();
+            
+            container.innerHTML = sortedAmenities.map(amenity => `
+                <label class="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" value="${amenity}" class="amenity-checkbox rounded">
+                    <span>${amenity}</span>
+                </label>
+            `).join('');
+        }
+
+        function searchProperties() {
+            const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+            
+            if (!searchTerm) {
+                // If search is empty, just apply existing filters
+                applyFilters();
+                return;
+            }
+
+            // Search by property name, apartment name, or location
+            filteredProperties = allProperties.filter(property => {
+                const matchesSearch = 
+                    property.property_name.toLowerCase().includes(searchTerm) ||
+                    (property.apartment_name && property.apartment_name.toLowerCase().includes(searchTerm)) ||
+                    property.location.toLowerCase().includes(searchTerm) ||
+                    property.builder_username.toLowerCase().includes(searchTerm);
+                
+                if (!matchesSearch) return false;
+
+                // Also apply other filters
+                const selectedLocations = Array.from(document.querySelectorAll('.location-checkbox:checked'))
+                    .map(cb => cb.value.toLowerCase());
+                const bhk = document.getElementById('filter-bhk').value;
+                const minPrice = parseFloat(document.getElementById('filter-min-price').value) || 0;
+                const maxPrice = parseFloat(document.getElementById('filter-max-price').value) || Infinity;
+                const minSqft = parseFloat(document.getElementById('filter-min-sqft').value) || 0;
+                const maxSqft = parseFloat(document.getElementById('filter-max-sqft').value) || Infinity;
+                const furnishing = document.getElementById('filter-furnishing').value;
+                const status = document.getElementById('filter-status').value;
+                const parking = document.getElementById('filter-parking').value;
+                const facing = document.getElementById('filter-facing').value;
+                const security = document.getElementById('filter-security').value;
+                const possession = document.getElementById('filter-possession').value;
+                
+                const selectedAmenities = Array.from(document.querySelectorAll('.amenity-checkbox:checked'))
+                    .map(cb => cb.value);
+
+                // Location filter
+                if (location && !property.location.toLowerCase().includes(location)) return false;
+                
+                // BHK filter
+                if (bhk) {
+                    if (bhk === '5') {
+                        // 5+ BHK: property should have 5 or more bedrooms
+                        if (parseInt(property.num_bedrooms) < 5) return false;
+                    } else {
+                        // Exact match for 1, 2, 3, 4 BHK
+                        if (property.num_bedrooms !== bhk) return false;
+                    }
+                }
+                
+                // Price filter
+                if (property.listing_price < minPrice || property.listing_price > maxPrice) return false;
+                
+                // Sqft filter
+                const sqft = parseFloat(property.sq_ft) || 0;
+                if (sqft < minSqft || sqft > maxSqft) return false;
+                
+                // Furnishing filter
+                if (furnishing && property.furnishing_status !== furnishing) return false;
+                
+                // Status filter
+                if (status && property.status !== status) return false;
+                
+                // Parking filter
+                if (parking && !property.parking?.includes(parking)) return false;
+                
+                // Facing filter
+                if (facing && property.facing !== facing) return false;
+                
+                // Security filter
+                if (security && property.gated_security !== security) return false;
+                
+                // Possession filter
+                if (possession) {
+                    if (possession === 'Ready Possession') {
+                        if (property.possession_on !== 'Ready Possession') return false;
+                    } else if (possession === '2029+') {
+                        const possessionYear = new Date(property.possession_on).getFullYear();
+                        if (property.possession_on === 'Ready Possession' || possessionYear < 2029) return false;
+                    } else {
+                        // For year-based filters (2025, 2026, etc.)
+                        const year = parseInt(possession);
+                        const possessionYear = new Date(property.possession_on).getFullYear();
+                        if (property.possession_on === 'Ready Possession' || possessionYear !== year) return false;
+                    }
+                }
+                
+                // Amenities filter
+                if (selectedAmenities.length > 0) {
+                    const propertyAmenities = property.amenities?.map(a => a.name) || [];
+                    if (!selectedAmenities.every(a => propertyAmenities.includes(a))) return false;
+                }
+                
+                return true;
+            });
+
+            displayProperties();
+        }
+
+        function applyFilters() {
+            const selectedLocations = Array.from(document.querySelectorAll('.location-checkbox:checked'))
+                .map(cb => cb.value.toLowerCase());
+            const bhk = document.getElementById('filter-bhk').value;
+            const minPrice = parseFloat(document.getElementById('filter-min-price').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('filter-max-price').value) || Infinity;
+            const minSqft = parseFloat(document.getElementById('filter-min-sqft').value) || 0;
+            const maxSqft = parseFloat(document.getElementById('filter-max-sqft').value) || Infinity;
+            const furnishing = document.getElementById('filter-furnishing').value;
+            const status = document.getElementById('filter-status').value;
+            const parking = document.getElementById('filter-parking').value;
+            const facing = document.getElementById('filter-facing').value;
+            const security = document.getElementById('filter-security').value;
+            const possession = document.getElementById('filter-possession').value;
+            
+            const selectedAmenities = Array.from(document.querySelectorAll('.amenity-checkbox:checked'))
+                .map(cb => cb.value);
+
+            filteredProperties = allProperties.filter(property => {
+                // Location filter
+                if (selectedLocations.length > 0 && !selectedLocations.includes(property.location.toLowerCase())) return false;
+                
+                // BHK filter
+                if (bhk) {
+                    if (bhk === '5') {
+                        // 5+ BHK: property should have 5 or more bedrooms
+                        if (parseInt(property.num_bedrooms) < 5) return false;
+                    } else {
+                        // Exact match for 1, 2, 3, 4 BHK
+                        if (property.num_bedrooms !== bhk) return false;
+                    }
+                }
+                
+                // Price filter
+                if (property.listing_price < minPrice || property.listing_price > maxPrice) return false;
+                
+                // Sqft filter
+                const sqft = parseFloat(property.sq_ft) || 0;
+                if (sqft < minSqft || sqft > maxSqft) return false;
+                
+                // Furnishing filter
+                if (furnishing && property.furnishing_status !== furnishing) return false;
+                
+                // Status filter
+                if (status && property.status !== status) return false;
+                
+                // Parking filter
+                if (parking && !property.parking?.includes(parking)) return false;
+                
+                // Facing filter
+                if (facing && property.facing !== facing) return false;
+                
+                // Security filter
+                if (security && property.gated_security !== security) return false;
+                
+                // Possession filter
+                if (possession) {
+                    if (possession === 'Ready Possession') {
+                        if (property.possession_on !== 'Ready Possession') return false;
+                    } else if (possession === '2029+') {
+                        const possessionYear = new Date(property.possession_on).getFullYear();
+                        if (property.possession_on === 'Ready Possession' || possessionYear < 2029) return false;
+                    } else {
+                        // For year-based filters (2025, 2026, etc.)
+                        const year = parseInt(possession);
+                        const possessionYear = new Date(property.possession_on).getFullYear();
+                        if (property.possession_on === 'Ready Possession' || possessionYear !== year) return false;
+                    }
+                }
+                
+                // Amenities filter
+                if (selectedAmenities.length > 0) {
+                    const propertyAmenities = property.amenities?.map(a => a.name) || [];
+                    if (!selectedAmenities.every(a => propertyAmenities.includes(a))) return false;
+                }
+                
+                return true;
+            });
+
+            // Auto-close filter dropdown
+            const filterSection = document.getElementById('filter-section');
+            const toggleText = document.getElementById('filter-toggle-text');
+            if (filterSection.classList.contains('open')) {
+                filterSection.classList.remove('open');
+                toggleText.textContent = 'Show Filters ▼';
+            }
+
+            displayActiveFilters();
+            displayProperties();
+        }
+
+        function displayActiveFilters() {
+            const activeFiltersSection = document.getElementById('active-filters');
+            const activeFiltersContainer = document.getElementById('active-filters-container');
+            const filterTags = [];
+
+            // Location filter
+            const selectedLocations = Array.from(document.querySelectorAll('.location-checkbox:checked'));
+            if (selectedLocations.length > 0) {
+                const locationValue = selectedLocations.length === 1 
+                    ? selectedLocations[0].value 
+                    : selectedLocations.map(cb => cb.value).join(', ');
+                filterTags.push({ label: 'Location', value: locationValue });
+            }
+
+            // BHK filter
+            const bhk = document.getElementById('filter-bhk').value;
+            if (bhk) filterTags.push({ label: 'BHK', value: `${bhk} BHK` });
+
+            // Price filter
+            const minPrice = document.getElementById('filter-min-price').value;
+            const maxPrice = document.getElementById('filter-max-price').value;
+            if (minPrice || maxPrice) {
+                const priceRange = `${minPrice ? '₹' + formatFilterPrice(minPrice) : 'Any'} - ${maxPrice ? '₹' + formatFilterPrice(maxPrice) : 'Any'}`;
+                filterTags.push({ label: 'Price', value: priceRange });
+            }
+
+            // Sqft filter
+            const minSqft = document.getElementById('filter-min-sqft').value;
+            const maxSqft = document.getElementById('filter-max-sqft').value;
+            if (minSqft || maxSqft) {
+                const sqftRange = `${minSqft || 'Any'} - ${maxSqft || 'Any'} sq.ft.`;
+                filterTags.push({ label: 'Size', value: sqftRange });
+            }
+
+            // Furnishing filter
+            const furnishing = document.getElementById('filter-furnishing').value;
+            if (furnishing) filterTags.push({ label: 'Furnishing', value: furnishing });
+
+            // Status filter
+            const status = document.getElementById('filter-status').value;
+            if (status) filterTags.push({ label: 'Status', value: status });
+
+            // Parking filter
+            const parking = document.getElementById('filter-parking').value;
+            if (parking) filterTags.push({ label: 'Parking', value: parking });
+
+            // Facing filter
+            const facing = document.getElementById('filter-facing').value;
+            if (facing) filterTags.push({ label: 'Facing', value: facing });
+
+            // Security filter
+            const security = document.getElementById('filter-security').value;
+            if (security) filterTags.push({ label: 'Security', value: security });
+
+            // Possession filter
+            const possession = document.getElementById('filter-possession').value;
+            if (possession) {
+                let possessionValue = possession;
+                if (possession === '2029+') possessionValue = '2029 & Beyond';
+                else if (possession !== 'Ready Possession') possessionValue = `Within ${possession}`;
+                filterTags.push({ label: 'Possession', value: possessionValue });
+            }
+
+            // Amenities filter
+            const selectedAmenities = Array.from(document.querySelectorAll('.amenity-checkbox:checked'));
+            if (selectedAmenities.length > 0) {
+                const amenityNames = selectedAmenities.map(cb => cb.nextSibling.textContent.trim()).join(', ');
+                filterTags.push({ label: 'Amenities', value: amenityNames });
+            }
+
+            // Display filter tags or hide section if no filters
+            if (filterTags.length === 0) {
+                activeFiltersSection.classList.add('hidden');
+            } else {
+                activeFiltersSection.classList.remove('hidden');
+                activeFiltersContainer.innerHTML = filterTags.map(tag => `
+                    <span class="inline-flex items-center gap-2 bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1.5 rounded-full">
+                        <span class="text-blue-600">${tag.label}:</span>
+                        <span>${tag.value}</span>
+                        <button onclick="removeFilter('${tag.label}')" class="ml-1 text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center transition-colors" title="Remove filter">
+                            ✕
+                        </button>
+                    </span>
+                `).join('');
+            }
+        }
+
+        function removeFilter(filterLabel) {
+            // Remove the specific filter based on its label
+            switch(filterLabel) {
+                case 'Location':
+                    document.querySelectorAll('.location-checkbox').forEach(cb => cb.checked = false);
+                    updateLocationDisplay();
+                    break;
+                case 'BHK':
+                    document.getElementById('filter-bhk').value = '';
+                    break;
+                case 'Price':
+                    document.getElementById('filter-min-price').value = '';
+                    document.getElementById('filter-max-price').value = '';
+                    break;
+                case 'Size':
+                    document.getElementById('filter-min-sqft').value = '';
+                    document.getElementById('filter-max-sqft').value = '';
+                    break;
+                case 'Furnishing':
+                    document.getElementById('filter-furnishing').value = '';
+                    break;
+                case 'Status':
+                    document.getElementById('filter-status').value = '';
+                    break;
+                case 'Parking':
+                    document.getElementById('filter-parking').value = '';
+                    break;
+                case 'Facing':
+                    document.getElementById('filter-facing').value = '';
+                    break;
+                case 'Security':
+                    document.getElementById('filter-security').value = '';
+                    break;
+                case 'Possession':
+                    document.getElementById('filter-possession').value = '';
+                    break;
+                case 'Amenities':
+                    document.querySelectorAll('.amenity-checkbox').forEach(cb => cb.checked = false);
+                    break;
+            }
+            
+            // Re-apply filters and update display
+            applyFilters();
+        }
+
+        function formatFilterPrice(price) {
+            const num = parseFloat(price);
+            if (num >= 10000000) {
+                return `${(num / 10000000).toFixed(2)} Cr`;
+            } else if (num >= 100000) {
+                return `${(num / 100000).toFixed(2)} L`;
+            }
+            return num.toLocaleString('en-IN');
+        }
+
+        function clearFilters() {
+            document.getElementById('search-bar').value = '';
+            document.querySelectorAll('.location-checkbox').forEach(cb => cb.checked = false);
+            updateLocationDisplay();
+            document.getElementById('filter-bhk').value = '';
+            document.getElementById('filter-min-price').value = '';
+            document.getElementById('filter-max-price').value = '';
+            document.getElementById('filter-min-sqft').value = '';
+            document.getElementById('filter-max-sqft').value = '';
+            document.getElementById('filter-furnishing').value = '';
+            document.getElementById('filter-status').value = '';
+            document.getElementById('filter-parking').value = '';
+            document.getElementById('filter-facing').value = '';
+            document.getElementById('filter-security').value = '';
+            document.getElementById('filter-possession').value = '';
+            document.querySelectorAll('.amenity-checkbox').forEach(cb => cb.checked = false);
+            
+            // Hide active filters display
+            document.getElementById('active-filters').classList.add('hidden');
+            
+            filteredProperties = [...allProperties];
+            displayProperties();
+        }
+
+        function sortProperties() {
+            const sortBy = document.getElementById('sort-by').value;
+            
+            switch(sortBy) {
+                case 'price-low':
+                    filteredProperties.sort((a, b) => a.listing_price - b.listing_price);
+                    break;
+                case 'price-high':
+                    filteredProperties.sort((a, b) => b.listing_price - a.listing_price);
+                    break;
+                case 'sqft-low':
+                    filteredProperties.sort((a, b) => parseFloat(a.sq_ft || 0) - parseFloat(b.sq_ft || 0));
+                    break;
+                case 'sqft-high':
+                    filteredProperties.sort((a, b) => parseFloat(b.sq_ft || 0) - parseFloat(a.sq_ft || 0));
+                    break;
+                case 'newest':
+                    filteredProperties.sort((a, b) => new Date(b.created_timestamp) - new Date(a.created_timestamp));
+                    break;
+            }
+            
+            displayProperties();
+        }
+
+        function displayProperties() {
+            const container = document.getElementById('properties-container');
+            const noResults = document.getElementById('no-results');
+            const resultsCount = document.getElementById('results-count');
+
+            resultsCount.textContent = `Found ${filteredProperties.length} ${filteredProperties.length === 1 ? 'property' : 'properties'}`;
+
+            if (filteredProperties.length === 0) {
+                container.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            container.innerHTML = filteredProperties.map(property => createPropertyCard(property)).join('');
+            
+            // Re-setup view tracking after properties are rendered
+            setupPropertyViewTracking();
+        }
+
+        function createPropertyCard(property) {
+            const price = formatPrice(property.listing_price);
+            
+            // Generate unique ID without colons
+            const carouselId = property.created_timestamp.replace(/[:.]/g, '-');
+            
+            const imageHtml = property.images.length > 0 ? 
+                `<div class="image-carousel relative" id="carousel-${carouselId}">
+                    <img src="${property.images[0]}" alt="${property.property_name}" 
+                        class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center bg-gray-200\\'><span class=\\'text-gray-400 text-4xl\\'>🏠</span></div>';">
+                    ${property.images.length > 1 ? `
+                        <button class="carousel-button prev" onclick="changeImage('${property.created_timestamp}', -1); event.stopPropagation();">❮</button>
+                        <button class="carousel-button next" onclick="changeImage('${property.created_timestamp}', 1); event.stopPropagation();">❯</button>
+                        <div class="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                            <span id="img-counter-${carouselId}">1</span>/${property.images.length}
+                        </div>
+                    ` : ''}
+                </div>` :
+                `<div class="w-full h-full flex items-center justify-center bg-gray-200">
+                    <span class="text-gray-400 text-4xl">🏠</span>
+                </div>`;
+
+            const amenitiesHtml = property.amenities?.slice(0, 5).map(a => 
+                `<span class="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-100 transition-colors">
+                    <span class="mr-1">${a.icon || '•'}</span> ${a.name}
+                </span>`
+            ).join('') || '';
+
+            const moreAmenities = property.amenities?.length > 5 ? 
+                `<span class="inline-flex items-center text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full border border-gray-300 font-semibold hover:bg-gray-200 transition-colors">+${property.amenities.length - 5} more</span>` : '';
+
+            return `
+                <div class="property-card bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden flex flex-col md:flex-row hover:shadow-2xl hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1"
+                    onclick="viewProperty('${property.created_timestamp}')" data-timestamp="${property.created_timestamp}">
+                    
+                    <!-- Image Section -->
+                    <div class="md:w-1/3 h-64 md:h-auto relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        ${imageHtml}
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="md:w-2/3 p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-2xl font-bold text-gray-900 mb-1 hover:text-blue-600 transition-colors">${property.property_name}</h3>
+                                    <p class="text-base font-semibold text-gray-700">${property.builder_name}</p>
+                                    <div class="flex items-center mt-2">
+                                        <svg class="w-4 h-4 text-blue-600 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <p class="text-sm text-gray-600">${property.location}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right ml-4">
+                                    <p class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">${price}</p>
+                                    <span class="inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full ${
+                                        property.status === 'Active' ? 'bg-green-100 text-green-800 border border-green-300' :
+                                        property.status === 'Sold' ? 'bg-red-100 text-red-800 border border-red-300' :
+                                        'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                                    }">${property.status}</span>
+                                </div>
+                            </div>
+
+                            <!-- Key Stats -->
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                                <div class="text-center p-3 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
+                                    <svg class="w-6 h-6 mx-auto mb-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                    </svg>
+                                    <p class="text-xs text-gray-600 font-medium">BHK</p>
+                                    <p class="text-xl font-bold text-gray-900">${property.num_bedrooms || 'N/A'}</p>
+                                </div>
+                                <div class="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-100 hover:shadow-md transition-shadow">
+                                    <svg class="w-6 h-6 mx-auto mb-1 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
+                                    </svg>
+                                    <p class="text-xs text-gray-600 font-medium">Bathrooms</p>
+                                    <p class="text-xl font-bold text-gray-900">${property.num_bathrooms || 'N/A'}</p>
+                                </div>
+                                <div class="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-100 hover:shadow-md transition-shadow">
+                                    <svg class="w-6 h-6 mx-auto mb-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                                    </svg>
+                                    <p class="text-xs text-gray-600 font-medium">Sq. Ft.</p>
+                                    <p class="text-xl font-bold text-gray-900">${property.sq_ft || 'N/A'}</p>
+                                </div>
+                                <div class="text-center p-3 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border border-orange-100 hover:shadow-md transition-shadow">
+                                    <svg class="w-6 h-6 mx-auto mb-1 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                                    </svg>
+                                    <p class="text-xs text-gray-600 font-medium">Parking</p>
+                                    <p class="text-xl font-bold text-gray-900">${property.parking || 'N/A'}</p>
+                                </div>
+                            </div>
+
+                            <!-- Additional Info -->
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm mb-4">
+                                ${property.furnishing_status ? `<p>🛋️ ${property.furnishing_status}</p>` : ''}
+                                ${property.facing ? `<p>🧭 ${property.facing} Facing</p>` : ''}
+                                ${property.floor ? `<p>🏢 Floor: ${property.floor}</p>` : ''}
+                                ${property.possession_on ? `<p>🗓️ Ready: ${formatDate(property.possession_on)}</p>` : ''}
+                                ${property.gated_security ? `<p>🔒 Gated Security</p>` : ''}
+                                ${property.age_of_building ? `<p>🏗️ ${property.age_of_building}</p>` : ''}
+                            </div>
+
+                            <!-- Description -->
+                            ${property.description ? `
+                                <p class="text-gray-600 text-sm mb-3 line-clamp-2">${property.description}</p>
+                            ` : ''}
+
+                            <!-- Amenities -->
+                            ${amenitiesHtml ? `
+                                <div class="flex flex-wrap gap-2 mb-3">
+                                    ${amenitiesHtml}
+                                    ${moreAmenities}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 pt-4 border-t border-gray-100">
+                            <button onclick="viewProperty('${property.created_timestamp}'); event.stopPropagation();" 
+                                class="inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg text-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Details
+                            </button>
+                            <button onclick="addToFavorites('${property.created_timestamp}'); event.stopPropagation();" 
+                                class="inline-flex items-center justify-center bg-white hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 border-2 border-gray-300 hover:border-blue-500 transform hover:scale-105 shadow-sm hover:shadow-md text-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                                Save
+                            </button>
+                            <button onclick="contactBuilder('${property.builder_username}', '${property.created_timestamp}'); event.stopPropagation();" 
+                                class="inline-flex items-center justify-center bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg text-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                Builder
+                            </button>
+                            <button onclick="bookVisit('${property.created_timestamp}'); event.stopPropagation();" 
+                                class="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg text-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Visit
+                            </button>
+                            <button onclick="contactExpert('${property.created_timestamp}'); event.stopPropagation();" 
+                                class="inline-flex items-center justify-center bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg text-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                Expert
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Image carousel for property cards
+        const imageIndices = {};
+
+        function changeImage(timestamp, direction) {
+            const property = filteredProperties.find(p => p.created_timestamp === timestamp);
+            if (!property || property.images.length <= 1) return;
+
+            if (!imageIndices[timestamp]) imageIndices[timestamp] = 0;
+            
+            imageIndices[timestamp] += direction;
+            if (imageIndices[timestamp] < 0) imageIndices[timestamp] = property.images.length - 1;
+            if (imageIndices[timestamp] >= property.images.length) imageIndices[timestamp] = 0;
+
+            const carouselId = timestamp.replace(/[:.]/g, '-');
+            const carousel = document.querySelector(`#carousel-${carouselId} img`);
+            const counter = document.getElementById(`img-counter-${carouselId}`);
+            
+            if (carousel) carousel.src = property.images[imageIndices[timestamp]];
+            if (counter) counter.textContent = imageIndices[timestamp] + 1;
+        }
+
+        function viewProperty(timestamp) {
+            window.location.href = `property_details.html?timestamp=${timestamp}`;
+        }
+
+        function addToFavorites(timestamp) {
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            if (!username) {
+                alert('Please login to save favorites.');
+                return;
+            }
+            
+            // Get existing favorites from localStorage (user-specific)
+            const favorites = JSON.parse(localStorage.getItem(`favoriteProperties_${username}`) || '[]');
+            
+            // Check if already in favorites
+            if (favorites.includes(timestamp)) {
+                showNotification('Already in Favorites', 'This property is already in your favorites!', 'info');
+                return;
+            }
+            
+            // Add to favorites
+            favorites.push(timestamp);
+            localStorage.setItem(`favoriteProperties_${username}`, JSON.stringify(favorites));
+            
+            // Increment shortlists count for this property
+            const shortlistKey = `propertyShortlists_${timestamp}`;
+            const currentCount = parseInt(localStorage.getItem(shortlistKey) || '0');
+            localStorage.setItem(shortlistKey, (currentCount + 1).toString());
+            console.log(`Shortlists count incremented for ${timestamp}: ${currentCount + 1}`);
+            
+            showNotification('Added to Favorites! ⭐', 'Property saved successfully. View it in "My Favorites" page.', 'success');
+        }
+
+        function contactBuilder(builderUsername, timestamp) {
+            const property = filteredProperties.find(p => p.created_timestamp === timestamp);
+            openContactModal(builderUsername, property);
+        }
+
+        let currentProperty = null;
+
+        async function openContactModal(builderUsername, property = null) {
+            currentProperty = property;
+            
+            // Increment contacted count for this property
+            if (property && property.created_timestamp) {
+                const contactedKey = `propertyContacted_${property.created_timestamp}`;
+                const currentCount = parseInt(localStorage.getItem(contactedKey) || '0');
+                localStorage.setItem(contactedKey, (currentCount + 1).toString());
+                console.log(`Contacted count incremented for ${property.created_timestamp}: ${currentCount + 1}`);
+            }
+            
+            try {
+                // Load user data to get builder contact info
+                const response = await fetch('user_data.csv');
+                const text = await response.text();
+                const rows = text.trim().split('\n').slice(1);
+                
+                // Find the builder
+                let builderInfo = null;
+                for (const row of rows) {
+                    const cols = parseCSVRow(row);
+                    if (cols[0] === 'builder' && cols[1] === builderUsername) {
+                        builderInfo = {
+                            name: `${cols[4]} ${cols[5]}`,
+                            email: cols[3],
+                            phone: cols[6]
+                        };
+                        break;
+                    }
+                }
+                
+                if (!builderInfo) {
+                    alert('Builder contact information not found.');
+                    return;
+                }
+                
+                // Populate modal
+                document.getElementById('builder-name').textContent = builderInfo.name;
+                document.getElementById('builder-phone').textContent = builderInfo.phone;
+                document.getElementById('builder-email').textContent = builderInfo.email;
+                document.getElementById('builder-phone-link').href = `tel:${builderInfo.phone}`;
+                document.getElementById('builder-email-link').href = `mailto:${builderInfo.email}`;
+                
+                // Show modal
+                document.getElementById('contact-modal').classList.add('active');
+            } catch (error) {
+                console.error('Error loading builder info:', error);
+                alert('Error loading contact information. Please try again.');
+            }
+        }
+
+        function closeContactModal() {
+            document.getElementById('contact-modal').classList.remove('active');
+        }
+
+        function requestCallback() {
+            const builderName = document.getElementById('builder-name').textContent;
+            const builderPhone = document.getElementById('builder-phone').textContent;
+            const builderEmail = document.getElementById('builder-email').textContent;
+            
+            // Get customer info from session storage
+            const customerFirstName = sessionStorage.getItem('loggedInUserFirstName') || 'Customer';
+            const customerLastName = sessionStorage.getItem('loggedInUserLastName') || '';
+            const customerName = `${customerFirstName} ${customerLastName}`.trim();
+            const customerPhone = sessionStorage.getItem('loggedInUserPhone') || '';
+            const customerEmail = sessionStorage.getItem('loggedInUserEmail') || '';
+            
+            // Create request object with property details
+            const request = {
+                id: Date.now(),
+                builderName: builderName,
+                builderEmail: builderEmail,
+                builderPhone: builderPhone,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                customerEmail: customerEmail,
+                requestType: 'Call Back',
+                status: 'Pending',
+                timestamp: new Date().toISOString(),
+                propertyDetails: currentProperty ? {
+                    name: currentProperty.property_name,
+                    apartmentName: currentProperty.apartment_name,
+                    location: currentProperty.location,
+                    bhk: currentProperty.num_bedrooms,
+                    price: currentProperty.listing_price,
+                    sqft: currentProperty.sq_ft,
+                    furnishing: currentProperty.furnishing_status,
+                    status: currentProperty.status
+                } : null
+            };
+            
+            // Save to localStorage
+            const connectRequests = JSON.parse(localStorage.getItem('connectRequests') || '[]');
+            connectRequests.push(request);
+            localStorage.setItem('connectRequests', JSON.stringify(connectRequests));
+            
+            closeContactModal();
+            showNotification('Request Sent! 📞', 'Connect request created successfully! The builder will contact you shortly.', 'success');
+        }
+
+        function bookVisit(timestamp) {
+            // Find and store the property before opening visit modal
+            const property = filteredProperties.find(p => p.created_timestamp === timestamp);
+            currentProperty = property;
+            
+            // Open book visit modal
+            document.getElementById('book-visit-modal').classList.add('active');
+        }
+
+        function closeBookVisitModal() {
+            document.getElementById('book-visit-modal').classList.remove('active');
+        }
+
+        async function bookDirectVisit() {
+            closeBookVisitModal();
+            
+            if (!currentProperty) {
+                alert('Property information not available. Please try again.');
+                return;
+            }
+            
+            try {
+                // Load builder details
+                const response = await fetch('user_data.csv');
+                const text = await response.text();
+                const rows = text.trim().split('\n').slice(1);
+                
+                let builderName = 'Builder';
+                for (const row of rows) {
+                    const cols = parseCSVRow(row);
+                    if (cols[0] === 'builder' && cols[1] === currentProperty.builder_username) {
+                        builderName = `${cols[4]} ${cols[5]}`.trim();
+                        break;
+                    }
+                }
+                
+                // Populate modal
+                document.getElementById('direct-visit-builder-name').textContent = builderName;
+                document.getElementById('builder-initial').textContent = builderName.charAt(0).toUpperCase();
+                document.getElementById('visit-property-name').textContent = currentProperty.property_name || 'N/A';
+                document.getElementById('visit-property-location').textContent = currentProperty.location || 'N/A';
+                
+                // Set minimum date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('visit-date').min = today;
+                document.getElementById('visit-date').value = '';
+                document.getElementById('visit-time').value = '';
+                
+                // Open direct visit modal
+                document.getElementById('direct-visit-modal').classList.add('active');
+            } catch (error) {
+                console.error('Error loading builder info:', error);
+                alert('Error loading builder information. Please try again.');
+            }
+        }
+
+        function closeDirectVisitModal() {
+            document.getElementById('direct-visit-modal').classList.remove('active');
+        }
+
+        function confirmDirectVisit() {
+            const visitDate = document.getElementById('visit-date').value;
+            const visitTime = document.getElementById('visit-time').value;
+            
+            if (!visitDate || !visitTime) {
+                showNotification('Missing Information', 'Please select both date and time for your visit.', 'error');
+                return;
+            }
+            
+            // Get customer and builder info
+            const customerFirstName = sessionStorage.getItem('loggedInUserFirstName') || 'Customer';
+            const customerLastName = sessionStorage.getItem('loggedInUserLastName') || '';
+            const customerName = `${customerFirstName} ${customerLastName}`.trim();
+            const customerPhone = sessionStorage.getItem('loggedInUserPhone') || '';
+            const customerEmail = sessionStorage.getItem('loggedInUserEmail') || '';
+            const builderName = document.getElementById('direct-visit-builder-name').textContent;
+            
+            // Create visit booking object
+            const visitBooking = {
+                id: Date.now(),
+                customerName: customerName,
+                customerPhone: customerPhone,
+                customerEmail: customerEmail,
+                builderName: builderName,
+                builderUsername: currentProperty.builder_username,
+                visitDate: visitDate,
+                visitTime: visitTime,
+                status: 'Pending',
+                visitType: 'Direct Visit',
+                timestamp: new Date().toISOString(),
+                propertyDetails: {
+                    name: currentProperty.property_name,
+                    apartmentName: currentProperty.apartment_name,
+                    location: currentProperty.location,
+                    bhk: currentProperty.num_bedrooms,
+                    price: currentProperty.listing_price,
+                    sqft: currentProperty.sq_ft,
+                    furnishing: currentProperty.furnishing_status,
+                    status: currentProperty.status,
+                    timestamp: currentProperty.created_timestamp || currentProperty.timestamp
+                }
+            };
+            
+            // Save to localStorage
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            visitBookings.push(visitBooking);
+            localStorage.setItem('visitBookings', JSON.stringify(visitBookings));
+            
+            closeDirectVisitModal();
+            const formattedDate = new Date(visitDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            showNotification('Visit Scheduled! 📅', `Your visit is scheduled for ${formattedDate} at ${visitTime}. The builder will confirm shortly.`, 'success');
+        }
+
+        function bookExpertAssistedVisit() {
+            closeBookVisitModal();
+            // Open expert assisted visit modal
+            document.getElementById('expert-assisted-visit-modal').classList.add('active');
+        }
+
+        function closeExpertAssistedVisitModal() {
+            document.getElementById('expert-assisted-visit-modal').classList.remove('active');
+        }
+
+        function autoAssignExpertForVisit() {
+            closeExpertAssistedVisitModal();
+            
+            if (!currentProperty) {
+                showNotification('Error', 'Property information not found!', 'error');
+                return;
+            }
+            
+            // Get customer info from session storage
+            const customerFirstName = sessionStorage.getItem('loggedInUserFirstName') || 'Customer';
+            const customerLastName = sessionStorage.getItem('loggedInUserLastName') || '';
+            const customerName = `${customerFirstName} ${customerLastName}`.trim();
+            const customerPhone = sessionStorage.getItem('loggedInUserPhone') || '';
+            const customerEmail = sessionStorage.getItem('loggedInUserEmail') || '';
+            
+            // Create expert-assisted visit request
+            const visitRequest = {
+                id: Date.now(),
+                customerName: customerName,
+                customerPhone: customerPhone,
+                customerEmail: customerEmail,
+                visitType: 'Expert Assisted Visit',
+                expertAssignment: 'Auto Assigned',
+                status: 'Pending',
+                timestamp: new Date().toISOString(),
+                propertyDetails: {
+                    name: currentProperty.property_name,
+                    apartmentName: currentProperty.apartment_name,
+                    location: currentProperty.location,
+                    bhk: currentProperty.num_bedrooms,
+                    price: currentProperty.listing_price,
+                    sqft: currentProperty.sq_ft,
+                    furnishing: currentProperty.furnishing_status,
+                    status: currentProperty.status
+                },
+                builderName: currentProperty.builder_name || 'N/A',
+                builderUsername: currentProperty.builder_username
+            };
+            
+            // Save to localStorage
+            const expertVisitRequests = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            expertVisitRequests.push(visitRequest);
+            localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisitRequests));
+            
+            showNotification('Expert Assigned! 👨‍💼', 'An experienced real estate consultant will contact you within 24 hours to coordinate your property visit.', 'success');
+        }
+
+        async function browseExpertsForVisit() {
+            closeExpertAssistedVisitModal();
+            
+            if (!currentProperty) {
+                alert('Property information not found!');
+                return;
+            }
+            
+            expertModalContext = 'visit';
+            
+            // Open browse experts modal
+            document.getElementById('browse-experts-modal').classList.add('active');
+            
+            // Load consultants from user_data.csv
+            try {
+                const response = await fetch('user_data.csv');
+                const text = await response.text();
+                const rows = text.trim().split('\n').slice(1);
+                
+                const consultants = [];
+                for (const row of rows) {
+                    const cols = parseCSVRow(row);
+                    if (cols[0] === 'consultant') {
+                        consultants.push({
+                            username: cols[1],
+                            firstName: cols[4],
+                            lastName: cols[5],
+                            email: cols[3],
+                            phone: cols[6]
+                        });
+                    }
+                }
+                
+                const container = document.getElementById('experts-container');
+                const noExperts = document.getElementById('no-experts');
+                
+                if (consultants.length === 0) {
+                    container.classList.add('hidden');
+                    noExperts.classList.remove('hidden');
+                } else {
+                    container.classList.remove('hidden');
+                    noExperts.classList.add('hidden');
+                    container.innerHTML = consultants.map(c => createExpertCard(c)).join('');
+                }
+            } catch (error) {
+                console.error('Error loading consultants:', error);
+                alert('Error loading consultants. Please try again.');
+            }
+        }
+
+
+
+        function selectExpertForVisit(expertName, expertPhone, expertEmail) {
+            closeBrowseExpertsModal();
+            
+            if (!currentProperty) {
+                alert('Property information not found!');
+                return;
+            }
+            
+            // Store selected expert details
+            selectedExpert = {
+                name: expertName,
+                phone: expertPhone,
+                email: expertEmail
+            };
+            
+            // Populate expert details in modal
+            const expertInitial = expertName.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('expert-initial').textContent = expertInitial;
+            document.getElementById('expert-visit-expert-name').textContent = expertName;
+            document.getElementById('expert-visit-property-name').textContent = currentProperty.property_name;
+            document.getElementById('expert-visit-property-location').textContent = currentProperty.location;
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('expert-visit-date').setAttribute('min', today);
+            
+            // Open scheduling modal
+            document.getElementById('expert-visit-schedule-modal').classList.add('active');
+        }
+        
+        function closeExpertVisitScheduleModal() {
+            document.getElementById('expert-visit-schedule-modal').classList.remove('active');
+            selectedExpert = null;
+        }
+        
+        function confirmExpertVisit() {
+            const visitDate = document.getElementById('expert-visit-date').value;
+            const visitTime = document.getElementById('expert-visit-time').value;
+            
+            if (!visitDate || !visitTime) {
+                showNotification('Missing Information', 'Please select both date and time for the visit.', 'error');
+                return;
+            }
+            
+            if (!selectedExpert || !currentProperty) {
+                showNotification('Error', 'Missing expert or property information!', 'error');
+                return;
+            }
+            
+            // Get customer info from session storage
+            const customerFirstName = sessionStorage.getItem('loggedInUserFirstName') || 'Customer';
+            const customerLastName = sessionStorage.getItem('loggedInUserLastName') || '';
+            const customerName = `${customerFirstName} ${customerLastName}`.trim();
+            const customerPhone = sessionStorage.getItem('loggedInUserPhone') || '';
+            const customerEmail = sessionStorage.getItem('loggedInUserEmail') || '';
+            
+            // Create expert-assisted visit request
+            const visitRequest = {
+                id: Date.now().toString(),
+                customerName: customerName,
+                customerPhone: customerPhone,
+                customerEmail: customerEmail,
+                expertName: selectedExpert.name,
+                expertPhone: selectedExpert.phone,
+                expertEmail: selectedExpert.email,
+                visitDate: visitDate,
+                visitTime: visitTime,
+                visitType: 'Expert Assisted Visit',
+                expertAssignment: 'Selected by Customer',
+                status: 'pending',
+                timestamp: new Date().toISOString(),
+                propertyDetails: {
+                    propertyName: currentProperty.property_name,
+                    name: currentProperty.property_name,
+                    apartmentName: currentProperty.apartment_name,
+                    location: currentProperty.location,
+                    bhk: currentProperty.num_bedrooms,
+                    price: currentProperty.listing_price,
+                    sqft: currentProperty.sq_ft,
+                    timestamp: currentProperty.created_timestamp
+                },
+                builderName: currentProperty.builder_name,
+                builderUsername: currentProperty.username || currentProperty.builder_username
+            };
+            
+            console.log('Creating expert visit request - currentProperty:', currentProperty);
+            console.log('Builder Username being saved:', visitRequest.builderUsername);
+            
+            // Save to localStorage
+            const expertVisitRequests = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            expertVisitRequests.push(visitRequest);
+            localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisitRequests));
+            
+            closeExpertVisitScheduleModal();
+            const formattedDate = new Date(visitDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            showNotification('Expert Visit Scheduled! 📅', `Your expert-assisted visit is scheduled for ${formattedDate} at ${visitTime}. ${visitRequest.expertName} will coordinate with you and the builder.`, 'success');
+        }
+
+        function contactExpert(timestamp) {
+            // Find and store the property before opening expert modal
+            const property = filteredProperties.find(p => p.created_timestamp === timestamp);
+            currentProperty = property;
+            
+            // Open expert selection modal
+            document.getElementById('expert-modal').classList.add('active');
+        }
+
+        function closeExpertModal() {
+            document.getElementById('expert-modal').classList.remove('active');
+        }
+
+        function autoAssignExpert() {
+            closeExpertModal();
+            showNotification('Expert Assigned! 👨‍💼', 'An experienced real estate consultant will contact you within 24 hours.', 'success');
+        }
+
+        async function browseExperts() {
+            closeExpertModal();
+            expertModalContext = 'contact';
+            
+            // Open browse experts modal
+            document.getElementById('browse-experts-modal').classList.add('active');
+            
+            // Load consultants from user_data.csv
+            try {
+                const response = await fetch('user_data.csv');
+                const text = await response.text();
+                const rows = text.trim().split('\n').slice(1);
+                
+                const consultants = [];
+                for (const row of rows) {
+                    const cols = parseCSVRow(row);
+                    if (cols[0] === 'consultant') {
+                        consultants.push({
+                            username: cols[1],
+                            firstName: cols[4],
+                            lastName: cols[5],
+                            email: cols[3],
+                            phone: cols[6]
+                        });
+                    }
+                }
+                
+                const container = document.getElementById('experts-container');
+                const noExperts = document.getElementById('no-experts');
+                
+                if (consultants.length === 0) {
+                    container.innerHTML = '';
+                    noExperts.classList.remove('hidden');
+                } else {
+                    noExperts.classList.add('hidden');
+                    container.innerHTML = consultants.map(consultant => createExpertCard(consultant)).join('');
+                }
+            } catch (error) {
+                console.error('Error loading consultants:', error);
+                alert('Error loading consultants. Please try again.');
+            }
+        }
+
+        function createExpertCard(consultant) {
+            const fullName = `${consultant.firstName} ${consultant.lastName}`;
+            const selectFunction = expertModalContext === 'visit' 
+                ? `selectExpertForVisit('${fullName}', '${consultant.phone}', '${consultant.email}')` 
+                : `selectExpert('${fullName}', '${consultant.phone}', '${consultant.email}')`;
+            
+            // Check for profile photo
+            const savedPhoto = localStorage.getItem(`profilePhoto_${consultant.username}`);
+            const initials = `${consultant.firstName.charAt(0)}${consultant.lastName.charAt(0)}`;
+            
+            const profileImageHtml = savedPhoto 
+                ? `<img src="${savedPhoto}" alt="${fullName}" class="w-12 h-12 rounded-full object-cover">` 
+                : `<div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">${initials}</div>`;
+            
+            return `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition duration-200">
+                    <div class="flex items-center mb-3">
+                        ${profileImageHtml}
+                        <div class="ml-3">
+                            <h4 class="text-lg font-bold text-gray-800">${fullName}</h4>
+                            <p class="text-xs text-gray-500">Real Estate Consultant</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4 text-sm">
+                        <div class="flex items-center text-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <span>${consultant.phone}</span>
+                        </div>
+                        <div class="flex items-center text-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span class="text-xs break-all">${consultant.email}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="viewExpertDetails('${consultant.username}')" 
+                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 text-sm">
+                            View Details
+                        </button>
+                        <button onclick="${selectFunction}" 
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 text-sm">
+                            Select Expert
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeBrowseExpertsModal() {
+            document.getElementById('browse-experts-modal').classList.remove('active');
+        }
+
+        function viewExpertDetails(username) {
+            // Open consultant profile page in a new tab
+            window.open(`consultant_public_profile.html?username=${username}`, '_blank');
+        }
+
+        function viewExpertDetails(username) {
+            // Open consultant profile page in a new tab
+            window.open(`consultant_public_profile.html?username=${username}`, '_blank');
+        }
+
+        function selectExpert(name, phone, email) {
+            closeBrowseExpertsModal();
+            
+            // Get customer info from session storage
+            const customerFirstName = sessionStorage.getItem('loggedInUserFirstName') || 'Customer';
+            const customerLastName = sessionStorage.getItem('loggedInUserLastName') || '';
+            const customerName = `${customerFirstName} ${customerLastName}`.trim();
+            const customerPhone = sessionStorage.getItem('loggedInUserPhone') || '';
+            const customerEmail = sessionStorage.getItem('loggedInUserEmail') || '';
+            
+            // Create consultant connect request
+            const request = {
+                id: Date.now(),
+                consultantName: name,
+                consultantPhone: phone,
+                consultantEmail: email,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                customerEmail: customerEmail,
+                requestType: 'Expert Consultation',
+                status: 'Pending',
+                timestamp: new Date().toISOString(),
+                propertyDetails: currentProperty ? {
+                    name: currentProperty.property_name,
+                    apartmentName: currentProperty.apartment_name,
+                    location: currentProperty.location,
+                    bhk: currentProperty.num_bedrooms,
+                    price: currentProperty.listing_price,
+                    sqft: currentProperty.sq_ft,
+                    furnishing: currentProperty.furnishing_status,
+                    status: currentProperty.status
+                } : null
+            };
+            
+            // Save to localStorage for consultant requests
+            const consultantRequests = JSON.parse(localStorage.getItem('consultantConnectRequests') || '[]');
+            consultantRequests.push(request);
+            localStorage.setItem('consultantConnectRequests', JSON.stringify(consultantRequests));
+            
+            showNotification('Expert Selected! ✨', `You have chosen ${name} as your consultant. They will contact you shortly at your registered contact information.`, 'success');
+        }
+
+        function formatPrice(price) {
+            if (!price) return 'N/A';
+            if (price >= 10000000) {
+                return `₹${(price / 10000000).toFixed(2)} Cr`;
+            } else if (price >= 100000) {
+                return `₹${(price / 100000).toFixed(2)} L`;
+            }
+            return `₹${price.toLocaleString('en-IN')}`;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+        }
+
+        // Track unique property views per session
+        function setupPropertyViewTracking() {
+            // Use Intersection Observer to detect when property cards are viewed
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.5 // Property card must be 50% visible
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const propertyCard = entry.target;
+                        const timestamp = propertyCard.getAttribute('data-timestamp');
+                        
+                        if (timestamp && !viewedPropertiesThisSession.has(timestamp)) {
+                            // Mark as viewed in this session
+                            viewedPropertiesThisSession.add(timestamp);
+                            
+                            // Increment unique view count in localStorage
+                            const viewKey = `propertyUniqueViews_${timestamp}`;
+                            const currentViews = parseInt(localStorage.getItem(viewKey) || '0');
+                            localStorage.setItem(viewKey, (currentViews + 1).toString());
+                            
+                            console.log(`Unique view counted for property ${timestamp}: ${currentViews + 1}`);
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all property cards
+            document.querySelectorAll('.property-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+    </script>
+</body>
+</html>

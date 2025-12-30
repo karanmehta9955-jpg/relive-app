@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio - RealEstate Partner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(to bottom, rgba(20, 184, 166, 0.05), rgba(20, 184, 166, 0.05)),
+                repeating-linear-gradient(0deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px),
+                repeating-linear-gradient(90deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px);
+            background-size: 100% 100%, 80px 80px, 80px 80px;
+            min-height: 100vh;
+        }
+        
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(20, 184, 166, 0.3);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+        .stat-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-lg border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-teal-600 to-teal-700 rounded-lg flex items-center justify-center shadow-md">
+                <span class="text-white font-bold text-lg">R</span>
+            </div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent">My Portfolio</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome, Consultant!</span>
+            
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown">
+                <div class="profile-icon" id="profile-icon" onclick="toggleProfileMenu()">
+                    <img id="profile-image" style="display: none;">
+                    <span id="profile-initials">U</span>
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="logout()" style="color: #dc2626;">
+                        <span>🚪 Logout</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="goBack()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                Back
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 md:p-10">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-8 border-b-2 border-teal-400 pb-2">My Portfolio</h2>
+        
+        <!-- Performance Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <div class="text-blue-500 mb-2 text-3xl">📊</div>
+                <div class="text-3xl font-bold text-gray-800" id="total-clients">0</div>
+                <div class="text-sm text-gray-500 mt-1">Total Clients Served</div>
+            </div>
+            
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <div class="text-green-500 mb-2 text-3xl">✅</div>
+                <div class="text-3xl font-bold text-gray-800" id="completed-visits">0</div>
+                <div class="text-sm text-gray-500 mt-1">Completed Visits</div>
+            </div>
+            
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <div class="text-purple-500 mb-2 text-3xl">📅</div>
+                <div class="text-3xl font-bold text-gray-800" id="upcoming-visits">0</div>
+                <div class="text-sm text-gray-500 mt-1">Upcoming Visits</div>
+            </div>
+            
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <div class="text-orange-500 mb-2 text-3xl">⭐</div>
+                <div class="text-3xl font-bold text-gray-800" id="rating">5.0</div>
+                <div class="text-sm text-gray-500 mt-1">Average Rating</div>
+            </div>
+        </div>
+
+        <!-- Expertise Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <div class="text-indigo-500 mb-2 text-3xl">📍</div>
+                <div class="text-sm font-semibold text-gray-700 mb-2">Expert Localities</div>
+                <div id="expert-localities" class="text-xs text-gray-600 max-h-20 overflow-y-auto">Loading...</div>
+            </div>
+            
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <div class="text-cyan-500 mb-2 text-3xl">💰</div>
+                <div class="text-sm font-semibold text-gray-700 mb-2">Expert Price Range</div>
+                <div id="expert-price-range" class="text-xs text-gray-600 max-h-20 overflow-y-auto">Loading...</div>
+            </div>
+            
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <div class="text-pink-500 mb-2 text-3xl">📐</div>
+                <div class="text-sm font-semibold text-gray-700 mb-2">Expert Square Footage</div>
+                <div id="expert-sqft" class="text-xs text-gray-600 max-h-20 overflow-y-auto">Loading...</div>
+            </div>
+            
+            <div class="stat-card bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <div class="text-amber-500 mb-2 text-3xl">🏠</div>
+                <div class="text-sm font-semibold text-gray-700 mb-2">Expert BHK</div>
+                <div id="expert-bhk" class="text-xs text-gray-600 max-h-20 overflow-y-auto">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Portfolio Insights -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-200">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">Growth Metrics</h3>
+                        <p class="text-sm text-gray-500">Month-over-month performance</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600 font-medium">Portfolio Growth</span>
+                            <span class="text-green-700 font-bold">+18%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full" style="width: 72%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600 font-medium">Client Retention</span>
+                            <span class="text-blue-700 font-bold">88%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full" style="width: 88%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600 font-medium">Visit Conversion</span>
+                            <span class="text-purple-700 font-bold">64%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full" style="width: 64%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-200">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">Recent Activity</h3>
+                        <p class="text-sm text-gray-500">Last 7 days summary</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">New Properties Added</span>
+                        </div>
+                        <span class="text-lg font-bold text-blue-600">4</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Property Views</span>
+                        </div>
+                        <span class="text-lg font-bold text-green-600">127</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Client Inquiries</span>
+                        </div>
+                        <span class="text-lg font-bold text-purple-600">18</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Portfolio Properties -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-200">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                    <span>💼</span> My Portfolio Properties
+                </h3>
+                <button onclick="openAddPropertyModal()" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center gap-2">
+                    <span>+</span> Add Properties
+                </button>
+            </div>
+            <div id="portfolio-properties" class="space-y-4">
+                <div class="text-gray-500 text-center py-8">Loading portfolio...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Property Modal -->
+    <div id="add-property-modal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Add Properties to Portfolio</h3>
+                <button onclick="closeAddPropertyModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <div class="flex gap-4 mb-4">
+                <input type="text" id="modal-search" placeholder="Search properties..." 
+                    onkeyup="filterModalProperties()"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                
+                <button onclick="toggleModalFilters()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg transition duration-150 flex items-center gap-2">
+                    🎛️ Filters
+                </button>
+                
+                <select id="modal-sort" onchange="sortModalProperties()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <option value="default">Sort By</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="sqft-low">Size: Small to Large</option>
+                    <option value="sqft-high">Size: Large to Small</option>
+                    <option value="newest">Newest First</option>
+                </select>
+            </div>
+
+            <!-- Filter Panel -->
+            <div id="modal-filter-panel" class="hidden mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                        <select id="modal-filter-location" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
+                            <option value="">All Locations</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">BHK</label>
+                        <select id="modal-filter-bhk" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
+                            <option value="">All</option>
+                            <option value="1">1 BHK</option>
+                            <option value="2">2 BHK</option>
+                            <option value="3">3 BHK</option>
+                            <option value="4">4 BHK</option>
+                            <option value="5">5+ BHK</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Price Range</label>
+                        <div class="flex gap-2">
+                            <select id="modal-filter-min-price" class="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
+                                <option value="">Min</option>
+                                <option value="0">₹0</option>
+                                <option value="1000000">₹10 L</option>
+                                <option value="2000000">₹20 L</option>
+                                <option value="3000000">₹30 L</option>
+                                <option value="5000000">₹50 L</option>
+                                <option value="7500000">₹75 L</option>
+                                <option value="10000000">₹1 Cr</option>
+                                <option value="15000000">₹1.5 Cr</option>
+                                <option value="20000000">₹2 Cr</option>
+                                <option value="30000000">₹3 Cr</option>
+                                <option value="50000000">₹5 Cr</option>
+                            </select>
+                            <select id="modal-filter-max-price" class="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
+                                <option value="">Max</option>
+                                <option value="1000000">₹10 L</option>
+                                <option value="2000000">₹20 L</option>
+                                <option value="3000000">₹30 L</option>
+                                <option value="5000000">₹50 L</option>
+                                <option value="7500000">₹75 L</option>
+                                <option value="10000000">₹1 Cr</option>
+                                <option value="15000000">₹1.5 Cr</option>
+                                <option value="20000000">₹2 Cr</option>
+                                <option value="30000000">₹3 Cr</option>
+                                <option value="50000000">₹5 Cr</option>
+                                <option value="100000000">₹10 Cr+</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2 mt-4">
+                    <button onclick="applyModalFilters()" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 text-sm">
+                        Apply Filters
+                    </button>
+                    <button onclick="clearModalFilters()" class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 text-sm">
+                        Clear
+                    </button>
+                </div>
+            </div>
+
+            <div id="available-properties" class="space-y-3 max-h-96 overflow-y-auto">
+                <div class="text-gray-500 text-center py-8">Loading properties...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loggedInEmail = sessionStorage.getItem('loggedInUserEmail');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayUserName();
+            loadPortfolioData();
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            if (username) loadProfilePhoto(username);
+        });
+
+        function loadProfilePhoto(username) {
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            if (savedPhoto) {
+                const profileIcon = document.getElementById('profile-icon');
+                const profileImage = document.getElementById('profile-image');
+                const profileInitials = document.getElementById('profile-initials');
+                
+                if (profileImage && profileInitials && profileIcon) {
+                    profileImage.src = savedPhoto;
+                    profileImage.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                    profileIcon.style.background = 'white';
+                }
+            }
+        }
+
+        function displayUserName() {
+            const firstName = sessionStorage.getItem('loggedInUserFirstName');
+            const lastName = sessionStorage.getItem('loggedInUserLastName');
+            const userDisplayElement = document.getElementById('user-display');
+
+            if (userDisplayElement) {
+                if (firstName && lastName) {
+                    userDisplayElement.textContent = `Welcome, ${firstName} ${lastName}!`;
+                    const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                    document.getElementById('profile-initials').textContent = initials;
+                    document.getElementById('profile-name').textContent = `${firstName} ${lastName}`;
+                } else {
+                    userDisplayElement.textContent = `Welcome, Consultant!`;
+                    document.getElementById('profile-initials').textContent = 'U';
+                    document.getElementById('profile-name').textContent = 'Consultant';
+                }
+            }
+        }
+
+        async function loadPortfolioData() {
+            try {
+                // Load action log to get all interactions
+                const response = await fetch('action_log.csv');
+                const text = await response.text();
+                const rows = text.trim().split('\n').slice(1);
+
+                const consultantActivities = [];
+                const uniqueClients = new Set();
+                let completedVisits = 0;
+                let upcomingVisits = 0;
+
+                const now = new Date();
+
+                for (const row of rows) {
+                    const cols = parseCSVRow(row);
+                    if (cols.length < 6) continue;
+
+                    const [timestamp, action, customer_email, builder_username, consultant_email, status, property_timestamp, notes, visit_date, visit_time] = cols;
+
+                    // Filter for this consultant's activities
+                    if (consultant_email !== loggedInEmail) continue;
+
+                    consultantActivities.push({
+                        timestamp,
+                        action,
+                        customer_email,
+                        builder_username,
+                        status,
+                        visit_date,
+                        visit_time
+                    });
+
+                    // Count unique clients
+                    if (customer_email) {
+                        uniqueClients.add(customer_email);
+                    }
+
+                    // Count visits
+                    if (action === 'expert_visit_scheduled' && visit_date) {
+                        const visitDateTime = new Date(visit_date);
+                        if (visitDateTime < now) {
+                            completedVisits++;
+                        } else {
+                            upcomingVisits++;
+                        }
+                    }
+                }
+
+                // Update statistics
+                document.getElementById('total-clients').textContent = uniqueClients.size;
+                document.getElementById('completed-visits').textContent = completedVisits;
+                document.getElementById('upcoming-visits').textContent = upcomingVisits;
+
+            } catch (error) {
+                console.error('Error loading portfolio data:', error);
+            }
+            
+            // Load portfolio properties
+            loadPortfolioProperties();
+        }
+
+        async function loadPortfolioProperties() {
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            if (!username) {
+                document.getElementById('portfolio-properties').innerHTML = '<div class="text-gray-500 text-center py-4">Please login to view your portfolio</div>';
+                updateExpertiseStats([]);
+                return;
+            }
+
+            try {
+                // Get portfolio from localStorage
+                const portfolio = JSON.parse(localStorage.getItem(`consultantPortfolio_${username}`) || '[]');
+                
+                if (portfolio.length === 0) {
+                    document.getElementById('portfolio-properties').innerHTML = '<div class="text-gray-500 text-center py-4">No properties in your portfolio yet</div>';
+                    updateExpertiseStats([]);
+                    return;
+                }
+
+                // Load property details
+                const buildersResponse = await fetch('builder_listings.csv');
+                const buildersText = await buildersResponse.text();
+                const builderRows = buildersText.trim().split('\n').slice(1);
+
+                const detailsResponse = await fetch('live_listing_details.csv');
+                const detailsText = await detailsResponse.text();
+                const detailRows = detailsText.trim().split('\n').slice(1);
+
+                const properties = [];
+                for (const item of portfolio) {
+                    // Find property in builder listings
+                    for (const row of builderRows) {
+                        const cols = parseCSVRow(row);
+                        if (cols[6] === item.timestamp) {
+                            const propertyInfo = {
+                                builder_username: cols[0],
+                                property_name: cols[1],
+                                location: cols[2],
+                                unit_type: cols[3],
+                                listing_price: cols[4],
+                                status: cols[5],
+                                created_timestamp: cols[6],
+                                addedOn: item.addedOn
+                            };
+
+                            // Find matching details
+                            const matchingDetail = detailRows.find(detailRow => {
+                                const detailCols = parseCSVRow(detailRow);
+                                return detailCols[0] === item.timestamp;
+                            });
+
+                            if (matchingDetail) {
+                                const detailCols = parseCSVRow(matchingDetail);
+                                propertyInfo.sq_ft = detailCols[1];
+                                propertyInfo.num_bedrooms = detailCols[2];
+                                propertyInfo.apartment_name = detailCols[6];
+                                propertyInfo.furnishing_status = detailCols[15];
+                            }
+
+                            properties.push(propertyInfo);
+                            break;
+                        }
+                    }
+                }
+
+                displayPortfolioProperties(properties);
+                updateExpertiseStats(properties);
+
+            } catch (error) {
+                console.error('Error loading portfolio properties:', error);
+                document.getElementById('portfolio-properties').innerHTML = '<div class="text-red-500 text-center py-4">Error loading portfolio</div>';
+                updateExpertiseStats([]);
+            }
+        }
+
+        function updateExpertiseStats(properties) {
+            // Expert Localities
+            const localities = [...new Set(properties.map(p => p.location).filter(Boolean))];
+            const localitiesEl = document.getElementById('expert-localities');
+            if (localities.length === 0) {
+                localitiesEl.innerHTML = '<span class="text-gray-400">No data</span>';
+            } else {
+                localitiesEl.innerHTML = localities.map(loc => `<span class="inline-block bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full mr-1 mb-1">${loc}</span>`).join('');
+            }
+
+            // Expert Price Range
+            const prices = properties.map(p => parseFloat(p.listing_price)).filter(p => !isNaN(p));
+            const priceRangeEl = document.getElementById('expert-price-range');
+            if (prices.length === 0) {
+                priceRangeEl.innerHTML = '<span class="text-gray-400">No data</span>';
+            } else {
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                priceRangeEl.innerHTML = `
+                    <div class="font-semibold text-cyan-700">${formatPrice(minPrice.toString())} - ${formatPrice(maxPrice.toString())}</div>
+                    <div class="text-gray-500 mt-1">${prices.length} properties</div>
+                `;
+            }
+
+            // Expert Square Footage
+            const sqfts = [...new Set(properties.map(p => p.sq_ft).filter(Boolean))].sort((a, b) => parseFloat(a) - parseFloat(b));
+            const sqftEl = document.getElementById('expert-sqft');
+            if (sqfts.length === 0) {
+                sqftEl.innerHTML = '<span class="text-gray-400">No data</span>';
+            } else {
+                sqftEl.innerHTML = sqfts.map(sqft => `<span class="inline-block bg-pink-100 text-pink-800 px-2 py-1 rounded-full mr-1 mb-1">${sqft} sq.ft</span>`).join('');
+            }
+
+            // Expert BHK
+            const bhks = [...new Set(properties.map(p => p.num_bedrooms).filter(Boolean))].sort((a, b) => parseInt(a) - parseInt(b));
+            const bhkEl = document.getElementById('expert-bhk');
+            if (bhks.length === 0) {
+                bhkEl.innerHTML = '<span class="text-gray-400">No data</span>';
+            } else {
+                bhkEl.innerHTML = bhks.map(bhk => `<span class="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded-full mr-1 mb-1">${bhk} BHK</span>`).join('');
+            }
+        }
+
+        function displayPortfolioProperties(properties) {
+            const container = document.getElementById('portfolio-properties');
+            
+            if (properties.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No properties found</div>';
+                return;
+            }
+
+            container.innerHTML = properties.map(property => {
+                const addedDate = new Date(property.addedOn).toLocaleDateString('en-IN');
+                
+                return `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition duration-200">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-800">${property.property_name}</h4>
+                                <p class="text-sm text-gray-600">${property.location}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${property.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                ${property.status}
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-sm">
+                            <div>
+                                <span class="text-gray-500">BHK:</span>
+                                <span class="font-medium ml-1">${property.num_bedrooms || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Sq.Ft:</span>
+                                <span class="font-medium ml-1">${property.sq_ft || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Price:</span>
+                                <span class="font-medium ml-1">${formatPrice(property.listing_price)}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Furnishing:</span>
+                                <span class="font-medium ml-1">${property.furnishing_status || 'N/A'}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                            <span class="text-xs text-gray-500">Added on ${addedDate}</span>
+                            <div class="flex gap-2">
+                                <button onclick="viewProperty('${property.created_timestamp}')" class="bg-teal-500 hover:bg-teal-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-150">
+                                    View Details
+                                </button>
+                                <button onclick="removeFromPortfolio('${property.created_timestamp}')" class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-150">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewProperty(timestamp) {
+            window.location.href = `consultant_property_details.html?timestamp=${timestamp}`;
+        }
+
+        function removeFromPortfolio(timestamp) {
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            if (!username) return;
+
+            if (!confirm('Are you sure you want to remove this property from your portfolio?')) {
+                return;
+            }
+
+            // Get existing portfolio
+            let portfolio = JSON.parse(localStorage.getItem(`consultantPortfolio_${username}`) || '[]');
+            
+            // Remove the property
+            portfolio = portfolio.filter(item => item.timestamp !== timestamp);
+            
+            // Save back to localStorage
+            localStorage.setItem(`consultantPortfolio_${username}`, JSON.stringify(portfolio));
+            
+            // Reload the portfolio
+            loadPortfolioProperties();
+            
+            alert('Property removed from portfolio');
+        }
+
+        function formatPrice(price) {
+            if (!price) return 'N/A';
+            const numPrice = parseFloat(price);
+            if (numPrice >= 10000000) {
+                return `₹${(numPrice / 10000000).toFixed(2)} Cr`;
+            } else if (numPrice >= 100000) {
+                return `₹${(numPrice / 100000).toFixed(2)} L`;
+            }
+            return `₹${numPrice.toLocaleString('en-IN')}`;
+        }
+
+        function parseCSVRow(row) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            menu.classList.toggle('show');
+        }
+
+        function viewProfile() {
+            window.location.href = 'manage_profile.html';
+        }
+
+        function viewSettings() {
+            alert('Settings page coming soon!');
+        }
+
+        function goBack() {
+            window.location.href = 'consultant_dashboard.html';
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        let allAvailableProperties = [];
+        let filteredAvailableProperties = [];
+
+        async function openAddPropertyModal() {
+            document.getElementById('add-property-modal').classList.add('active');
+            await loadAvailableProperties();
+        }
+
+        function closeAddPropertyModal() {
+            document.getElementById('add-property-modal').classList.remove('active');
+            // Clear filters and search
+            document.getElementById('modal-search').value = '';
+            document.getElementById('modal-sort').value = 'default';
+            document.getElementById('modal-filter-panel').classList.add('hidden');
+            clearModalFilters();
+        }
+
+        function toggleModalFilters() {
+            const filterPanel = document.getElementById('modal-filter-panel');
+            filterPanel.classList.toggle('hidden');
+        }
+
+        function applyModalFilters() {
+            const location = document.getElementById('modal-filter-location').value;
+            const bhk = document.getElementById('modal-filter-bhk').value;
+            const minPrice = parseFloat(document.getElementById('modal-filter-min-price').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('modal-filter-max-price').value) || Infinity;
+
+            filteredAvailableProperties = allAvailableProperties.filter(property => {
+                // Location filter
+                if (location && property.location !== location) return false;
+                
+                // BHK filter
+                if (bhk && property.num_bedrooms !== bhk) return false;
+                
+                // Price filter
+                const price = parseFloat(property.listing_price);
+                if (price < minPrice || price > maxPrice) return false;
+                
+                return true;
+            });
+
+            displayAvailableProperties(filteredAvailableProperties);
+        }
+
+        function clearModalFilters() {
+            document.getElementById('modal-filter-location').value = '';
+            document.getElementById('modal-filter-bhk').value = '';
+            document.getElementById('modal-filter-min-price').value = '';
+            document.getElementById('modal-filter-max-price').value = '';
+            filteredAvailableProperties = [...allAvailableProperties];
+            displayAvailableProperties(filteredAvailableProperties);
+        }
+
+        function sortModalProperties() {
+            const sortBy = document.getElementById('modal-sort').value;
+            let propertiesToSort = filteredAvailableProperties.length > 0 ? [...filteredAvailableProperties] : [...allAvailableProperties];
+            
+            switch(sortBy) {
+                case 'price-low':
+                    propertiesToSort.sort((a, b) => parseFloat(a.listing_price) - parseFloat(b.listing_price));
+                    break;
+                case 'price-high':
+                    propertiesToSort.sort((a, b) => parseFloat(b.listing_price) - parseFloat(a.listing_price));
+                    break;
+                case 'sqft-low':
+                    propertiesToSort.sort((a, b) => parseFloat(a.sq_ft || 0) - parseFloat(b.sq_ft || 0));
+                    break;
+                case 'sqft-high':
+                    propertiesToSort.sort((a, b) => parseFloat(b.sq_ft || 0) - parseFloat(a.sq_ft || 0));
+                    break;
+                case 'newest':
+                    propertiesToSort.sort((a, b) => new Date(b.created_timestamp) - new Date(a.created_timestamp));
+                    break;
+                default:
+                    propertiesToSort = filteredAvailableProperties.length > 0 ? [...filteredAvailableProperties] : [...allAvailableProperties];
+            }
+            
+            displayAvailableProperties(propertiesToSort);
+        }
+
+        async function loadAvailableProperties() {
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            if (!username) {
+                document.getElementById('available-properties').innerHTML = '<div class="text-gray-500 text-center py-4">Please login to add properties</div>';
+                return;
+            }
+
+            try {
+                // Get current portfolio
+                const portfolio = JSON.parse(localStorage.getItem(`consultantPortfolio_${username}`) || '[]');
+                const portfolioTimestamps = portfolio.map(item => item.timestamp);
+
+                // Load all active properties
+                const buildersResponse = await fetch('builder_listings.csv');
+                const buildersText = await buildersResponse.text();
+                const builderRows = buildersText.trim().split('\n').slice(1);
+
+                const detailsResponse = await fetch('live_listing_details.csv');
+                const detailsText = await detailsResponse.text();
+                const detailRows = detailsText.trim().split('\n').slice(1);
+
+                // Load builder names from user_data.csv
+                const userDataResponse = await fetch('user_data.csv');
+                const userDataText = await userDataResponse.text();
+                const userDataRows = userDataText.trim().split('\n').slice(1);
+                
+                // Create a map of builder usernames to builder names
+                const builderNames = {};
+                for (const row of userDataRows) {
+                    const cols = parseCSVRow(row);
+                    if (cols[0] === 'builder') { // role is builder
+                        const username = cols[1];
+                        const firstName = cols[4];
+                        const lastName = cols[5];
+                        builderNames[username] = `${firstName} ${lastName}`;
+                    }
+                }
+
+                allAvailableProperties = [];
+                for (const row of builderRows) {
+                    const cols = parseCSVRow(row);
+                    if (cols.length < 7) continue;
+
+                    // Only show Active listings that are not in portfolio
+                    if (cols[5] === 'Active' && !portfolioTimestamps.includes(cols[6])) {
+                        const propertyInfo = {
+                            builder_username: cols[0],
+                            builder_name: builderNames[cols[0]] || cols[0],
+                            property_name: cols[1],
+                            location: cols[2],
+                            unit_type: cols[3],
+                            listing_price: cols[4],
+                            status: cols[5],
+                            created_timestamp: cols[6]
+                        };
+
+                        // Find matching details
+                        const matchingDetail = detailRows.find(detailRow => {
+                            const detailCols = parseCSVRow(detailRow);
+                            return detailCols[0] === cols[6];
+                        });
+
+                        if (matchingDetail) {
+                            const detailCols = parseCSVRow(matchingDetail);
+                            propertyInfo.sq_ft = detailCols[1];
+                            propertyInfo.num_bedrooms = detailCols[2];
+                            propertyInfo.apartment_name = detailCols[6];
+                            propertyInfo.furnishing_status = detailCols[14];
+                        }
+
+                        allAvailableProperties.push(propertyInfo);
+                    }
+                }
+
+                filteredAvailableProperties = [...allAvailableProperties];
+                populateLocationDropdown();
+                displayAvailableProperties(filteredAvailableProperties);
+
+            } catch (error) {
+                console.error('Error loading available properties:', error);
+                document.getElementById('available-properties').innerHTML = '<div class="text-red-500 text-center py-4">Error loading properties</div>';
+            }
+        }
+
+        function populateLocationDropdown() {
+            const locationSelect = document.getElementById('modal-filter-location');
+            const locations = [...new Set(allAvailableProperties.map(p => p.location))].sort();
+            
+            locationSelect.innerHTML = '<option value="">All Locations</option>';
+            locations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location;
+                option.textContent = location;
+                locationSelect.appendChild(option);
+            });
+        }
+
+        function displayAvailableProperties(properties) {
+            const container = document.getElementById('available-properties');
+            
+            if (properties.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No available properties to add</div>';
+                return;
+            }
+
+            container.innerHTML = properties.map(property => {
+                return `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition duration-200">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-800">${property.property_name}</h4>
+                                <p class="text-sm text-gray-600 mb-1">👤 ${property.builder_name}</p>
+                                <p class="text-sm text-gray-600">📍 ${property.location}</p>
+                                <div class="flex gap-4 mt-2 text-sm text-gray-600">
+                                    <span>🏠 ${property.num_bedrooms || 'N/A'} BHK</span>
+                                    <span>📐 ${property.sq_ft || 'N/A'} sq.ft</span>
+                                    <span>💰 ${formatPrice(property.listing_price)}</span>
+                                </div>
+                            </div>
+                            <button onclick="addPropertyToPortfolio('${property.created_timestamp}')" 
+                                class="bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-150 ml-4">
+                                + Add
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterModalProperties() {
+            const searchTerm = document.getElementById('modal-search').value.toLowerCase();
+            const baseProperties = filteredAvailableProperties.length > 0 ? filteredAvailableProperties : allAvailableProperties;
+            
+            if (!searchTerm) {
+                displayAvailableProperties(baseProperties);
+                return;
+            }
+
+            const filtered = baseProperties.filter(property => {
+                return property.property_name.toLowerCase().includes(searchTerm) ||
+                       (property.apartment_name && property.apartment_name.toLowerCase().includes(searchTerm)) ||
+                       property.location.toLowerCase().includes(searchTerm);
+            });
+
+            displayAvailableProperties(filtered);
+        }
+
+        function addPropertyToPortfolio(timestamp) {
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            if (!username) return;
+
+            // Get existing portfolio
+            const portfolio = JSON.parse(localStorage.getItem(`consultantPortfolio_${username}`) || '[]');
+            
+            // Check if already in portfolio
+            if (portfolio.some(item => item.timestamp === timestamp)) {
+                alert('This property is already in your portfolio!');
+                return;
+            }
+
+            // Add to portfolio
+            portfolio.push({
+                timestamp: timestamp,
+                addedOn: new Date().toISOString()
+            });
+            localStorage.setItem(`consultantPortfolio_${username}`, JSON.stringify(portfolio));
+            
+            alert('Property added to portfolio!');
+            
+            // Reload both lists
+            loadAvailableProperties();
+            loadPortfolioProperties();
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

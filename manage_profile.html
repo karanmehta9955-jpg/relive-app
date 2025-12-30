@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Profile - RealEstate Partner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f7f9fc; 
+        }
+        
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover {
+            transform: scale(1.05);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        .profile-section {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-avatar img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .profile-avatar-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .profile-avatar-overlay:hover {
+            background: rgba(0, 0, 0, 0.85);
+            height: 35%;
+        }
+
+        .profile-avatar-overlay span {
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .profile-photo-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-photo-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 1rem;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #6b7280;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #dc2626;
+        }
+
+        .modal-preview {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            font-weight: bold;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-preview img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            background: white;
+        }
+
+        .modal-preview img:hover {
+            opacity: 0.9;
+        }
+
+        .image-viewer-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-viewer-modal.show {
+            display: flex;
+        }
+
+        .image-viewer-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-viewer-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 0.5rem;
+        }
+
+        .image-viewer-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .image-viewer-close:hover {
+            background: rgba(220, 38, 38, 0.8);
+        }
+
+        .crop-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1500;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crop-modal.show {
+            display: flex;
+        }
+
+        .crop-container {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .crop-preview-area {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #f3f4f6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crop-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.1s;
+            cursor: move;
+            user-select: none;
+        }
+
+        .crop-circle-overlay {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+        }
+
+        .crop-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .crop-control-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .crop-control-group label {
+            min-width: 80px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .crop-control-group input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e7eb;
+            outline: none;
+        }
+
+        .crop-control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--theme-color);
+            cursor: pointer;
+        }
+
+        .crop-control-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--theme-color);
+            cursor: pointer;
+            border: none;
+        }
+
+        .crop-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .crop-buttons button {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-align: center;
+        }
+
+        .modal-btn-primary {
+            background: var(--theme-color);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .modal-btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .modal-btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .file-input-wrapper {
+            display: none;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--theme-color);
+            box-shadow: 0 0 0 3px var(--theme-shadow);
+        }
+
+        .input-group input:disabled {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--theme-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        /* Role-specific colors */
+        .customer-theme {
+            --theme-color: #3b82f6;
+            --theme-shadow: rgba(59, 130, 246, 0.1);
+        }
+
+        .builder-theme {
+            --theme-color: #f97316;
+            --theme-shadow: rgba(249, 115, 22, 0.1);
+        }
+
+        .consultant-theme {
+            --theme-color: #14b8a6;
+            --theme-shadow: rgba(20, 184, 166, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
+        <h1 class="text-2xl font-bold" id="header-title">Manage Profile</h1>
+        <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome!</span>
+            
+            <div class="profile-dropdown">
+                <div class="profile-icon" onclick="toggleProfileMenu()" id="header-profile-icon">
+                    <span id="header-profile-initials">U</span>
+                    <img id="header-profile-image" style="display: none;" alt="Profile">
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="goToDashboard()" style="color: #dc2626;">
+                        <span>🏠 Dashboard</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="goToDashboard()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                ← Back to Dashboard
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 md:p-10 max-w-4xl">
+        <!-- Profile Avatar Section -->
+        <div class="profile-section text-center">
+            <div class="profile-avatar" id="profile-avatar">
+                <span id="avatar-initials">U</span>
+                <img id="profile-image" style="display: none;" alt="Profile Photo">
+                <div class="profile-avatar-overlay" onclick="openProfilePhotoModal()">
+                    <span>Edit Profile<br>Picture</span>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold mt-4 text-gray-800" id="full-name">User Name</h2>
+            <p class="text-gray-600" id="user-role">Role</p>
+            <p class="text-sm text-gray-500 mt-2">Member since: <span id="member-since">N/A</span></p>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="profile-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Personal Information</h3>
+            <form id="profile-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" name="username" disabled>
+                    <p class="text-xs text-gray-500 mt-1">Username cannot be changed</p>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" placeholder="10-digit phone number">
+                </div>
+
+                <div class="flex space-x-4 mt-6">
+                    <button type="submit" class="btn-primary flex-1">
+                        💾 Save Changes
+                    </button>
+                    <button type="button" onclick="resetForm()" class="btn-secondary">
+                        ↺ Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="profile-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Change Password</h3>
+            <form id="password-form">
+                <div class="input-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter current password">
+                </div>
+
+                <div class="input-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password">
+                </div>
+
+                <div class="input-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    🔒 Update Password
+                </button>
+            </form>
+        </div>
+
+        <!-- Account Statistics (Optional) -->
+        <div class="profile-section" id="stats-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Account Statistics</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-2xl font-bold" id="stat-1-value">0</p>
+                    <p class="text-sm text-gray-600" id="stat-1-label">Activity</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-2xl font-bold" id="stat-2-value">0</p>
+                    <p class="text-sm text-gray-600" id="stat-2-label">Requests</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-2xl font-bold" id="stat-3-value">0</p>
+                    <p class="text-sm text-gray-600" id="stat-3-label">Completed</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-2xl font-bold" id="stat-4-value">0</p>
+                    <p class="text-sm text-gray-600" id="stat-4-label">Total</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Profile Photo Modal -->
+    <div class="profile-photo-modal" id="profile-photo-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-xl font-bold text-gray-800">Manage Profile Picture</h3>
+                <span class="modal-close" onclick="closeProfilePhotoModal()">×</span>
+            </div>
+            
+            <div class="modal-preview" id="modal-preview">
+                <span id="modal-initials">U</span>
+                <img id="modal-image" style="display: none;" alt="Profile Preview" onclick="openImageViewer()">
+            </div>
+
+            <div class="modal-buttons">
+                <label for="photo-file-input" class="modal-btn modal-btn-primary">
+                    📷 Choose New Photo
+                </label>
+                <input type="file" id="photo-file-input" class="file-input-wrapper" accept="image/*" onchange="handlePhotoSelection(event)">
+                
+                <button class="modal-btn modal-btn-danger" onclick="deleteProfilePhoto()" id="delete-photo-btn">
+                    🗑️ Delete Photo
+                </button>
+                
+                <button class="modal-btn modal-btn-secondary" onclick="closeProfilePhotoModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div class="image-viewer-modal" id="image-viewer-modal">
+        <div class="image-viewer-content">
+            <span class="image-viewer-close" onclick="closeImageViewer()">×</span>
+            <img id="viewer-image" src="" alt="Profile Picture">
+        </div>
+    </div>
+
+    <!-- Crop Modal -->
+    <div class="crop-modal" id="crop-modal">
+        <div class="crop-container">
+            <div class="modal-header">
+                <h3 class="text-xl font-bold text-gray-800">Adjust Profile Picture</h3>
+                <span class="modal-close" onclick="closeCropModal()">×</span>
+            </div>
+
+            <div class="crop-preview-area" id="crop-preview-area">
+                <img id="crop-image" class="crop-image" src="" alt="Crop Preview">
+                <div class="crop-circle-overlay"></div>
+            </div>
+
+            <div class="crop-controls">
+                <div class="crop-control-group">
+                    <label>Zoom:</label>
+                    <input type="range" id="zoom-slider" min="50" max="300" value="100" step="1">
+                    <span id="zoom-value">100%</span>
+                </div>
+                <div class="crop-control-group">
+                    <label>Rotate:</label>
+                    <input type="range" id="rotate-slider" min="0" max="360" value="0" step="1">
+                    <span id="rotate-value">0°</span>
+                </div>
+                <p class="text-sm text-gray-600 mt-2">💡 Tip: Drag the image to reposition it within the circle</p>
+            </div>
+
+            <div class="crop-buttons">
+                <button class="modal-btn modal-btn-secondary" onclick="closeCropModal()">Cancel</button>
+                <button class="modal-btn modal-btn-primary" onclick="applyCrop()">✓ Apply & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUserData = {};
+        let userRole = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserProfile();
+        });
+
+        async function loadUserProfile() {
+            // Get user data from session storage
+            const firstName = sessionStorage.getItem('loggedInUserFirstName');
+            const lastName = sessionStorage.getItem('loggedInUserLastName');
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            const email = sessionStorage.getItem('loggedInUserEmail');
+            const phone = sessionStorage.getItem('loggedInUserPhone');
+            const role = sessionStorage.getItem('loggedInUserRole');
+
+            if (!username) {
+                alert('Session expired. Please log in again.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            userRole = role || 'customer';
+            
+            console.log('Session role:', role);
+            console.log('User role set to:', userRole);
+
+            // Apply theme based on role
+            document.body.classList.add(`${userRole}-theme`);
+
+            // Set header color
+            const headerTitle = document.getElementById('header-title');
+            if (userRole === 'customer') {
+                headerTitle.className = 'text-2xl font-bold text-blue-700';
+            } else if (userRole === 'builder') {
+                headerTitle.className = 'text-2xl font-bold text-orange-700';
+            } else if (userRole === 'consultant') {
+                headerTitle.className = 'text-2xl font-bold text-teal-700';
+            }
+
+            // Load user data from CSV
+            try {
+                const response = await fetch('user_data.csv');
+                const csvText = await response.text();
+                const rows = csvText.trim().split('\n');
+                
+                for (let i = 1; i < rows.length; i++) {
+                    const row = parseCSVRow(rows[i]);
+                    if (row.username === username) {
+                        currentUserData = row;
+                        break;
+                    }
+                }
+
+                // If role not in sessionStorage, get it from CSV data
+                if (!role && currentUserData.role) {
+                    userRole = currentUserData.role;
+                    sessionStorage.setItem('loggedInUserRole', userRole);
+                    console.log('Role retrieved from CSV:', userRole);
+                    
+                    // Apply theme based on role
+                    document.body.classList.add(`${userRole}-theme`);
+                    
+                    // Set header color
+                    const headerTitle = document.getElementById('header-title');
+                    if (userRole === 'customer') {
+                        headerTitle.className = 'text-2xl font-bold text-blue-700';
+                    } else if (userRole === 'builder') {
+                        headerTitle.className = 'text-2xl font-bold text-orange-700';
+                    } else if (userRole === 'consultant') {
+                        headerTitle.className = 'text-2xl font-bold text-teal-700';
+                    }
+                }
+
+                // Populate form
+                document.getElementById('firstName').value = currentUserData.first_name || firstName || '';
+                document.getElementById('lastName').value = currentUserData.last_name || lastName || '';
+                document.getElementById('username').value = currentUserData.username || username || '';
+                document.getElementById('email').value = currentUserData.email || email || '';
+                document.getElementById('phone').value = currentUserData.phone || phone || '';
+
+                // Update profile display
+                const fullName = `${currentUserData.first_name} ${currentUserData.last_name}`;
+                const initials = (currentUserData.first_name.charAt(0) + currentUserData.last_name.charAt(0)).toUpperCase();
+                
+                document.getElementById('full-name').textContent = fullName;
+                document.getElementById('user-role').textContent = capitalizeRole(currentUserData.role);
+                document.getElementById('avatar-initials').textContent = initials;
+                document.getElementById('user-display').textContent = `Welcome, ${fullName}!`;
+                document.getElementById('header-profile-initials').textContent = initials;
+                document.getElementById('profile-name').textContent = fullName;
+
+                // Set avatar gradient based on role
+                const avatar = document.getElementById('profile-avatar');
+                const headerIcon = document.getElementById('header-profile-icon');
+                if (userRole === 'customer') {
+                    avatar.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                    headerIcon.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                } else if (userRole === 'builder') {
+                    avatar.style.background = 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)';
+                    headerIcon.style.background = 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)';
+                } else if (userRole === 'consultant') {
+                    avatar.style.background = 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)';
+                    headerIcon.style.background = 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)';
+                }
+
+                // Set member since date
+                if (currentUserData.created_date) {
+                    document.getElementById('member-since').textContent = formatDate(currentUserData.created_date);
+                } else {
+                    document.getElementById('member-since').textContent = 'Not available';
+                }
+
+                // Load profile photo if exists
+                loadProfilePhoto();
+
+                // Load statistics based on role
+                loadStatistics();
+
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        function loadStatistics() {
+            // Customize stats based on user role
+            if (userRole === 'customer') {
+                document.getElementById('stat-1-label').textContent = 'Favorites';
+                document.getElementById('stat-2-label').textContent = 'Visits';
+                document.getElementById('stat-3-label').textContent = 'Requests';
+                document.getElementById('stat-4-label').textContent = 'Total';
+
+                const favorites = JSON.parse(localStorage.getItem('favoriteProperties') || '[]');
+                const visits = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+                const builderRequests = JSON.parse(localStorage.getItem('connectRequests') || '[]');
+                const consultantRequests = JSON.parse(localStorage.getItem('consultantConnectRequests') || '[]');
+
+                const customerName = `${currentUserData.first_name} ${currentUserData.last_name}`;
+                const myVisits = visits.filter(v => v.customerName === customerName);
+                const myBuilderRequests = builderRequests.filter(r => r.customerName === customerName);
+                const myConsultantRequests = consultantRequests.filter(r => r.customerName === customerName);
+
+                document.getElementById('stat-1-value').textContent = favorites.length;
+                document.getElementById('stat-2-value').textContent = myVisits.length;
+                document.getElementById('stat-3-value').textContent = myBuilderRequests.length + myConsultantRequests.length;
+                document.getElementById('stat-4-value').textContent = favorites.length + myVisits.length + myBuilderRequests.length + myConsultantRequests.length;
+
+            } else if (userRole === 'builder') {
+                document.getElementById('stat-1-label').textContent = 'Listings';
+                document.getElementById('stat-2-label').textContent = 'Visits';
+                document.getElementById('stat-3-label').textContent = 'Requests';
+                document.getElementById('stat-4-label').textContent = 'Total';
+
+                const visits = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+                const requests = JSON.parse(localStorage.getItem('connectRequests') || '[]');
+                
+                const myVisits = visits.filter(v => v.builderUsername === currentUserData.username);
+                const myRequests = requests.filter(r => r.builderName === `${currentUserData.first_name} ${currentUserData.last_name}`);
+
+                document.getElementById('stat-1-value').textContent = '0'; // Would need to fetch from listings
+                document.getElementById('stat-2-value').textContent = myVisits.length;
+                document.getElementById('stat-3-value').textContent = myRequests.length;
+                document.getElementById('stat-4-value').textContent = myVisits.length + myRequests.length;
+
+            } else if (userRole === 'consultant') {
+                document.getElementById('stat-1-label').textContent = 'Appointments';
+                document.getElementById('stat-2-label').textContent = 'Requests';
+                document.getElementById('stat-3-label').textContent = 'Completed';
+                document.getElementById('stat-4-label').textContent = 'Total';
+
+                const expertVisits = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+                const requests = JSON.parse(localStorage.getItem('consultantConnectRequests') || '[]');
+
+                const myVisits = expertVisits.filter(v => v.expertEmail === currentUserData.email);
+                const completedVisits = myVisits.filter(v => v.status === 'Completed' || v.status === 'Approved');
+
+                document.getElementById('stat-1-value').textContent = myVisits.length;
+                document.getElementById('stat-2-value').textContent = requests.length;
+                document.getElementById('stat-3-value').textContent = completedVisits.length;
+                document.getElementById('stat-4-value').textContent = myVisits.length + requests.length;
+            }
+        }
+
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (!firstName || !lastName || !email || !phone) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+                alert('Please enter a valid 10-digit phone number.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/update_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: currentUserData.username,
+                        first_name: firstName,
+                        last_name: lastName,
+                        email: email,
+                        phone: phone
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update session storage
+                    sessionStorage.setItem('loggedInUserFirstName', firstName);
+                    sessionStorage.setItem('loggedInUserLastName', lastName);
+                    sessionStorage.setItem('loggedInUserEmail', email);
+                    sessionStorage.setItem('loggedInUserPhone', phone);
+
+                    alert('Profile updated successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to update profile: ' + (result.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Error updating profile. Please try again.');
+            }
+        });
+
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                alert('Please fill in all password fields.');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('New passwords do not match.');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('Password must be at least 6 characters long.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/change_password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: currentUserData.username,
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Password changed successfully!');
+                    document.getElementById('password-form').reset();
+                } else {
+                    alert('Failed to change password: ' + (result.message || 'Current password is incorrect'));
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                alert('Error changing password. Please try again.');
+            }
+        });
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset all changes?')) {
+                loadUserProfile();
+            }
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            menu.classList.toggle('show');
+        }
+
+        function viewProfile() {
+            // Already on profile page
+            const menu = document.getElementById('profile-menu');
+            menu.classList.remove('show');
+        }
+
+        function viewSettings() {
+            alert('Settings page coming soon!');
+        }
+
+        function goToDashboard() {
+            if (userRole === 'customer') {
+                window.location.href = 'customer_dashboard.html';
+            } else if (userRole === 'builder') {
+                window.location.href = 'builder_dashboard.html';
+            } else if (userRole === 'consultant') {
+                window.location.href = 'consultant_dashboard.html';
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        function parseCSVRow(row) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current.trim());
+            
+            // CSV structure: role,username,password,email,firstname,lastname,contact
+            return {
+                role: values[0] || '',
+                username: values[1] || '',
+                password: values[2] || '',
+                email: values[3] || '',
+                first_name: values[4] || '',
+                last_name: values[5] || '',
+                phone: values[6] || '',
+                created_date: values[7] || ''
+            };
+        }
+
+        function capitalizeRole(role) {
+            if (!role) return 'User';
+            return role.charAt(0).toUpperCase() + role.slice(1);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Not available';
+            try {
+                const date = new Date(dateStr);
+                const day = date.getDate();
+                const suffix = getDaySuffix(day);
+                const month = date.toLocaleDateString('en-IN', { month: 'long' });
+                const year = date.getFullYear();
+                return `${day}${suffix} ${month}, ${year}`;
+            } catch (e) {
+                return 'Not available';
+            }
+        }
+
+        function getDaySuffix(day) {
+            if (day >= 11 && day <= 13) return 'th';
+            switch (day % 10) {
+                case 1: return 'st';
+                case 2: return 'nd';
+                case 3: return 'rd';
+                default: return 'th';
+            }
+        }
+
+        function loadProfilePhoto() {
+            const username = currentUserData.username;
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            
+            if (savedPhoto) {
+                const profileAvatar = document.getElementById('profile-avatar');
+                const profileImage = document.getElementById('profile-image');
+                const avatarInitials = document.getElementById('avatar-initials');
+                
+                profileImage.src = savedPhoto;
+                profileImage.style.display = 'block';
+                avatarInitials.style.display = 'none';
+                profileAvatar.style.background = 'white';
+                
+                // Update header icon
+                const headerIcon = document.getElementById('header-profile-icon');
+                const headerImage = document.getElementById('header-profile-image');
+                const headerInitials = document.getElementById('header-profile-initials');
+                
+                headerImage.src = savedPhoto;
+                headerImage.style.display = 'block';
+                headerInitials.style.display = 'none';
+                headerIcon.style.background = 'white';
+            }
+        }
+
+        function openProfilePhotoModal() {
+            const modal = document.getElementById('profile-photo-modal');
+            const modalInitials = document.getElementById('modal-initials');
+            const modalImage = document.getElementById('modal-image');
+            const deleteBtn = document.getElementById('delete-photo-btn');
+            
+            // Set modal preview avatar with same gradient as main avatar
+            const modalPreview = document.getElementById('modal-preview');
+            if (userRole === 'customer') {
+                modalPreview.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+            } else if (userRole === 'builder') {
+                modalPreview.style.background = 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)';
+            } else if (userRole === 'consultant') {
+                modalPreview.style.background = 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)';
+            }
+            
+            // Show current photo or initials
+            const username = currentUserData.username;
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            
+            if (savedPhoto) {
+                modalImage.src = savedPhoto;
+                modalImage.style.display = 'block';
+                modalInitials.style.display = 'none';
+                deleteBtn.style.display = 'block';
+                modalPreview.style.background = 'white';
+            } else {
+                const initials = (currentUserData.first_name.charAt(0) + currentUserData.last_name.charAt(0)).toUpperCase();
+                modalInitials.textContent = initials;
+                modalImage.style.display = 'none';
+                modalInitials.style.display = 'flex';
+                deleteBtn.style.display = 'none';
+            }
+            
+            modal.classList.add('show');
+        }
+
+        function closeProfilePhotoModal() {
+            const modal = document.getElementById('profile-photo-modal');
+            modal.classList.remove('show');
+        }
+
+        function openImageViewer() {
+            const modalImage = document.getElementById('modal-image');
+            if (modalImage.style.display !== 'none') {
+                const viewerImage = document.getElementById('viewer-image');
+                viewerImage.src = modalImage.src;
+                document.getElementById('image-viewer-modal').classList.add('show');
+            }
+        }
+
+        function closeImageViewer() {
+            document.getElementById('image-viewer-modal').classList.remove('show');
+        }
+
+        let selectedImageData = null;
+        let cropState = {
+            zoom: 1,
+            rotate: 0,
+            offsetX: 0,
+            offsetY: 0
+        };
+
+        function handlePhotoSelection(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload a valid image file.');
+                return;
+            }
+
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Image size should be less than 2MB.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedImageData = e.target.result;
+                openCropModal(selectedImageData);
+            };
+            
+            reader.readAsDataURL(file);
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        function openCropModal(imageData) {
+            const cropModal = document.getElementById('crop-modal');
+            const cropImage = document.getElementById('crop-image');
+            const zoomSlider = document.getElementById('zoom-slider');
+            const rotateSlider = document.getElementById('rotate-slider');
+            
+            // Reset crop state
+            cropState = { zoom: 1, rotate: 0, offsetX: 0, offsetY: 0 };
+            
+            // Set image
+            cropImage.src = imageData;
+            cropImage.style.transform = 'scale(1) rotate(0deg)';
+            
+            // Reset sliders
+            zoomSlider.value = 100;
+            rotateSlider.value = 0;
+            document.getElementById('zoom-value').textContent = '100%';
+            document.getElementById('rotate-value').textContent = '0°';
+            
+            // Show modal
+            cropModal.classList.add('show');
+            
+            // Close the profile photo modal
+            closeProfilePhotoModal();
+            
+            // Setup drag functionality
+            setupImageDrag();
+        }
+
+        function closeCropModal() {
+            document.getElementById('crop-modal').classList.remove('show');
+        }
+
+        function setupImageDrag() {
+            const cropImage = document.getElementById('crop-image');
+            const previewArea = document.getElementById('crop-preview-area');
+            let isDragging = false;
+            let startX, startY;
+            
+            cropImage.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                startX = e.clientX - cropState.offsetX;
+                startY = e.clientY - cropState.offsetY;
+                cropImage.style.cursor = 'grabbing';
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                cropState.offsetX = e.clientX - startX;
+                cropState.offsetY = e.clientY - startY;
+                updateImageTransform();
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    cropImage.style.cursor = 'move';
+                }
+            });
+            
+            // Touch support
+            cropImage.addEventListener('touchstart', function(e) {
+                isDragging = true;
+                const touch = e.touches[0];
+                startX = touch.clientX - cropState.offsetX;
+                startY = touch.clientY - cropState.offsetY;
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                cropState.offsetX = touch.clientX - startX;
+                cropState.offsetY = touch.clientY - startY;
+                updateImageTransform();
+            });
+            
+            document.addEventListener('touchend', function() {
+                isDragging = false;
+            });
+        }
+
+        function updateImageTransform() {
+            const cropImage = document.getElementById('crop-image');
+            cropImage.style.transform = `translate(${cropState.offsetX}px, ${cropState.offsetY}px) scale(${cropState.zoom}) rotate(${cropState.rotate}deg)`;
+        }
+
+        // Zoom slider
+        document.addEventListener('DOMContentLoaded', function() {
+            const zoomSlider = document.getElementById('zoom-slider');
+            const rotateSlider = document.getElementById('rotate-slider');
+            
+            if (zoomSlider) {
+                zoomSlider.addEventListener('input', function(e) {
+                    cropState.zoom = e.target.value / 100;
+                    document.getElementById('zoom-value').textContent = e.target.value + '%';
+                    updateImageTransform();
+                });
+            }
+            
+            if (rotateSlider) {
+                rotateSlider.addEventListener('input', function(e) {
+                    cropState.rotate = e.target.value;
+                    document.getElementById('rotate-value').textContent = e.target.value + '°';
+                    updateImageTransform();
+                });
+            }
+        });
+
+        function applyCrop() {
+            const cropImage = document.getElementById('crop-image');
+            const previewArea = document.getElementById('crop-preview-area');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match crop circle (200x200)
+            canvas.width = 200;
+            canvas.height = 200;
+            
+            // Create a new image to load the source
+            const img = new Image();
+            img.onload = function() {
+                // Get the natural dimensions of the image
+                const naturalWidth = img.width;
+                const naturalHeight = img.height;
+                
+                // The preview area dimensions
+                const previewAreaHeight = 400;
+                const previewAreaWidth = previewArea.offsetWidth;
+                
+                // Calculate the initial scale to fit the image in the preview (object-fit: contain)
+                const scaleToFitWidth = previewAreaWidth / naturalWidth;
+                const scaleToFitHeight = previewAreaHeight / naturalHeight;
+                const initialScale = Math.min(scaleToFitWidth, scaleToFitHeight);
+                
+                // Calculate the displayed size in the preview (before user zoom)
+                const displayedWidth = naturalWidth * initialScale;
+                const displayedHeight = naturalHeight * initialScale;
+                
+                // After user's zoom is applied
+                const zoomedWidth = displayedWidth * cropState.zoom;
+                const zoomedHeight = displayedHeight * cropState.zoom;
+                
+                // The circle overlay is 200px diameter in a 400px tall preview area
+                // We need to extract what's visible in that 200px circle
+                
+                // Calculate the center of the preview area
+                const previewCenterX = previewAreaWidth / 2;
+                const previewCenterY = previewAreaHeight / 2;
+                
+                // Calculate where the image is positioned (centered, then offset by drag)
+                const imageCenterX = previewCenterX + cropState.offsetX;
+                const imageCenterY = previewCenterY + cropState.offsetY;
+                
+                // The circle overlay is at the center of the preview
+                // Calculate offset from image center to circle center
+                const offsetFromImageCenterX = previewCenterX - imageCenterX;
+                const offsetFromImageCenterY = previewCenterY - imageCenterY;
+                
+                // Convert to ratio of the zoomed image
+                const ratioX = offsetFromImageCenterX / zoomedWidth;
+                const ratioY = offsetFromImageCenterY / zoomedHeight;
+                
+                // Circle is 200px in 400px preview, we want to extract that area from the original image
+                const circleRadiusInPreview = 100; // 200px diameter / 2
+                const sourceCircleRadius = (circleRadiusInPreview / zoomedWidth) * naturalWidth;
+                
+                // Calculate source rectangle in original image
+                const sourceCenterX = naturalWidth / 2 + (ratioX * naturalWidth);
+                const sourceCenterY = naturalHeight / 2 + (ratioY * naturalHeight);
+                
+                const sourceX = sourceCenterX - sourceCircleRadius;
+                const sourceY = sourceCenterY - sourceCircleRadius;
+                const sourceSize = sourceCircleRadius * 2;
+                
+                // Save context state
+                ctx.save();
+                
+                // Create circular clipping path
+                ctx.beginPath();
+                ctx.arc(100, 100, 100, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.clip();
+                
+                // Fill with white background first
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, 200, 200);
+                
+                // Apply rotation at canvas center if needed
+                if (cropState.rotate !== 0) {
+                    ctx.translate(100, 100);
+                    ctx.rotate((cropState.rotate * Math.PI) / 180);
+                    ctx.translate(-100, -100);
+                }
+                
+                // Draw the cropped portion from source to fill the entire canvas
+                ctx.drawImage(
+                    img,
+                    sourceX,
+                    sourceY,
+                    sourceSize,
+                    sourceSize,
+                    0,
+                    0,
+                    200,
+                    200
+                );
+                
+                ctx.restore();
+                
+                // Get cropped image data
+                const croppedImageData = canvas.toDataURL('image/png');
+                
+                // Save to localStorage
+                const username = currentUserData.username;
+                localStorage.setItem(`profilePhoto_${username}`, croppedImageData);
+                
+                // Update main profile display
+                const profileAvatar = document.getElementById('profile-avatar');
+                const profileImage = document.getElementById('profile-image');
+                const avatarInitials = document.getElementById('avatar-initials');
+                profileImage.src = croppedImageData;
+                profileImage.style.display = 'block';
+                avatarInitials.style.display = 'none';
+                profileAvatar.style.background = 'white';
+                
+                // Update header icon
+                const headerIcon = document.getElementById('header-profile-icon');
+                const headerImage = document.getElementById('header-profile-image');
+                const headerInitials = document.getElementById('header-profile-initials');
+                headerImage.src = croppedImageData;
+                headerImage.style.display = 'block';
+                headerInitials.style.display = 'none';
+                headerIcon.style.background = 'white';
+                
+                // Update modal preview
+                const modalPreview = document.getElementById('modal-preview');
+                const modalImage = document.getElementById('modal-image');
+                const modalInitials = document.getElementById('modal-initials');
+                modalImage.src = croppedImageData;
+                modalImage.style.display = 'block';
+                modalInitials.style.display = 'none';
+                document.getElementById('delete-photo-btn').style.display = 'block';
+                modalPreview.style.background = 'white';
+                
+                // Close crop modal and reopen profile modal
+                closeCropModal();
+                openProfilePhotoModal();
+                
+                alert('Profile photo updated successfully!');
+            };
+            
+            img.src = selectedImageData;
+        }
+
+        function deleteProfilePhoto() {
+            if (!confirm('Are you sure you want to delete your profile photo?')) {
+                return;
+            }
+            
+            const username = currentUserData.username;
+            
+            // Remove from localStorage
+            localStorage.removeItem(`profilePhoto_${username}`);
+            
+            // Update main profile display
+            const profileAvatar = document.getElementById('profile-avatar');
+            const profileImage = document.getElementById('profile-image');
+            const avatarInitials = document.getElementById('avatar-initials');
+            const initials = (currentUserData.first_name.charAt(0) + currentUserData.last_name.charAt(0)).toUpperCase();
+            
+            profileImage.style.display = 'none';
+            avatarInitials.style.display = 'flex';
+            avatarInitials.textContent = initials;
+            
+            // Restore gradient background
+            if (userRole === 'customer') {
+                profileAvatar.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+            } else if (userRole === 'builder') {
+                profileAvatar.style.background = 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)';
+            } else if (userRole === 'consultant') {
+                profileAvatar.style.background = 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)';
+            }
+            
+            // Restore header icon
+            const headerIcon = document.getElementById('header-profile-icon');
+            const headerImage = document.getElementById('header-profile-image');
+            const headerInitials = document.getElementById('header-profile-initials');
+            headerImage.style.display = 'none';
+            headerInitials.style.display = 'flex';
+            headerInitials.textContent = initials;
+            
+            if (userRole === 'customer') {
+                headerIcon.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+            } else if (userRole === 'builder') {
+                headerIcon.style.background = 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)';
+            } else if (userRole === 'consultant') {
+                headerIcon.style.background = 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)';
+            }
+            
+            // Update modal preview
+            const modalPreview = document.getElementById('modal-preview');
+            const modalImage = document.getElementById('modal-image');
+            const modalInitials = document.getElementById('modal-initials');
+            modalImage.style.display = 'none';
+            modalInitials.style.display = 'flex';
+            modalInitials.textContent = initials;
+            document.getElementById('delete-photo-btn').style.display = 'none';
+            
+            // Restore modal gradient background
+            if (userRole === 'customer') {
+                modalPreview.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+            } else if (userRole === 'builder') {
+                modalPreview.style.background = 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)';
+            } else if (userRole === 'consultant') {
+                modalPreview.style.background = 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)';
+            }
+            
+            alert('Profile photo deleted successfully!');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('profile-photo-modal');
+            if (event.target === modal) {
+                closeProfilePhotoModal();
+            }
+            
+            const imageViewer = document.getElementById('image-viewer-modal');
+            if (event.target === imageViewer) {
+                closeImageViewer();
+            }
+        });
+    </script>
+</body>
+</html>

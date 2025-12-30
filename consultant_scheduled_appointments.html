@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduled Appointments - Consultant Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f7f9fc; 
+        }
+
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(20, 184, 166, 0.3);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        /* Calendar Styles */
+        .calendar-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-header {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .time-slot {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            position: relative;
+            min-height: 60px;
+        }
+
+        .time-slot:hover {
+            background-color: #f9fafb;
+        }
+
+        .visit-block {
+            position: relative;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .visit-block:hover {
+            transform: translateX(3px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Pending = Highlighted/Tentative */
+        .visit-pending {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            border-style: dashed;
+        }
+
+        /* Accepted = Solid */
+        .visit-accepted {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid #10b981;
+            border-style: solid;
+        }
+
+        .request-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #f59e0b;
+            transition: all 0.2s;
+        }
+
+        .request-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-accepted {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-auto {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-selected {
+            background-color: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .scrollable-list {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .scrollable-calendar {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar */
+        .scrollable-list::-webkit-scrollbar,
+        .scrollable-calendar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-track,
+        .scrollable-calendar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb,
+        .scrollable-calendar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb:hover,
+        .scrollable-calendar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Month View Styles */
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #e5e7eb;
+            border: 1px solid #e5e7eb;
+        }
+
+        .month-day-header {
+            background-color: #f3f4f6;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .month-day-cell {
+            background-color: white;
+            min-height: 100px;
+            padding: 0.5rem;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .month-day-cell.other-month {
+            background-color: #f9fafb;
+            color: #9ca3af;
+        }
+
+        .month-day-cell.today {
+            background-color: #ccfbf1;
+        }
+
+        .month-day-number {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .month-visit-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 1px;
+        }
+
+        .month-visit-dot.pending {
+            background-color: #f59e0b;
+        }
+
+        .month-visit-dot.accepted {
+            background-color: #10b981;
+        }
+
+        .view-toggle {
+            display: inline-flex;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+        }
+
+        .view-toggle button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .view-toggle button.active {
+            background-color: white;
+            color: #14b8a6;
+        }
+
+        .view-toggle button:not(.active) {
+            color: white;
+        }
+
+        .view-toggle button:not(.active):hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
+        <h1 class="text-2xl font-bold text-teal-700">My Scheduled Appointments</h1>
+        <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome, Consultant!</span>
+            <div class="profile-dropdown">
+                <div class="profile-icon" id="profile-icon" onclick="toggleProfileMenu()">
+                    <img id="profile-image" style="display: none;">
+                    <span id="profile-initials">U</span>
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="window.history.back()" style="color: #dc2626;">
+                        <span>🏠 Dashboard</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="window.history.back()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                ← Back
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6">
+        <!-- Stats Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Total Appointments</p>
+                <p id="total-visits" class="text-3xl font-bold text-teal-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Pending</p>
+                <p id="pending-visits" class="text-3xl font-bold text-yellow-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Confirmed</p>
+                <p id="accepted-visits" class="text-3xl font-bold text-green-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Today</p>
+                <p id="today-visits" class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+        </div>
+
+        <!-- Main Layout: 70% Calendar + 30% Requests -->
+        <div class="grid grid-cols-1 lg:grid-cols-10 gap-6">
+            
+            <!-- Left Side: Calendar (70%) -->
+            <div class="lg:col-span-7">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-1">Expert Visit Calendar</h2>
+                                <p id="calendar-date" class="text-teal-200">My Schedule</p>
+                            </div>
+                            <div class="view-toggle">
+                                <button id="day-view-btn" onclick="switchView('day')" class="active">
+                                    Day View
+                                </button>
+                                <button id="month-view-btn" onclick="switchView('month')">
+                                    Month View
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-center space-x-2">
+                            <button onclick="previousPeriod()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition">
+                                ← <span id="prev-label">Prev</span>
+                            </button>
+                            <button onclick="today()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition">
+                                Today
+                            </button>
+                            <button onclick="nextPeriod()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition">
+                                <span id="next-label">Next</span> →
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="scrollable-calendar p-4">
+                        <div id="calendar-grid">
+                            <!-- Time slots will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="p-4 bg-gray-50 border-t border-gray-200">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Status Legend:</p>
+                        <div class="flex space-x-4 flex-wrap">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded bg-yellow-200 border-2 border-dashed border-yellow-500 mr-2"></div>
+                                <span class="text-sm text-gray-600">Pending Confirmation</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded bg-green-200 border-2 border-solid border-green-500 mr-2"></div>
+                                <span class="text-sm text-gray-600">Confirmed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Pending Requests (30%) -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <div class="mb-4">
+                        <div class="grid grid-cols-3 gap-2 mb-3">
+                            <button 
+                                id="toggle-all" 
+                                onclick="switchRequestType('all')"
+                                class="py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-teal-500 text-white">
+                                All (<span id="count-all">0</span>)
+                            </button>
+                            <button 
+                                id="toggle-pending" 
+                                onclick="switchRequestType('pending')"
+                                class="py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-gray-200 text-gray-700 hover:bg-gray-300">
+                                Pending (<span id="count-pending">0</span>)
+                            </button>
+                            <button 
+                                id="toggle-accepted" 
+                                onclick="switchRequestType('accepted')"
+                                class="py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-gray-200 text-gray-700 hover:bg-gray-300">
+                                Accepted (<span id="count-accepted">0</span>)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="scrollable-list" id="pending-requests-container">
+                        <!-- Pending visit requests will be loaded here -->
+                    </div>
+
+                    <div id="no-pending-requests" class="hidden text-center py-8">
+                        <div class="text-gray-300 text-5xl mb-3">✅</div>
+                        <p class="text-gray-500 text-sm">No appointments found</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Propose New Time Modal -->
+    <div id="propose-time-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-teal-700">🔄 Propose New Time</h3>
+                <button onclick="closeProposeTimeModal()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">
+                    ✕
+                </button>
+            </div>
+            
+            <!-- Current Visit Info -->
+            <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-yellow-500 p-4 rounded-lg mb-6">
+                <p class="text-sm font-bold text-yellow-900 mb-2">📅 Current Schedule:</p>
+                <div class="space-y-1">
+                    <p class="text-xs text-yellow-800" id="modal-customer-name"></p>
+                    <p class="text-xs text-yellow-800" id="modal-current-date"></p>
+                    <p class="text-xs text-yellow-800" id="modal-current-time"></p>
+                </div>
+            </div>
+
+            <!-- Property Info -->
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 p-4 rounded-lg mb-6">
+                <p class="text-sm font-bold text-purple-900 mb-2">🏢 Property Details:</p>
+                <div class="space-y-1">
+                    <p class="text-xs text-purple-800" id="modal-property-name"></p>
+                    <p class="text-xs text-purple-800" id="modal-property-location"></p>
+                </div>
+            </div>
+            
+            <!-- New Schedule Form -->
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">📅 New Date:</label>
+                    <input type="date" id="new-visit-date" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition">
+                    <p class="text-xs text-gray-500 mt-1">Select a new date for the visit</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">🕐 New Time:</label>
+                    <select id="new-visit-time" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition">
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="12:30 PM">12:30 PM</option>
+                        <option value="01:00 PM">01:00 PM</option>
+                        <option value="01:30 PM">01:30 PM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="02:30 PM">02:30 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="03:30 PM">03:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="05:30 PM">05:30 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Choose a convenient time slot</p>
+                </div>
+
+                <!-- Info Notice -->
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 p-4 rounded-lg">
+                    <p class="text-xs font-semibold text-blue-800">ℹ️ Important:</p>
+                    <p class="text-xs text-blue-700 mt-1">The customer must accept the new time for the change to take effect. They will be notified of your proposed schedule.</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="confirmProposeNewTime()" class="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                    ✓ Confirm New Time
+                </button>
+                <button onclick="closeProposeTimeModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                    ✕ Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let allVisits = [];
+        let currentView = 'day'; // 'day' or 'month'
+        let currentRequestType = 'all'; // 'all', 'pending', or 'accepted'
+        const loggedInEmail = sessionStorage.getItem('loggedInUserEmail');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayUserName();
+            loadVisits();
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            if (username) loadProfilePhoto(username);
+        });
+
+        function loadProfilePhoto(username) {
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            if (savedPhoto) {
+                const profileIcon = document.getElementById('profile-icon');
+                const profileImage = document.getElementById('profile-image');
+                const profileInitials = document.getElementById('profile-initials');
+                
+                if (profileImage && profileInitials && profileIcon) {
+                    profileImage.src = savedPhoto;
+                    profileImage.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                    profileIcon.style.background = 'white';
+                }
+            }
+        }
+
+        function displayUserName() {
+            const firstName = sessionStorage.getItem('loggedInUserFirstName');
+            const lastName = sessionStorage.getItem('loggedInUserLastName');
+            const userDisplayElement = document.getElementById('user-display');
+
+            if (userDisplayElement && firstName && lastName) {
+                userDisplayElement.textContent = `Welcome, ${firstName} ${lastName}!`;
+                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                document.getElementById('profile-initials').textContent = initials;
+                document.getElementById('profile-name').textContent = `${firstName} ${lastName}`;
+            }
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            menu.classList.toggle('show');
+        }
+
+        function viewProfile() {
+            window.location.href = 'manage_profile.html';
+        }
+
+        function viewSettings() {
+            alert('Settings page coming soon!');
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        function loadVisits() {
+            // Load all expert-assisted visit requests from localStorage
+            const expertVisitBookings = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            
+            // Filter visits for the logged-in consultant (by email)
+            // Includes both auto-assigned and selected expert visits
+            allVisits = expertVisitBookings.filter(visit => {
+                const expertEmail = (visit.expertEmail || '').toLowerCase();
+                const currentEmail = (loggedInEmail || '').toLowerCase();
+                
+                // Include if:
+                // 1. Expert email matches (selected by customer)
+                // 2. Auto-assigned and no expert assigned yet (consultant can claim)
+                return expertEmail === currentEmail || 
+                       (visit.expertAssignment === 'Auto Assigned' && !visit.expertEmail);
+            });
+            
+            updateStats();
+            renderCalendar();
+            renderPendingRequests();
+        }
+
+        function updateStats() {
+            const total = allVisits.length;
+            const pending = allVisits.filter(v => (v.status || '').toLowerCase() === 'pending').length;
+            const accepted = allVisits.filter(v => {
+                const status = (v.status || '').toLowerCase();
+                return status === 'accepted' || 
+                       status === 'rescheduled - awaiting builder approval' || 
+                       status === 'rescheduled - awaiting customer';
+            }).length;
+            
+            // Count today's visits
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const todayVisits = allVisits.filter(v => v.visitDate === todayStr).length;
+            
+            document.getElementById('total-visits').textContent = total;
+            document.getElementById('pending-visits').textContent = pending;
+            document.getElementById('accepted-visits').textContent = accepted;
+            document.getElementById('today-visits').textContent = todayVisits;
+            
+            // Update toggle counts
+            document.getElementById('count-all').textContent = total;
+            document.getElementById('count-pending').textContent = pending;
+            document.getElementById('count-accepted').textContent = accepted;
+        }
+
+        function renderCalendar() {
+            if (currentView === 'day') {
+                renderDayView();
+            } else {
+                renderMonthView();
+            }
+        }
+
+        function renderDayView() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            
+            // Format date as YYYY-MM-DD to match the stored format
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+            
+            // Update calendar header date
+            document.getElementById('calendar-date').textContent = currentDate.toLocaleDateString('en-IN', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // Filter visits for the selected date
+            const dayVisits = allVisits.filter(visit => visit.visitDate === dateStr);
+            
+            // Generate time slots from 9 AM to 6 PM
+            const timeSlots = generateTimeSlots();
+            
+            let html = '';
+            timeSlots.forEach(slot => {
+                const visitsInSlot = dayVisits.filter(visit => visit.visitTime === slot);
+                
+                html += `
+                    <div class="time-slot">
+                        <div class="flex">
+                            <div class="w-24 text-sm font-semibold text-gray-600">${slot}</div>
+                            <div class="flex-1">
+                                ${visitsInSlot.map(visit => createVisitBlock(visit)).join('')}
+                                ${visitsInSlot.length === 0 ? '<span class="text-xs text-gray-400">No appointments scheduled</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            calendarGrid.innerHTML = html;
+        }
+
+        function renderMonthView() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            
+            // Update calendar header to show month and year
+            document.getElementById('calendar-date').textContent = currentDate.toLocaleDateString('en-IN', { 
+                year: 'numeric', 
+                month: 'long' 
+            });
+            
+            // Get first day of month and number of days in month
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday
+            
+            // Days of week headers
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            let html = '<div class="month-grid">';
+            
+            // Add day headers
+            dayNames.forEach(day => {
+                html += `<div class="month-day-header">${day}</div>`;
+            });
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const prevMonthDate = new Date(year, month, -(startingDayOfWeek - i - 1));
+                html += `<div class="month-day-cell other-month">
+                    <div class="month-day-number">${prevMonthDate.getDate()}</div>
+                </div>`;
+            }
+            
+            // Add days of the month
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayVisits = allVisits.filter(visit => visit.visitDate === dateStr);
+                const isToday = dateStr === todayStr;
+                
+                html += `<div class="month-day-cell ${isToday ? 'today' : ''}" onclick="viewDayFromMonth('${dateStr}')">
+                    <div class="month-day-number">${day}</div>`;
+                
+                if (dayVisits.length > 0) {
+                    const pending = dayVisits.filter(v => (v.status || '').toLowerCase() === 'pending').length;
+                    const accepted = dayVisits.filter(v => (v.status || '').toLowerCase() === 'accepted').length;
+                    
+                    html += '<div class="mt-1">';
+                    for (let i = 0; i < pending; i++) {
+                        html += '<span class="month-visit-dot pending"></span>';
+                    }
+                    for (let i = 0; i < accepted; i++) {
+                        html += '<span class="month-visit-dot accepted"></span>';
+                    }
+                    html += '</div>';
+                    html += `<div class="text-xs text-gray-600 mt-1">${dayVisits.length} visit${dayVisits.length > 1 ? 's' : ''}</div>`;
+                }
+                
+                html += '</div>';
+            }
+            
+            // Add empty cells for days after month ends
+            const totalCells = startingDayOfWeek + daysInMonth;
+            const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let i = 1; i <= remainingCells; i++) {
+                html += `<div class="month-day-cell other-month">
+                    <div class="month-day-number">${i}</div>
+                </div>`;
+            }
+            
+            html += '</div>';
+            calendarGrid.innerHTML = html;
+        }
+
+        function viewDayFromMonth(dateStr) {
+            // Parse the date string (format: YYYY-MM-DD)
+            const [year, month, day] = dateStr.split('-').map(num => parseInt(num));
+            currentDate = new Date(year, month - 1, day);
+            switchView('day');
+        }
+
+        function generateTimeSlots() {
+            const slots = [];
+            const times = [
+                '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+                '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM', '02:00 PM', '02:30 PM',
+                '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM'
+            ];
+            return times;
+        }
+
+        function createVisitBlock(visit) {
+            const status = (visit.status || '').toLowerCase();
+            const statusClass = status === 'pending' ? 'visit-pending' : 'visit-accepted';
+            const statusIcon = status === 'pending' ? '⏳' : '✓';
+            
+            const propertyName = visit.propertyDetails?.propertyName || visit.propertyDetails?.name || 'Property';
+            const assignmentType = visit.expertAssignment === 'Auto Assigned' ? '🤖 Auto' : '👤 Selected';
+            
+            return `
+                <div class="visit-block ${statusClass}" onclick="viewVisitDetails('${visit.id}')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="font-semibold text-sm">${statusIcon} ${propertyName}</p>
+                            <p class="text-xs text-gray-600">${visit.customerName}</p>
+                            <p class="text-xs text-gray-500">${assignmentType} • ${visit.builderName}</p>
+                        </div>
+                        <span class="badge badge-${status}">
+                            ${visit.status}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPendingRequests() {
+            const container = document.getElementById('pending-requests-container');
+            const noRequests = document.getElementById('no-pending-requests');
+            
+            // Filter based on current request type
+            let filteredVisits = [];
+            if (currentRequestType === 'all') {
+                filteredVisits = allVisits;
+            } else if (currentRequestType === 'pending') {
+                filteredVisits = allVisits.filter(visit => (visit.status || '').toLowerCase() === 'pending');
+            } else if (currentRequestType === 'accepted') {
+                filteredVisits = allVisits.filter(visit => {
+                    const status = (visit.status || '').toLowerCase();
+                    return status === 'accepted' || 
+                           status === 'rescheduled - awaiting builder approval' || 
+                           status === 'rescheduled - awaiting customer';
+                });
+            }
+            
+            if (filteredVisits.length === 0) {
+                container.classList.add('hidden');
+                noRequests.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noRequests.classList.add('hidden');
+            
+            container.innerHTML = filteredVisits.map(visit => createRequestCard(visit)).join('');
+        }
+
+        function createRequestCard(visit) {
+            const visitDate = new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            const propertyName = visit.propertyDetails?.propertyName || visit.propertyDetails?.name || 'Property';
+            const assignmentBadge = visit.expertAssignment === 'Auto Assigned' 
+                ? '<span class="badge badge-auto">🤖 Auto Assigned</span>'
+                : '<span class="badge badge-selected">👤 Customer Selected</span>';
+            
+            return `
+                <div class="request-card">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <p class="font-bold text-gray-800">${propertyName}</p>
+                            <p class="text-sm text-gray-600">${visit.propertyDetails?.location || 'N/A'}</p>
+                        </div>
+                        ${assignmentBadge}
+                    </div>
+                    
+                    <div class="bg-blue-50 p-3 rounded-lg mb-3">
+                        <p class="text-xs text-blue-700 font-semibold mb-1">Customer Details</p>
+                        <p class="font-semibold text-sm text-gray-800">${visit.customerName}</p>
+                        <p class="text-xs text-gray-600">📞 ${visit.customerPhone}</p>
+                        <p class="text-xs text-gray-600">📧 ${visit.customerEmail}</p>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-3 rounded-lg mb-3">
+                        <p class="text-xs text-purple-600 font-semibold mb-1">Builder</p>
+                        <p class="font-semibold text-sm text-gray-800">${visit.builderName}</p>
+                    </div>
+                    
+                    <div class="text-xs text-gray-600 mb-3">
+                        <p>📅 ${visitDate} • 🕐 ${visit.visitTime}</p>
+                        <p class="mt-1">📝 Requested: ${new Date(visit.timestamp).toLocaleDateString('en-IN')}</p>
+                    </div>
+                    
+                    ${visit.status === 'Rescheduled - Awaiting Builder Approval' ? `
+                        <div class="bg-gradient-to-r from-orange-50 to-orange-100 border-l-4 border-orange-500 p-3 rounded-lg mb-3">
+                            <p class="text-sm text-orange-800 font-semibold mb-2">⏳ Awaiting Builder Approval</p>
+                            ${visit.proposedDate && visit.proposedTime ? `
+                                <div class="bg-white p-2 rounded border border-orange-200 mb-2">
+                                    <p class="text-xs font-semibold text-gray-700">Your Proposed New Time:</p>
+                                    <p class="text-xs text-gray-600">📅 ${new Date(visit.proposedDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                    <p class="text-xs text-gray-600">🕐 ${visit.proposedTime}</p>
+                                </div>
+                            ` : ''}
+                            <p class="text-xs text-orange-700">Builder is reviewing your proposed time change</p>
+                        </div>
+                    ` : visit.status === 'Rescheduled - Awaiting Customer' ? `
+                        <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-center">
+                            <p class="text-sm text-blue-700 font-semibold">⏳ Awaiting Customer Confirmation</p>
+                            <p class="text-xs text-blue-600 mt-1">New time proposed, waiting for customer to accept</p>
+                            ${visit.proposedDate && visit.proposedTime ? `
+                                <div class="mt-2 bg-white p-2 rounded border border-blue-200">
+                                    <p class="text-xs font-semibold text-gray-700">Proposed Schedule:</p>
+                                    <p class="text-xs text-gray-600">📅 ${new Date(visit.proposedDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                    <p class="text-xs text-gray-600">🕐 ${visit.proposedTime}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : visit.status === 'Completed' ? `
+                        <button class="w-full bg-gray-400 text-white text-sm font-semibold py-2 px-3 rounded-lg cursor-not-allowed" disabled>
+                            ✓ Visit Completed
+                        </button>
+                    ` : visit.status === 'accepted' ? `
+                        <div class="flex flex-col space-y-2">
+                            <button onclick="cancelVisit('${visit.id}')" 
+                                class="w-full bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                🚫 Cancel Request
+                            </button>
+                            <button onclick="proposeNewTimeConsultant('${visit.id}')" 
+                                class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                🔄 Propose New Time
+                            </button>
+                            <button onclick="markVisitCompletedConsultant('${visit.id}')" 
+                                class="w-full bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                ✅ Completed
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="flex space-x-2">
+                            <button onclick="acceptVisit('${visit.id}')" 
+                                class="flex-1 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150 ${visit.status === 'rejected' ? 'opacity-50 cursor-not-allowed' : ''}"
+                                ${visit.status === 'rejected' ? 'disabled' : ''}>
+                                ✓ Accept
+                            </button>
+                            <button onclick="rejectVisit('${visit.id}')" 
+                                class="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150 ${visit.status === 'rejected' ? 'opacity-50 cursor-not-allowed' : ''}"
+                                ${visit.status === 'rejected' ? 'disabled' : ''}>
+                                ✗ Decline
+                            </button>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function switchRequestType(type) {
+            currentRequestType = type;
+            
+            // Update toggle button styles
+            const toggles = ['all', 'pending', 'accepted'];
+            toggles.forEach(t => {
+                const btn = document.getElementById(`toggle-${t}`);
+                if (t === type) {
+                    btn.className = 'py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-teal-500 text-white';
+                } else {
+                    btn.className = 'py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-gray-200 text-gray-700 hover:bg-gray-300';
+                }
+            });
+            
+            renderPendingRequests();
+        }
+
+        function acceptVisit(visitId) {
+            const expertVisitBookings = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            const visitIndex = expertVisitBookings.findIndex(v => v.id == visitId);
+            
+            if (visitIndex !== -1) {
+                expertVisitBookings[visitIndex].status = 'accepted';
+                localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisitBookings));
+                
+                // Auto-trigger builder approval request
+                const visit = expertVisitBookings[visitIndex];
+                createBuilderApprovalRequest(visit);
+                
+                alert('Visit appointment accepted! A request has been sent to the builder for final approval.');
+                loadVisits();
+            }
+        }
+
+        function createBuilderApprovalRequest(visit) {
+            // Create a builder approval request for expert-assisted visit
+            const builderApprovals = JSON.parse(localStorage.getItem('builderApprovalRequests') || '[]');
+            
+            // Get consultant details from session if not available in visit
+            const consultantFirstName = sessionStorage.getItem('loggedInUserFirstName');
+            const consultantLastName = sessionStorage.getItem('loggedInUserLastName');
+            const consultantName = visit.expertName || `${consultantFirstName} ${consultantLastName}`;
+            const consultantPhone = sessionStorage.getItem('loggedInUserPhone');
+            
+            const approvalRequest = {
+                id: Date.now(),
+                visitId: visit.id,
+                requestType: 'Expert Assisted Visit',
+                customerName: visit.customerName,
+                customerPhone: visit.customerPhone,
+                customerEmail: visit.customerEmail,
+                expertName: consultantName,
+                expertPhone: visit.expertPhone || consultantPhone || '',
+                expertEmail: visit.expertEmail || loggedInEmail,
+                builderName: visit.builderName,
+                builderUsername: visit.builderUsername,
+                visitDate: visit.visitDate,
+                visitTime: visit.visitTime,
+                propertyDetails: visit.propertyDetails,
+                status: 'Pending Builder Approval',
+                expertAssignment: visit.expertAssignment,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('Creating builder approval request:', approvalRequest);
+            console.log('Builder Username:', visit.builderUsername);
+            console.log('All visit data:', visit);
+            
+            builderApprovals.push(approvalRequest);
+            localStorage.setItem('builderApprovalRequests', JSON.stringify(builderApprovals));
+            
+            console.log('Builder approval request saved. Total requests:', builderApprovals.length);
+        }
+
+        function rejectVisit(visitId) {
+            if (!confirm('Are you sure you want to decline this visit appointment?')) {
+                return;
+            }
+            
+            const expertVisitBookings = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            const visitIndex = expertVisitBookings.findIndex(v => v.id == visitId);
+            
+            if (visitIndex !== -1) {
+                expertVisitBookings[visitIndex].status = 'rejected';
+                localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisitBookings));
+                
+                alert('Visit appointment declined.');
+                loadVisits();
+            }
+        }
+
+        function cancelVisit(visitId) {
+            const reason = prompt('Please enter the reason for cancellation:');
+            
+            if (!reason || reason.trim() === '') {
+                alert('Cancellation reason is required.');
+                return;
+            }
+            
+            const expertVisitBookings = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            const visitIndex = expertVisitBookings.findIndex(v => v.id == visitId);
+            
+            if (visitIndex !== -1) {
+                expertVisitBookings[visitIndex].status = 'Cancelled by Consultant';
+                expertVisitBookings[visitIndex].cancellationReason = reason.trim();
+                expertVisitBookings[visitIndex].cancelledAt = new Date().toISOString();
+                localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisitBookings));
+                
+                alert('Visit has been cancelled.');
+                loadVisits();
+            }
+        }
+
+        let currentProposingVisitId = null;
+
+        function proposeNewTimeConsultant(visitId) {
+            const expertVisitBookings = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            const visit = expertVisitBookings.find(v => v.id == visitId);
+            
+            if (!visit) return;
+            
+            currentProposingVisitId = visitId;
+            
+            // Populate modal with current visit info
+            document.getElementById('modal-customer-name').textContent = `Customer: ${visit.customerName}`;
+            document.getElementById('modal-current-date').textContent = `Date: ${new Date(visit.visitDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+            document.getElementById('modal-current-time').textContent = `Time: ${visit.visitTime}`;
+            
+            const propertyName = visit.propertyDetails?.propertyName || visit.propertyDetails?.name || 'Property';
+            const propertyLocation = visit.propertyDetails?.location || 'N/A';
+            document.getElementById('modal-property-name').textContent = `Property: ${propertyName}`;
+            document.getElementById('modal-property-location').textContent = `Location: ${propertyLocation}`;
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('new-visit-date').setAttribute('min', today);
+            document.getElementById('new-visit-date').value = '';
+            document.getElementById('new-visit-time').value = '09:00 AM';
+            
+            // Show modal
+            document.getElementById('propose-time-modal').classList.add('active');
+        }
+
+        function confirmProposeNewTime() {
+            const newDate = document.getElementById('new-visit-date').value;
+            const newTime = document.getElementById('new-visit-time').value;
+            
+            if (!newDate) {
+                alert('Please select a new date');
+                return;
+            }
+            
+            const expertVisitBookings = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            const visitIndex = expertVisitBookings.findIndex(v => v.id == currentProposingVisitId);
+            
+            if (visitIndex !== -1) {
+                const visit = expertVisitBookings[visitIndex];
+                
+                // Store proposed time and set status to await builder approval
+                expertVisitBookings[visitIndex].proposedDate = newDate;
+                expertVisitBookings[visitIndex].proposedTime = newTime;
+                expertVisitBookings[visitIndex].status = 'Rescheduled - Awaiting Builder Approval';
+                expertVisitBookings[visitIndex].originalDate = visit.visitDate;
+                expertVisitBookings[visitIndex].originalTime = visit.visitTime;
+                
+                localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisitBookings));
+                
+                // Update the builder approval request with proposed time
+                const builderApprovals = JSON.parse(localStorage.getItem('builderApprovalRequests') || '[]');
+                const approvalIndex = builderApprovals.findIndex(a => a.visitId == currentProposingVisitId);
+                if (approvalIndex !== -1) {
+                    builderApprovals[approvalIndex].proposedDate = newDate;
+                    builderApprovals[approvalIndex].proposedTime = newTime;
+                    builderApprovals[approvalIndex].status = 'Rescheduled - Awaiting Builder Approval';
+                    builderApprovals[approvalIndex].originalDate = visit.visitDate;
+                    builderApprovals[approvalIndex].originalTime = visit.visitTime;
+                    localStorage.setItem('builderApprovalRequests', JSON.stringify(builderApprovals));
+                }
+                
+                closeProposeTimeModal();
+                loadVisits();
+                alert(`New time proposed: ${new Date(newDate).toLocaleDateString('en-IN')} at ${newTime}\nWaiting for builder approval first.`);
+            }
+        }
+
+        function closeProposeTimeModal() {
+            document.getElementById('propose-time-modal').classList.remove('active');
+            currentProposingVisitId = null;
+        }
+
+        function markVisitCompletedConsultant(visitId) {
+            if (!confirm('Mark this visit as completed?')) {
+                return;
+            }
+            
+            const expertVisitBookings = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            const visitIndex = expertVisitBookings.findIndex(v => v.id == visitId);
+            
+            if (visitIndex !== -1) {
+                const visit = expertVisitBookings[visitIndex];
+                expertVisitBookings[visitIndex].status = 'Completed';
+                expertVisitBookings[visitIndex].completedAt = new Date().toISOString();
+                
+                // Increment site visits counter for the property
+                if (visit.propertyTimestamp) {
+                    const liveListings = JSON.parse(localStorage.getItem('liveListings') || '[]');
+                    const propertyIndex = liveListings.findIndex(p => p.timestamp === visit.propertyTimestamp);
+                    
+                    if (propertyIndex !== -1) {
+                        liveListings[propertyIndex].siteVisits = (liveListings[propertyIndex].siteVisits || 0) + 1;
+                        localStorage.setItem('liveListings', JSON.stringify(liveListings));
+                    }
+                }
+                
+                localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisitBookings));
+                
+                alert('Visit marked as completed.');
+                loadVisits();
+            }
+        }
+
+        function viewVisitDetails(visitId) {
+            const visit = allVisits.find(v => v.id == visitId);
+            if (!visit) return;
+            
+            const visitDate = new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            
+            const propertyName = visit.propertyDetails?.propertyName || visit.propertyDetails?.name || 'Property';
+            const assignmentType = visit.expertAssignment === 'Auto Assigned' ? 'Auto Assigned by System' : 'Selected by Customer';
+            
+            alert(`Expert-Assisted Visit Details:\n\nAssignment: ${assignmentType}\n\nProperty: ${propertyName}\nLocation: ${visit.propertyDetails?.location || 'N/A'}\n\nCustomer: ${visit.customerName}\nPhone: ${visit.customerPhone}\nEmail: ${visit.customerEmail}\n\nBuilder: ${visit.builderName}\n\nScheduled Visit:\nDate: ${visitDate}\nTime: ${visit.visitTime}\n\nStatus: ${visit.status}\nRequested: ${new Date(visit.timestamp).toLocaleDateString('en-IN')}`);
+        }
+
+        function previousPeriod() {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            }
+            renderCalendar();
+        }
+
+        function today() {
+            currentDate = new Date();
+            renderCalendar();
+        }
+
+        function nextPeriod() {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() + 1);
+            } else {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+            renderCalendar();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            
+            // Update toggle buttons
+            document.getElementById('day-view-btn').classList.toggle('active', view === 'day');
+            document.getElementById('month-view-btn').classList.toggle('active', view === 'month');
+            
+            // Update navigation labels
+            if (view === 'day') {
+                document.getElementById('prev-label').textContent = 'Prev';
+                document.getElementById('next-label').textContent = 'Next';
+            } else {
+                document.getElementById('prev-label').textContent = 'Prev Month';
+                document.getElementById('next-label').textContent = 'Next Month';
+            }
+            
+            renderCalendar();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduled Appointments - Builder Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(to bottom, rgba(139, 92, 246, 0.05), rgba(139, 92, 246, 0.05)),
+                repeating-linear-gradient(0deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px),
+                repeating-linear-gradient(90deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px);
+            background-size: 100% 100%, 80px 80px, 80px 80px;
+            min-height: 100vh;
+        }
+
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        /* Calendar Styles */
+        .calendar-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .time-slot {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            position: relative;
+            min-height: 60px;
+        }
+
+        .time-slot:hover {
+            background-color: #f9fafb;
+        }
+
+        .visit-block {
+            position: relative;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .visit-block:hover {
+            transform: translateX(3px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Pending = Highlighted/Tentative */
+        .visit-pending {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            border-style: dashed;
+        }
+
+        /* Accepted = Solid */
+        .visit-accepted {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid #10b981;
+            border-style: solid;
+        }
+
+        .request-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #f59e0b;
+            transition: all 0.2s;
+        }
+
+        .request-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-accepted {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .scrollable-list {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .scrollable-calendar {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar */
+        .scrollable-list::-webkit-scrollbar,
+        .scrollable-calendar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-track,
+        .scrollable-calendar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb,
+        .scrollable-calendar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb:hover,
+        .scrollable-calendar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Month View Styles */
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #e5e7eb;
+            border: 1px solid #e5e7eb;
+        }
+
+        .month-day-header {
+            background-color: #f3f4f6;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .month-day-cell {
+            background-color: white;
+            min-height: 100px;
+            padding: 0.5rem;
+            position: relative;
+        }
+
+        .month-day-cell.other-month {
+            background-color: #f9fafb;
+            color: #9ca3af;
+        }
+
+        .month-day-cell.today {
+            background-color: #eff6ff;
+        }
+
+        .month-day-number {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .month-visit-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 1px;
+        }
+
+        .month-visit-dot.pending {
+            background-color: #f59e0b;
+        }
+
+        .month-visit-dot.accepted {
+            background-color: #10b981;
+        }
+
+        .view-toggle {
+            display: inline-flex;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+        }
+
+        .view-toggle button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .view-toggle button.active {
+            background-color: white;
+            color: #667eea;
+        }
+
+        .view-toggle button:not(.active) {
+            color: white;
+        }
+
+        .view-toggle button:not(.active):hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-lg border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg flex items-center justify-center shadow-md">
+                <span class="text-white font-bold text-lg">R</span>
+            </div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">Scheduled Appointments</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome, Builder!</span>
+            
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown">
+                <div class="profile-icon" onclick="toggleProfileMenu()" id="profile-icon">
+                    <span id="profile-initials">U</span>
+                    <img id="profile-image" style="display: none;" alt="Profile">
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="window.location.href='builder_dashboard.html'" style="color: #dc2626;">
+                        <span>🏠 Dashboard</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="window.history.back()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                ← Back
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6">
+        <!-- Enhanced Stats Dashboard -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 border-2 border-purple-200">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Appointment Analytics</h3>
+                    <p class="text-sm text-gray-600">Overview of all scheduled visits</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Total Visits</p>
+                <p id="total-visits" class="text-3xl font-bold text-purple-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Pending Requests</p>
+                <p id="pending-visits" class="text-3xl font-bold text-yellow-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Accepted</p>
+                <p id="accepted-visits" class="text-3xl font-bold text-green-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Cancelled</p>
+                <p id="cancelled-visits" class="text-3xl font-bold text-red-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Completed</p>
+                <p id="completed-visits" class="text-3xl font-bold text-indigo-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Today's Visits</p>
+                <p id="today-visits" class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+        </div>
+
+        <!-- Performance Indicators -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold text-green-700" id="completion-rate">0%</div>
+                        <div class="text-xs text-green-600">Completion</div>
+                    </div>
+                </div>
+                <div class="w-full bg-green-200 rounded-full h-3">
+                    <div id="completion-bar" class="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p class="text-sm text-green-700 mt-3">Visit completion rate this month</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold text-blue-700" id="avg-response">0h</div>
+                        <div class="text-xs text-blue-600">Avg Response</div>
+                    </div>
+                </div>
+                <div class="w-full bg-blue-200 rounded-full h-3">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full" style="width: 75%"></div>
+                </div>
+                <p class="text-sm text-blue-700 mt-3">Average response time to requests</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold text-purple-700" id="pending-action">0</div>
+                        <div class="text-xs text-purple-600">Need Action</div>
+                    </div>
+                </div>
+                <div class="w-full bg-purple-200 rounded-full h-3">
+                    <div id="pending-bar" class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p class="text-sm text-purple-700 mt-3">Requests awaiting your response</p>
+            </div>
+        </div>
+        
+        <!-- Main Layout: 70% Calendar + 30% Requests -->
+        <div class="grid grid-cols-1 lg:grid-cols-10 gap-6">
+            
+            <!-- Left Side: Calendar (70%) -->
+            <div class="lg:col-span-7">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-1">Visit Calendar</h2>
+                                <p id="calendar-date" class="text-purple-200">Today's Schedule</p>
+                            </div>
+                            <div class="view-toggle">
+                                <button id="day-view-btn" onclick="switchView('day')" class="active">
+                                    Day View
+                                </button>
+                                <button id="month-view-btn" onclick="switchView('month')">
+                                    Month View
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-center space-x-2">
+                            <button onclick="previousPeriod()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition">
+                                ← <span id="prev-label">Prev</span>
+                            </button>
+                            <button onclick="today()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition">
+                                Today
+                            </button>
+                            <button onclick="nextPeriod()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition">
+                                <span id="next-label">Next</span> →
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="scrollable-calendar p-4">
+                        <div id="calendar-grid">
+                            <!-- Time slots will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="p-4 bg-gray-50 border-t border-gray-200">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Legend:</p>
+                        <div class="flex space-x-4">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded bg-yellow-200 border-2 border-dashed border-yellow-500 mr-2"></div>
+                                <span class="text-sm text-gray-600">Pending (Awaiting Confirmation)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded bg-green-200 border-2 border-solid border-green-500 mr-2"></div>
+                                <span class="text-sm text-gray-600">Accepted (Confirmed)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Pending Requests (30%) -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <!-- Visit Type Tabs -->
+                    <div class="mb-4">
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <button 
+                                id="tab-direct" 
+                                onclick="switchVisitTab('direct')"
+                                class="py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-purple-500 text-white">
+                                🏠 Direct Visits
+                            </button>
+                            <button 
+                                id="tab-expert" 
+                                onclick="switchVisitTab('expert')"
+                                class="py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-gray-200 text-gray-700 hover:bg-gray-300">
+                                👨‍💼 Expert Visits
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Filter Toggles -->
+                    <div class="mb-4">
+                        <div class="grid grid-cols-3 gap-2 mb-3">
+                            <button 
+                                id="toggle-all" 
+                                onclick="switchRequestType('all')"
+                                class="py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-purple-500 text-white">
+                                All (<span id="count-all">0</span>)
+                            </button>
+                            <button 
+                                id="toggle-pending" 
+                                onclick="switchRequestType('pending')"
+                                class="py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-gray-200 text-gray-700 hover:bg-gray-300">
+                                Pending (<span id="count-pending">0</span>)
+                            </button>
+                            <button 
+                                id="toggle-accepted" 
+                                onclick="switchRequestType('accepted')"
+                                class="py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-gray-200 text-gray-700 hover:bg-gray-300">
+                                Accepted (<span id="count-accepted">0</span>)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Direct Visits Container -->
+                    <div id="direct-visits-section">
+                        <div class="scrollable-list" id="pending-requests-container">
+                        <!-- Request cards will be loaded here -->
+                    </div>
+
+                        <div id="no-pending-requests" class="hidden text-center py-8">
+                            <div class="text-gray-300 text-5xl mb-3">✓</div>
+                            <p class="text-gray-500 text-sm">No visits found</p>
+                        </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Expert Visits Container -->
+                    <div id="expert-visits-section" class="hidden">
+                        <div class="scrollable-list" id="expert-requests-container">
+                            <!-- Expert visit approval requests will be loaded here -->
+                        </div>
+                        <div id="no-expert-requests" class="hidden text-center py-8">
+                            <div class="text-gray-300 text-5xl mb-3">✓</div>
+                            <p class="text-gray-500 text-sm">No expert visit requests found</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Propose New Time Modal -->
+    <div id="propose-time-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">🔄 Propose New Visit Time</h3>
+                <button onclick="closeProposeTimeModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+            </div>
+            
+            <!-- Current Visit Info -->
+            <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-yellow-500 p-4 rounded-lg mb-6">
+                <p class="text-sm font-semibold text-yellow-800 mb-2">Current Schedule</p>
+                <div class="space-y-1">
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Customer:</span> <span id="propose-customer-name"></span></p>
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Date:</span> <span id="propose-current-date"></span></p>
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Time:</span> <span id="propose-current-time"></span></p>
+                </div>
+            </div>
+
+            <!-- Property Info -->
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 p-4 rounded-lg mb-6">
+                <p class="text-sm font-semibold text-purple-800 mb-2">Property</p>
+                <p class="font-semibold text-gray-800" id="propose-property-name"></p>
+                <p class="text-sm text-gray-600" id="propose-property-location"></p>
+            </div>
+            
+            <!-- New Schedule Form -->
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Proposed Date</label>
+                    <input type="date" id="propose-new-date" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Proposed Time</label>
+                    <select id="propose-new-time" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="">Select a time</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="12:30 PM">12:30 PM</option>
+                        <option value="01:00 PM">01:00 PM</option>
+                        <option value="01:30 PM">01:30 PM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="02:30 PM">02:30 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="03:30 PM">03:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="05:30 PM">05:30 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                    </select>
+                </div>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <span class="font-semibold">ℹ️ Note:</span> The customer will be notified of the proposed new time and must accept it for the change to take effect.
+                    </p>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button onclick="confirmProposeNewTime()" 
+                        class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-150">
+                        ✓ Propose New Time
+                    </button>
+                    <button onclick="closeProposeTimeModal()" 
+                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 px-4 rounded-lg transition duration-150">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Visit Modal -->
+    <div id="cancel-visit-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">🚫 Cancel Visit</h3>
+                <button onclick="closeCancelModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+            </div>
+            
+            <!-- Current Visit Info -->
+            <div class="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 p-4 rounded-lg mb-6">
+                <p class="text-sm font-semibold text-red-800 mb-2">⚠️ Visit to be Cancelled</p>
+                <div class="space-y-1">
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Customer:</span> <span id="cancel-customer-name"></span></p>
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Date:</span> <span id="cancel-visit-date"></span></p>
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Time:</span> <span id="cancel-visit-time"></span></p>
+                </div>
+            </div>
+
+            <!-- Property Info -->
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 p-4 rounded-lg mb-6">
+                <p class="text-sm font-semibold text-purple-800 mb-2">Property</p>
+                <p class="font-semibold text-gray-800" id="cancel-property-name"></p>
+                <p class="text-sm text-gray-600" id="cancel-property-location"></p>
+            </div>
+            
+            <!-- Cancellation Reason Form -->
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Reason for Cancellation</label>
+                    <textarea id="cancel-reason-text" rows="4"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        placeholder="Please provide a reason for cancellation. This will be shared with the customer."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Provide a clear explanation to help the customer understand the cancellation.</p>
+                </div>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg">
+                    <p class="text-sm text-yellow-800">
+                        <span class="font-semibold">⚠️ Warning:</span> This action cannot be undone. The customer will be notified immediately.
+                    </p>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button onclick="confirmCancelVisit()" 
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-150">
+                        ✓ Confirm Cancellation
+                    </button>
+                    <button onclick="closeCancelModal()" 
+                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 px-4 rounded-lg transition duration-150">
+                        Keep Visit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let allVisits = [];
+        let allExpertVisits = [];
+        let currentView = 'day'; // 'day' or 'month'
+        let currentRequestType = 'all'; // 'all', 'pending', or 'accepted'
+        let currentVisitTab = 'direct'; // 'direct' or 'expert'
+        const loggedInUsername = sessionStorage.getItem('loggedInUserUsername');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayUserName();
+            loadVisits();
+        });
+
+        function displayUserName() {
+            const firstName = sessionStorage.getItem('loggedInUserFirstName');
+            const lastName = sessionStorage.getItem('loggedInUserLastName');
+            const userDisplayElement = document.getElementById('user-display');
+
+            if (userDisplayElement && firstName && lastName) {
+                userDisplayElement.textContent = `Welcome, ${firstName} ${lastName}!`;
+                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                document.getElementById('profile-initials').textContent = initials;
+                document.getElementById('profile-name').textContent = `${firstName} ${lastName}`;
+                
+                const username = sessionStorage.getItem('loggedInUserUsername');
+                if (username) loadProfilePhoto(username);
+            }
+        }
+
+        function loadProfilePhoto(username) {
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            if (savedPhoto) {
+                const profileIcon = document.getElementById('profile-icon');
+                const profileImage = document.getElementById('profile-image');
+                const profileInitials = document.getElementById('profile-initials');
+                
+                if (profileImage && profileInitials && profileIcon) {
+                    profileImage.src = savedPhoto;
+                    profileImage.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                    profileIcon.style.background = 'white';
+                }
+            }
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            menu.classList.toggle('show');
+        }
+
+        function viewProfile() {
+            window.location.href = 'manage_profile.html';
+        }
+
+        function viewSettings() {
+            alert('Settings page coming soon!');
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        function loadVisits() {
+            // Load all visit bookings from localStorage
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            
+            // Filter visits for the logged-in builder
+            allVisits = visitBookings.filter(visit => visit.builderUsername === loggedInUsername);
+            
+            // Load expert-assisted visit approval requests
+            const builderApprovals = JSON.parse(localStorage.getItem('builderApprovalRequests') || '[]');
+            console.log('All builder approvals:', builderApprovals);
+            console.log('Logged in username:', loggedInUsername);
+            
+            allExpertVisits = builderApprovals.filter(visit => visit.builderUsername === loggedInUsername);
+            console.log('Filtered expert visits for this builder:', allExpertVisits);
+            
+            updateStats();
+            renderCalendar();
+            renderPendingRequests();
+            renderExpertRequests();
+        }
+
+        function updateStats() {
+            const total = allVisits.length + allExpertVisits.length;
+            const pending = allVisits.filter(v => v.status === 'Pending').length + 
+                           allExpertVisits.filter(v => v.status === 'Pending Builder Approval' || v.status === 'Pending').length;
+            const accepted = allVisits.filter(v => v.status === 'Accepted').length + 
+                            allExpertVisits.filter(v => v.status === 'Approved' || v.status === 'Accepted').length;
+            const cancelled = allVisits.filter(v => v.status === 'Cancelled by Builder').length + 
+                             allExpertVisits.filter(v => v.status === 'Cancelled by Builder').length;
+            const completed = allVisits.filter(v => v.status === 'Completed').length + 
+                             allExpertVisits.filter(v => v.status === 'Completed').length;
+            
+            // Count today's visits (both direct and expert)
+            const today = new Date().toISOString().split('T')[0];
+            const todayVisits = allVisits.filter(v => v.visitDate === today).length + 
+                               allExpertVisits.filter(v => v.visitDate === today).length;
+            
+            document.getElementById('total-visits').textContent = total;
+            document.getElementById('pending-visits').textContent = pending;
+            document.getElementById('accepted-visits').textContent = accepted;
+            document.getElementById('cancelled-visits').textContent = cancelled;
+            document.getElementById('completed-visits').textContent = completed;
+            document.getElementById('today-visits').textContent = todayVisits;
+            
+            // Update toggle counts
+            document.getElementById('count-all').textContent = total;
+            document.getElementById('count-pending').textContent = pending;
+            document.getElementById('count-accepted').textContent = accepted;
+        }
+
+        function renderCalendar() {
+            if (currentView === 'day') {
+                renderDayView();
+            } else {
+                renderMonthView();
+            }
+        }
+
+        function renderDayView() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            
+            // Format date as YYYY-MM-DD to match the stored format
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+            
+            // Update calendar header date
+            document.getElementById('calendar-date').textContent = currentDate.toLocaleDateString('en-IN', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // Filter visits for the selected date (including both direct and expert visits)
+            const directVisits = allVisits.filter(visit => visit.visitDate === dateStr);
+            const expertVisits = allExpertVisits.filter(visit => visit.visitDate === dateStr);
+            const dayVisits = [...directVisits, ...expertVisits];
+            
+            // Generate time slots from 9 AM to 6 PM
+            const timeSlots = generateTimeSlots();
+            
+            let html = '';
+            timeSlots.forEach(slot => {
+                const visitsInSlot = dayVisits.filter(visit => visit.visitTime === slot);
+                
+                html += `
+                    <div class="time-slot">
+                        <div class="flex">
+                            <div class="w-24 text-sm font-semibold text-gray-600">${slot}</div>
+                            <div class="flex-1">
+                                ${visitsInSlot.map(visit => createVisitBlock(visit)).join('')}
+                                ${visitsInSlot.length === 0 ? '<span class="text-xs text-gray-400">No visits scheduled</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            calendarGrid.innerHTML = html;
+        }
+
+        function renderMonthView() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            
+            // Update calendar header to show month and year
+            document.getElementById('calendar-date').textContent = currentDate.toLocaleDateString('en-IN', { 
+                year: 'numeric', 
+                month: 'long' 
+            });
+            
+            // Get first day of month and number of days in month
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday
+            
+            // Days of week headers
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            let html = '<div class="month-grid">';
+            
+            // Add day headers
+            dayNames.forEach(day => {
+                html += `<div class="month-day-header">${day}</div>`;
+            });
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const prevMonthDate = new Date(year, month, -(startingDayOfWeek - i - 1));
+                html += `<div class="month-day-cell other-month">
+                    <div class="month-day-number">${prevMonthDate.getDate()}</div>
+                </div>`;
+            }
+            
+            // Add days of the month
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const directVisits = allVisits.filter(visit => visit.visitDate === dateStr);
+                const expertVisits = allExpertVisits.filter(visit => visit.visitDate === dateStr);
+                const dayVisits = [...directVisits, ...expertVisits];
+                const isToday = dateStr === todayStr;
+                
+                html += `<div class="month-day-cell ${isToday ? 'today' : ''}" onclick="viewDayFromMonth('${dateStr}')">
+                    <div class="month-day-number">${day}</div>`;
+                
+                if (dayVisits.length > 0) {
+                    const pending = dayVisits.filter(v => v.status === 'Pending' || v.status === 'Pending Builder Approval').length;
+                    const accepted = dayVisits.filter(v => v.status === 'Accepted' || v.status === 'Approved').length;
+                    
+                    html += '<div class="mt-1">';
+                    for (let i = 0; i < pending; i++) {
+                        html += '<span class="month-visit-dot pending"></span>';
+                    }
+                    for (let i = 0; i < accepted; i++) {
+                        html += '<span class="month-visit-dot accepted"></span>';
+                    }
+                    html += '</div>';
+                    html += `<div class="text-xs text-gray-600 mt-1">${dayVisits.length} visit${dayVisits.length > 1 ? 's' : ''}</div>`;
+                }
+                
+                html += '</div>';
+            }
+            
+            // Add empty cells for days after month ends
+            const totalCells = startingDayOfWeek + daysInMonth;
+            const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let i = 1; i <= remainingCells; i++) {
+                html += `<div class="month-day-cell other-month">
+                    <div class="month-day-number">${i}</div>
+                </div>`;
+            }
+            
+            html += '</div>';
+            calendarGrid.innerHTML = html;
+        }
+
+        function viewDayFromMonth(dateStr) {
+            // Parse the date string (format: YYYY-MM-DD)
+            const [year, month, day] = dateStr.split('-').map(num => parseInt(num));
+            currentDate = new Date(year, month - 1, day);
+            switchView('day');
+        }
+
+        function generateTimeSlots() {
+            const slots = [];
+            const times = [
+                '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+                '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM', '02:00 PM', '02:30 PM',
+                '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM'
+            ];
+            return times;
+        }
+
+        function createVisitBlock(visit) {
+            // Determine if this is an expert visit or direct visit
+            const isExpertVisit = visit.requestType === 'Expert Assisted Visit';
+            const visitType = isExpertVisit ? '👨‍💼' : '🏠';
+            
+            // Determine status
+            let statusClass, statusIcon, statusText;
+            if (visit.status === 'Pending' || visit.status === 'Pending Builder Approval') {
+                statusClass = 'visit-pending';
+                statusIcon = '⏳';
+                statusText = visit.status;
+            } else if (visit.status === 'Accepted' || visit.status === 'Approved') {
+                statusClass = 'visit-accepted';
+                statusIcon = '✓';
+                statusText = visit.status;
+            } else {
+                statusClass = 'visit-pending';
+                statusIcon = '⏳';
+                statusText = visit.status || 'Pending';
+            }
+            
+            return `
+                <div class="visit-block ${statusClass}" onclick="viewVisitDetails(${visit.id}, ${isExpertVisit})">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="font-semibold text-sm">${statusIcon} ${visitType} ${visit.customerName}</p>
+                            <p class="text-xs text-gray-600">${visit.propertyDetails.name}</p>
+                            <p class="text-xs text-gray-500">${visit.propertyDetails.location}</p>
+                            ${isExpertVisit ? `<p class="text-xs text-teal-600">with ${visit.expertName}</p>` : ''}
+                        </div>
+                        <span class="badge ${statusClass === 'visit-pending' ? 'badge-pending' : 'badge-accepted'}">
+                            ${statusText}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPendingRequests() {
+            const container = document.getElementById('pending-requests-container');
+            const noRequests = document.getElementById('no-pending-requests');
+            
+            // Filter based on current request type
+            let filteredVisits = [];
+            if (currentRequestType === 'all') {
+                filteredVisits = allVisits;
+            } else if (currentRequestType === 'pending') {
+                filteredVisits = allVisits.filter(visit => visit.status === 'Pending');
+            } else if (currentRequestType === 'accepted') {
+                filteredVisits = allVisits.filter(visit => visit.status === 'Accepted');
+            }
+            
+            if (filteredVisits.length === 0) {
+                container.classList.add('hidden');
+                noRequests.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noRequests.classList.add('hidden');
+            
+            container.innerHTML = filteredVisits.map(visit => createRequestCard(visit)).join('');
+        }
+
+        function renderExpertRequests() {
+            const container = document.getElementById('expert-requests-container');
+            const noRequests = document.getElementById('no-expert-requests');
+            
+            // Filter based on current request type
+            let filteredVisits = [];
+            if (currentRequestType === 'all') {
+                filteredVisits = allExpertVisits;
+            } else if (currentRequestType === 'pending') {
+                filteredVisits = allExpertVisits.filter(visit => 
+                    visit.status === 'Pending Builder Approval' || visit.status === 'Pending'
+                );
+            } else if (currentRequestType === 'accepted') {
+                filteredVisits = allExpertVisits.filter(visit => 
+                    visit.status === 'Approved' || visit.status === 'Accepted'
+                );
+            }
+            
+            if (filteredVisits.length === 0) {
+                container.classList.add('hidden');
+                noRequests.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noRequests.classList.add('hidden');
+            
+            container.innerHTML = filteredVisits.map(visit => createExpertRequestCard(visit)).join('');
+        }
+
+        function createExpertRequestCard(visit) {
+            const visitDateFormatted = new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            
+            // Determine status badge
+            let statusBadgeClass, statusBadgeText;
+            if (visit.status === 'Approved' || visit.status === 'Accepted' || visit.status === 'Rescheduled - Awaiting Customer') {
+                statusBadgeClass = 'badge-accepted';
+                statusBadgeText = visit.status === 'Rescheduled - Awaiting Customer' ? 'Confirmed' : visit.status;
+            } else if (visit.status === 'Completed') {
+                statusBadgeClass = 'badge-accepted';
+                statusBadgeText = 'Completed';
+            } else {
+                statusBadgeClass = 'badge-pending';
+                statusBadgeText = visit.status;
+            }
+            
+            const assignmentBadge = visit.expertAssignment === 'Auto Assigned' 
+                ? '<span class="badge" style="background-color: #dbeafe; color: #1e40af;">🤖 Auto Assigned</span>'
+                : '<span class="badge" style="background-color: #e0e7ff; color: #4338ca;">👤 Customer Selected</span>';
+            
+            // Format proposed date if it exists
+            let proposedDateFormatted = '';
+            if (visit.proposedDate) {
+                proposedDateFormatted = new Date(visit.proposedDate).toLocaleDateString('en-IN', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            }
+            
+            return `
+                <div class="request-card" style="border-left-color: #14b8a6;">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <p class="font-bold text-gray-800">${visit.customerName}</p>
+                            <p class="text-xs text-gray-500">with ${visit.expertName}</p>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="badge ${statusBadgeClass}">${statusBadgeText}</span>
+                            ${assignmentBadge}
+                        </div>
+                    </div>
+                    
+                    <!-- Current/Original Date & Time -->
+                    <div class="bg-teal-50 border border-teal-200 p-2 rounded-lg mb-3">
+                        <p class="text-xs text-teal-700 font-semibold mb-1">${visit.status === 'Rescheduled - Awaiting Builder Approval' ? 'Original Schedule' : 'Expert-Assisted Visit Request'}</p>
+                        <div class="flex items-center space-x-3">
+                            <p class="text-sm font-bold text-gray-800">📅 ${visitDateFormatted}</p>
+                            <p class="text-sm font-bold text-gray-800">🕐 ${visit.visitTime}</p>
+                        </div>
+                    </div>
+                    
+                    ${visit.status === 'Rescheduled - Awaiting Builder Approval' && visit.proposedDate ? `
+                    <!-- Proposed New Date & Time -->
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 p-3 rounded-lg mb-3">
+                        <p class="text-xs text-blue-800 font-semibold mb-2">🔄 Consultant Proposed New Time</p>
+                        <div class="flex items-center space-x-3 mb-2">
+                            <p class="text-sm font-bold text-blue-900">📅 ${proposedDateFormatted}</p>
+                            <p class="text-sm font-bold text-blue-900">🕐 ${visit.proposedTime}</p>
+                        </div>
+                        <p class="text-xs text-blue-700">Please review and approve/reject the proposed time change</p>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Property Details -->
+                    <div class="bg-purple-50 p-3 rounded-lg mb-3">
+                        <p class="text-xs text-purple-600 font-semibold mb-1">Property Details</p>
+                        <p class="font-semibold text-sm text-gray-800">${visit.propertyDetails.name}</p>
+                        <p class="text-xs text-gray-600">${visit.propertyDetails.location}</p>
+                        <div class="grid grid-cols-2 gap-2 mt-2 text-xs">
+                            <p class="text-gray-600">🏠 ${visit.propertyDetails.bhk} BHK</p>
+                            <p class="text-gray-600">💰 ${formatPrice(visit.propertyDetails.price)}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Expert Details -->
+                    <div class="bg-teal-50 p-3 rounded-lg mb-3">
+                        <p class="text-xs text-teal-700 font-semibold mb-1">Consultant Details</p>
+                        <p class="font-semibold text-sm text-gray-800">${visit.expertName}</p>
+                        ${visit.expertPhone ? `<p class="text-xs text-gray-600">📞 ${visit.expertPhone}</p>` : ''}
+                        ${visit.expertEmail ? `<p class="text-xs text-gray-600">📧 ${visit.expertEmail}</p>` : ''}
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-2">
+                        ${visit.status === 'Rescheduled - Awaiting Builder Approval' ? `
+                            <button onclick="approveProposedTime(${visit.id})" 
+                                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                ✓ Approve New Time
+                            </button>
+                            <button onclick="rejectProposedTime(${visit.id})" 
+                                class="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                ✗ Reject
+                            </button>
+                        ` : visit.status === 'Completed' ? `
+                            <button class="flex-1 bg-gray-400 text-white text-sm font-semibold py-2 px-3 rounded-lg cursor-not-allowed" disabled>
+                                ✓ Completed
+                            </button>
+                        ` : visit.status === 'Approved' || visit.status === 'Accepted' || visit.status === 'Rescheduled - Awaiting Customer' ? `
+                            <button onclick="markExpertVisitCompleted(${visit.id})" 
+                                class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                ✓ Mark Completed
+                            </button>
+                        ` : `
+                            <button onclick="approveExpertVisit(${visit.id})" 
+                                class="flex-1 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                ✓ Approve
+                            </button>
+                            <button onclick="rejectExpertVisit(${visit.id})" 
+                                class="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                ✗ Reject
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function createRequestCard(visit) {
+            const visitDateFormatted = new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            
+            const statusBadgeClass = visit.status === 'Pending' ? 'badge-pending' : 'badge-accepted';
+            
+            return `
+                <div class="request-card">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <p class="font-bold text-gray-800">${visit.customerName}</p>
+                        </div>
+                        <span class="badge ${statusBadgeClass}">${visit.status}</span>
+                    </div>
+                    
+                    <!-- Requested Date & Time -->
+                    <div class="bg-yellow-50 border border-yellow-200 p-2 rounded-lg mb-3">
+                        <p class="text-xs text-yellow-700 font-semibold mb-1">Requested Visit</p>
+                        <div class="flex items-center space-x-3">
+                            <p class="text-sm font-bold text-gray-800">📅 ${visitDateFormatted}</p>
+                            <p class="text-sm font-bold text-gray-800">🕐 ${visit.visitTime}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Property Details -->
+                    <div class="bg-purple-50 p-3 rounded-lg mb-3">
+                        <p class="text-xs text-purple-600 font-semibold mb-1">Property Details</p>
+                        <p class="font-semibold text-sm text-gray-800">${visit.propertyDetails.name}</p>
+                        <p class="text-xs text-gray-600">${visit.propertyDetails.location}</p>
+                        <div class="grid grid-cols-2 gap-2 mt-2 text-xs">
+                            <p class="text-gray-600">🏠 ${visit.propertyDetails.bhk} BHK</p>
+                            <p class="text-gray-600">💰 ${formatPrice(visit.propertyDetails.price)}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Contact -->
+                    <div class="mb-3">
+                        <p class="text-xs text-gray-500 mb-1">Customer Contact</p>
+                        <div class="text-xs space-y-1">
+                            <div>
+                                <a href="tel:${visit.customerPhone}" class="text-blue-600 hover:underline">📞 ${visit.customerPhone}</a>
+                            </div>
+                            <div>
+                                <a href="mailto:${visit.customerEmail}" class="text-blue-600 hover:underline">✉️ ${visit.customerEmail}</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    ${visit.status === 'Cancelled by Builder' ? `
+                        <div class="bg-red-50 border border-red-200 p-3 rounded-lg text-center">
+                            <p class="text-sm text-red-700 font-semibold">🚫 Visit Cancelled</p>
+                        </div>
+                    ` : visit.status === 'Completed' ? `
+                        <div class="bg-green-50 border border-green-200 p-3 rounded-lg text-center">
+                            <p class="text-sm text-green-700 font-semibold">✅ Visit Completed</p>
+                        </div>
+                    ` : visit.status === 'Rescheduled - Awaiting Customer' ? `
+                        <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-center">
+                            <p class="text-sm text-blue-700 font-semibold">⏳ Awaiting Customer Response</p>
+                            <p class="text-xs text-blue-600 mt-1">New time proposed, waiting for customer to accept</p>
+                        </div>
+                    ` : `
+                        <div class="flex ${visit.status === 'Accepted' ? 'flex-col' : ''} space-x-2 ${visit.status === 'Accepted' ? 'space-x-0 space-y-2' : ''}">
+                            ${visit.status === 'Accepted' ? `
+                                <button onclick="cancelVisit(${visit.id})" 
+                                    class="w-full bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                    🚫 Cancel Visit
+                                </button>
+                                <button onclick="proposeNewTime(${visit.id})" 
+                                    class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                    🔄 Propose New Time
+                                </button>
+                                <button onclick="markVisitCompleted(${visit.id})" 
+                                    class="w-full bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                    ✅ Completed
+                                </button>
+                            ` : `
+                                <button onclick="acceptVisit(${visit.id})" 
+                                    class="flex-1 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                    ✓ Accept
+                                </button>
+                                <button onclick="rejectVisit(${visit.id})" 
+                                    class="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                    ✗ Reject
+                                </button>
+                            `}
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function switchRequestType(type) {
+            currentRequestType = type;
+            
+            // Update toggle button styles
+            const toggles = ['all', 'pending', 'accepted'];
+            toggles.forEach(t => {
+                const btn = document.getElementById(`toggle-${t}`);
+                if (t === type) {
+                    btn.className = 'py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-purple-500 text-white';
+                } else {
+                    btn.className = 'py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-gray-200 text-gray-700 hover:bg-gray-300';
+                }
+            });
+            
+            if (currentVisitTab === 'direct') {
+                renderPendingRequests();
+            } else {
+                renderExpertRequests();
+            }
+        }
+
+        function switchVisitTab(tab) {
+            currentVisitTab = tab;
+            
+            // Update tab button styles
+            if (tab === 'direct') {
+                document.getElementById('tab-direct').className = 'py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-purple-500 text-white';
+                document.getElementById('tab-expert').className = 'py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-gray-200 text-gray-700 hover:bg-gray-300';
+                
+                document.getElementById('direct-visits-section').classList.remove('hidden');
+                document.getElementById('expert-visits-section').classList.add('hidden');
+            } else {
+                document.getElementById('tab-direct').className = 'py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-gray-200 text-gray-700 hover:bg-gray-300';
+                document.getElementById('tab-expert').className = 'py-2 px-3 rounded-lg font-semibold text-sm transition duration-150 bg-purple-500 text-white';
+                
+                document.getElementById('direct-visits-section').classList.add('hidden');
+                document.getElementById('expert-visits-section').classList.remove('hidden');
+            }
+            
+            // Update the toggle counts based on the selected visit tab
+            updateToggleCounts();
+        }
+
+        function updateToggleCounts() {
+            let total, pending, accepted;
+            
+            if (currentVisitTab === 'direct') {
+                // Counts for direct visits
+                total = allVisits.length;
+                pending = allVisits.filter(v => v.status === 'Pending').length;
+                accepted = allVisits.filter(v => v.status === 'Accepted').length;
+            } else {
+                // Counts for expert visits
+                total = allExpertVisits.length;
+                pending = allExpertVisits.filter(v => v.status === 'Pending Builder Approval' || v.status === 'Pending').length;
+                accepted = allExpertVisits.filter(v => v.status === 'Approved' || v.status === 'Accepted').length;
+            }
+            
+            document.getElementById('count-all').textContent = total;
+            document.getElementById('count-pending').textContent = pending;
+            document.getElementById('count-accepted').textContent = accepted;
+        }
+
+        function approveExpertVisit(requestId) {
+            if (!confirm('Approve this expert-assisted visit request?')) return;
+            
+            const builderApprovals = JSON.parse(localStorage.getItem('builderApprovalRequests') || '[]');
+            const requestIndex = builderApprovals.findIndex(v => v.id === requestId);
+            
+            if (requestIndex !== -1) {
+                builderApprovals[requestIndex].status = 'Approved';
+                localStorage.setItem('builderApprovalRequests', JSON.stringify(builderApprovals));
+                
+                // Also update the original expert visit request
+                const visitId = builderApprovals[requestIndex].visitId;
+                const expertVisits = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+                const visitIndex = expertVisits.findIndex(v => v.id == visitId);
+                if (visitIndex !== -1) {
+                    expertVisits[visitIndex].builderApprovalStatus = 'Approved';
+                    localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisits));
+                }
+                
+                loadVisits();
+                alert('Expert visit request approved! The consultant and customer will be notified.');
+            }
+        }
+
+        function rejectExpertVisit(requestId) {
+            if (!confirm('Reject this expert-assisted visit request? This action cannot be undone.')) return;
+            
+            const builderApprovals = JSON.parse(localStorage.getItem('builderApprovalRequests') || '[]');
+            const requestIndex = builderApprovals.findIndex(v => v.id === requestId);
+            
+            if (requestIndex !== -1) {
+                const visitId = builderApprovals[requestIndex].visitId;
+                
+                // Remove from builder approvals
+                const filteredApprovals = builderApprovals.filter(v => v.id !== requestId);
+                localStorage.setItem('builderApprovalRequests', JSON.stringify(filteredApprovals));
+                
+                // Update the original expert visit request
+                const expertVisits = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+                const visitIndex = expertVisits.findIndex(v => v.id == visitId);
+                if (visitIndex !== -1) {
+                    expertVisits[visitIndex].builderApprovalStatus = 'Rejected';
+                    expertVisits[visitIndex].status = 'rejected';
+                    localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisits));
+                }
+                
+                loadVisits();
+                alert('Expert visit request rejected.');
+            }
+        }
+
+        function acceptVisit(visitId) {
+            if (!confirm('Accept this visit request?')) return;
+            
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            const visitIndex = visitBookings.findIndex(v => v.id === visitId);
+            
+            if (visitIndex !== -1) {
+                visitBookings[visitIndex].status = 'Accepted';
+                localStorage.setItem('visitBookings', JSON.stringify(visitBookings));
+                
+                loadVisits();
+                alert('Visit request accepted! The customer will be notified.');
+            }
+        }
+
+        function rejectVisit(visitId) {
+            if (!confirm('Reject this visit request? This action cannot be undone.')) return;
+            
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            const filteredVisits = visitBookings.filter(v => v.id !== visitId);
+            
+            localStorage.setItem('visitBookings', JSON.stringify(filteredVisits));
+            
+            loadVisits();
+            alert('Visit request rejected.');
+        }
+
+        function markExpertVisitCompleted(requestId) {
+            if (!confirm('Mark this expert-assisted visit as completed?')) return;
+            
+            const builderApprovals = JSON.parse(localStorage.getItem('builderApprovalRequests') || '[]');
+            const requestIndex = builderApprovals.findIndex(v => v.id === requestId);
+            
+            if (requestIndex !== -1) {
+                builderApprovals[requestIndex].status = 'Completed';
+                builderApprovals[requestIndex].completedDate = new Date().toISOString();
+                localStorage.setItem('builderApprovalRequests', JSON.stringify(builderApprovals));
+                
+                // Also update the original expert visit request
+                const visitId = builderApprovals[requestIndex].visitId;
+                const expertVisits = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+                const visitIndex = expertVisits.findIndex(v => v.id == visitId);
+                if (visitIndex !== -1) {
+                    expertVisits[visitIndex].status = 'Completed';
+                    expertVisits[visitIndex].completedDate = new Date().toISOString();
+                    localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisits));
+                }
+                
+                // Increment the property's visited count
+                const propertyTimestamp = builderApprovals[requestIndex].propertyDetails.timestamp || 
+                                        builderApprovals[requestIndex].propertyDetails.created_timestamp;
+                if (propertyTimestamp) {
+                    const visitedKey = `propertyVisited_${propertyTimestamp}`;
+                    const currentCount = parseInt(localStorage.getItem(visitedKey) || '0');
+                    localStorage.setItem(visitedKey, (currentCount + 1).toString());
+                }
+                
+                loadVisits();
+                alert('Expert visit marked as completed!');
+            }
+        }
+
+        function approveProposedTime(requestId) {
+            if (!confirm('Approve the proposed new time?')) return;
+            
+            const builderApprovals = JSON.parse(localStorage.getItem('builderApprovalRequests') || '[]');
+            const requestIndex = builderApprovals.findIndex(v => v.id === requestId);
+            
+            if (requestIndex !== -1) {
+                const request = builderApprovals[requestIndex];
+                
+                // Update builder approval request to awaiting customer
+                builderApprovals[requestIndex].status = 'Rescheduled - Awaiting Customer';
+                builderApprovals[requestIndex].visitDate = request.proposedDate;
+                builderApprovals[requestIndex].visitTime = request.proposedTime;
+                localStorage.setItem('builderApprovalRequests', JSON.stringify(builderApprovals));
+                
+                // Update the original expert visit request
+                const visitId = request.visitId;
+                const expertVisits = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+                const visitIndex = expertVisits.findIndex(v => v.id == visitId);
+                if (visitIndex !== -1) {
+                    expertVisits[visitIndex].status = 'Rescheduled - Awaiting Customer';
+                    localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisits));
+                }
+                
+                loadVisits();
+                alert('Proposed time approved! Waiting for customer acceptance.');
+            }
+        }
+
+        function rejectProposedTime(requestId) {
+            if (!confirm('Reject the proposed new time?')) return;
+            
+            const builderApprovals = JSON.parse(localStorage.getItem('builderApprovalRequests') || '[]');
+            const requestIndex = builderApprovals.findIndex(v => v.id === requestId);
+            
+            if (requestIndex !== -1) {
+                const request = builderApprovals[requestIndex];
+                
+                // Revert to approved status with original date/time
+                builderApprovals[requestIndex].status = 'Approved';
+                builderApprovals[requestIndex].visitDate = request.originalDate || request.visitDate;
+                builderApprovals[requestIndex].visitTime = request.originalTime || request.visitTime;
+                delete builderApprovals[requestIndex].proposedDate;
+                delete builderApprovals[requestIndex].proposedTime;
+                delete builderApprovals[requestIndex].originalDate;
+                delete builderApprovals[requestIndex].originalTime;
+                localStorage.setItem('builderApprovalRequests', JSON.stringify(builderApprovals));
+                
+                // Update the original expert visit request
+                const visitId = request.visitId;
+                const expertVisits = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+                const visitIndex = expertVisits.findIndex(v => v.id == visitId);
+                if (visitIndex !== -1) {
+                    expertVisits[visitIndex].status = 'accepted';
+                    expertVisits[visitIndex].visitDate = request.originalDate || expertVisits[visitIndex].visitDate;
+                    expertVisits[visitIndex].visitTime = request.originalTime || expertVisits[visitIndex].visitTime;
+                    delete expertVisits[visitIndex].proposedDate;
+                    delete expertVisits[visitIndex].proposedTime;
+                    delete expertVisits[visitIndex].originalDate;
+                    delete expertVisits[visitIndex].originalTime;
+                    localStorage.setItem('expertAssistedVisitRequests', JSON.stringify(expertVisits));
+                }
+                
+                loadVisits();
+                alert('Proposed time rejected. Keeping original schedule.');
+            }
+        }
+
+        let currentCancelVisit = null;
+
+        function cancelVisit(visitId) {
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            const visit = visitBookings.find(v => v.id === visitId);
+            
+            if (!visit) return;
+            
+            currentCancelVisit = visit;
+            
+            // Populate visit info
+            document.getElementById('cancel-customer-name').textContent = visit.customerName;
+            const visitDate = new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            document.getElementById('cancel-visit-date').textContent = visitDate;
+            document.getElementById('cancel-visit-time').textContent = visit.visitTime;
+            
+            // Populate property info
+            const propertyName = visit.propertyDetails?.name || visit.propertyDetails?.propertyName || 'Property';
+            document.getElementById('cancel-property-name').textContent = propertyName;
+            document.getElementById('cancel-property-location').textContent = visit.propertyDetails?.location || 'N/A';
+            
+            // Clear previous reason
+            document.getElementById('cancel-reason-text').value = '';
+            
+            // Open modal
+            document.getElementById('cancel-visit-modal').classList.add('active');
+        }
+
+        function closeCancelModal() {
+            document.getElementById('cancel-visit-modal').classList.remove('active');
+            currentCancelVisit = null;
+        }
+
+        function confirmCancelVisit() {
+            if (!currentCancelVisit) return;
+            
+            const reason = document.getElementById('cancel-reason-text').value.trim();
+            
+            if (!reason) {
+                alert('Please provide a reason for cancellation.');
+                return;
+            }
+            
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            const visitIndex = visitBookings.findIndex(v => v.id === currentCancelVisit.id);
+            
+            if (visitIndex !== -1) {
+                visitBookings[visitIndex].status = 'Cancelled by Builder';
+                visitBookings[visitIndex].cancellationReason = reason;
+                visitBookings[visitIndex].cancellationDate = new Date().toISOString();
+                localStorage.setItem('visitBookings', JSON.stringify(visitBookings));
+                
+                closeCancelModal();
+                loadVisits();
+                alert('Visit cancelled. The customer has been notified.');
+            }
+        }
+
+        let currentProposeVisit = null;
+
+        function proposeNewTime(visitId) {
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            const visit = visitBookings.find(v => v.id === visitId);
+            
+            if (!visit) return;
+            
+            currentProposeVisit = visit;
+            
+            // Populate current visit info
+            document.getElementById('propose-customer-name').textContent = visit.customerName;
+            const visitDate = new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            document.getElementById('propose-current-date').textContent = visitDate;
+            document.getElementById('propose-current-time').textContent = visit.visitTime;
+            
+            // Populate property info
+            const propertyName = visit.propertyDetails?.name || visit.propertyDetails?.propertyName || 'Property';
+            document.getElementById('propose-property-name').textContent = propertyName;
+            document.getElementById('propose-property-location').textContent = visit.propertyDetails?.location || 'N/A';
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('propose-new-date').setAttribute('min', today);
+            document.getElementById('propose-new-date').value = visit.visitDate;
+            document.getElementById('propose-new-time').value = visit.visitTime;
+            
+            // Open modal
+            document.getElementById('propose-time-modal').classList.add('active');
+        }
+
+        function closeProposeTimeModal() {
+            document.getElementById('propose-time-modal').classList.remove('active');
+            currentProposeVisit = null;
+        }
+
+        function confirmProposeNewTime() {
+            if (!currentProposeVisit) return;
+            
+            const newDate = document.getElementById('propose-new-date').value;
+            const newTime = document.getElementById('propose-new-time').value;
+            
+            if (!newDate || !newTime) {
+                alert('Please select both date and time.');
+                return;
+            }
+            
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            const visitIndex = visitBookings.findIndex(v => v.id === currentProposeVisit.id);
+            
+            if (visitIndex !== -1) {
+                visitBookings[visitIndex].proposedDate = newDate;
+                visitBookings[visitIndex].proposedTime = newTime;
+                visitBookings[visitIndex].status = 'Rescheduled - Awaiting Customer';
+                visitBookings[visitIndex].originalDate = currentProposeVisit.visitDate;
+                visitBookings[visitIndex].originalTime = currentProposeVisit.visitTime;
+                
+                localStorage.setItem('visitBookings', JSON.stringify(visitBookings));
+                
+                closeProposeTimeModal();
+                loadVisits();
+                
+                const formattedDate = new Date(newDate).toLocaleDateString('en-IN', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                alert(`New time proposed: ${formattedDate} at ${newTime}\n\nWaiting for customer acceptance.`);
+            }
+        }
+
+        function markVisitCompleted(visitId) {
+            if (!confirm('Mark this visit as completed?')) return;
+            
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            const visitIndex = visitBookings.findIndex(v => v.id === visitId);
+            
+            if (visitIndex !== -1) {
+                const visit = visitBookings[visitIndex];
+                visitBookings[visitIndex].status = 'Completed';
+                visitBookings[visitIndex].completedDate = new Date().toISOString();
+                
+                localStorage.setItem('visitBookings', JSON.stringify(visitBookings));
+                
+                // Increment the property's visited count
+                const propertyTimestamp = visit.propertyDetails.timestamp || visit.propertyDetails.created_timestamp;
+                console.log('Property timestamp for visited count:', propertyTimestamp);
+                console.log('Visit property details:', visit.propertyDetails);
+                
+                if (propertyTimestamp) {
+                    const visitedKey = `propertyVisited_${propertyTimestamp}`;
+                    const currentCount = parseInt(localStorage.getItem(visitedKey) || '0');
+                    const newCount = currentCount + 1;
+                    localStorage.setItem(visitedKey, newCount.toString());
+                    console.log(`Visited count updated for ${propertyTimestamp}: ${currentCount} → ${newCount}`);
+                } else {
+                    console.error('No property timestamp found in visit details');
+                }
+                
+                loadVisits();
+                alert('Visit marked as completed!');
+            }
+        }
+
+        function viewVisitDetails(visitId, isExpertVisit = false) {
+            let visit;
+            if (isExpertVisit) {
+                visit = allExpertVisits.find(v => v.id === visitId);
+            } else {
+                visit = allVisits.find(v => v.id === visitId);
+            }
+            
+            if (!visit) return;
+            
+            const visitDate = new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            
+            if (isExpertVisit) {
+                alert(`Expert-Assisted Visit Details:\n\nCustomer: ${visit.customerName}\nPhone: ${visit.customerPhone}\nEmail: ${visit.customerEmail}\n\nConsultant: ${visit.expertName}\n${visit.expertPhone ? 'Phone: ' + visit.expertPhone + '\n' : ''}${visit.expertEmail ? 'Email: ' + visit.expertEmail + '\n' : ''}\nProperty: ${visit.propertyDetails.name}\nLocation: ${visit.propertyDetails.location}\n\nDate: ${visitDate}\nTime: ${visit.visitTime}\n\nStatus: ${visit.status}\nAssignment: ${visit.expertAssignment || 'N/A'}`);
+            } else {
+                alert(`Direct Visit Details:\n\nCustomer: ${visit.customerName}\nPhone: ${visit.customerPhone}\n\nProperty: ${visit.propertyDetails.name}\nLocation: ${visit.propertyDetails.location}\n\nDate: ${visitDate}\nTime: ${visit.visitTime}\n\nStatus: ${visit.status}`);
+            }
+        }
+
+        function previousPeriod() {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            }
+            renderCalendar();
+        }
+
+        function today() {
+            currentDate = new Date();
+            if (currentView === 'month') {
+                renderCalendar();
+            } else {
+                renderCalendar();
+            }
+        }
+
+        function nextPeriod() {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() + 1);
+            } else {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+            renderCalendar();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            
+            // Update toggle buttons
+            document.getElementById('day-view-btn').classList.toggle('active', view === 'day');
+            document.getElementById('month-view-btn').classList.toggle('active', view === 'month');
+            
+            // Update navigation labels
+            if (view === 'day') {
+                document.getElementById('prev-label').textContent = 'Prev';
+                document.getElementById('next-label').textContent = 'Next';
+            } else {
+                document.getElementById('prev-label').textContent = 'Prev Month';
+                document.getElementById('next-label').textContent = 'Next Month';
+            }
+            
+            renderCalendar();
+        }
+
+        function formatPrice(price) {
+            if (!price) return 'N/A';
+            const numPrice = parseFloat(price);
+            if (numPrice >= 10000000) {
+                return `₹${(numPrice / 10000000).toFixed(2)} Cr`;
+            } else if (numPrice >= 100000) {
+                return `₹${(numPrice / 100000).toFixed(2)} L`;
+            }
+            return `₹${numPrice.toLocaleString('en-IN')}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1328 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Listing Profile - Loading...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* CSS is expanded to avoid editor warnings/yellow lines */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f0f4f8; 
+        }
+        
+        /* Profile Dropdown Styles */
+        .profile-dropdown { position: relative; display: inline-block; }
+        .profile-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; cursor: pointer; transition: all 0.2s;
+            position: relative; overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3); }
+        .dropdown-menu {
+            display: none; position: absolute; right: 0; top: 50px; background: white;
+            min-width: 200px; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000; overflow: hidden;
+        }
+        .dropdown-menu.show { display: block; animation: slideDownProfile 0.2s ease-out; }
+        @keyframes slideDownProfile { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .dropdown-item {
+            padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s;
+            display: flex; align-items: center; gap: 0.5rem; color: #374151;
+        }
+        .dropdown-item:hover { background: #f3f4f6; }
+        .dropdown-divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        
+        .data-point-bar { 
+            border-bottom: 3px solid #f6ad55; 
+        }
+        
+        .info-card { 
+            background-color: white; 
+            padding: 1.5rem; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            height: 100%; 
+        }
+        
+        .section-heading { 
+            font-size: 1.25rem; 
+            font-weight: 700; 
+            color: #1f2937; 
+            margin-bottom: 1rem; 
+            border-bottom: 1px solid #ffedd5; 
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .icon-square { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 3rem; 
+            height: 3rem; 
+            background-color: #ffedd5; 
+            color: #dd6b20; 
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 50;
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            z-index: 51;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-gradient-to-r from-orange-600 to-red-500 shadow-lg p-6 sticky top-0 z-10">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Property Profile</h1>
+                        <p class="text-orange-100 text-sm">Complete property management</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome, Builder!</span>
+            <div class="profile-dropdown">
+                <div class="profile-icon" onclick="toggleProfileMenu()" id="profile-icon">
+                    <span id="profile-initials">U</span>
+                    <img id="profile-image" style="display: none;" alt="Profile">
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="window.history.back()" style="color: #dc2626;">
+                        <span>🚪 Logout</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="window.history.back()" class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                ← Back to Listings
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        <!-- Property Quick Stats Bar -->
+        <div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl shadow-2xl p-6 mb-8 -mt-6 relative">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
+                    <div class="flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </div>
+                    <div id="quick-views" class="text-2xl font-bold text-white">0</div>
+                    <div class="text-xs text-white/90">Total Views</div>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
+                    <div class="flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <div id="quick-favorites" class="text-2xl font-bold text-white">0</div>
+                    <div class="text-xs text-white/90">Favorites</div>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
+                    <div class="flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div id="quick-visits" class="text-2xl font-bold text-white">0</div>
+                    <div class="text-xs text-white/90">Site Visits</div>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
+                    <div class="flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div id="quick-inquiries" class="text-2xl font-bold text-white">0</div>
+                    <div class="text-xs text-white/90">Inquiries</div>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
+                    <div class="flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                    <div id="quick-trend" class="text-2xl font-bold text-white">+0%</div>
+                    <div class="text-xs text-white/90">This Month</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="profile-container" class="space-y-8">
+            <div id="info-bar" class="data-point-bar bg-white p-4 rounded-xl shadow-lg flex flex-wrap justify-between items-center text-center">
+                <div class="p-2 flex-1 min-w-[150px]">
+                    <p class="text-xs text-gray-500 uppercase font-semibold">Listing Name</p>
+                    <p id="listing-name" class="text-xl font-extrabold text-gray-900 truncate">N/A</p>
+                </div>
+                <div class="p-2 flex-1 min-w-[150px]">
+                    <p class="text-xs text-gray-500 uppercase font-semibold">Status</p>
+                    <span id="status-badge" class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800">N/A</span>
+                </div>
+                <div class="p-2 flex-1 min-w-[150px]">
+                    <p class="text-xs text-gray-500 uppercase font-semibold">Price</p>
+                    <p id="listing-price-bar" class="text-xl font-bold text-green-600">N/A</p>
+                </div>
+                <div class="p-2 flex-1 min-w-[150px]">
+                    <p class="text-xs text-gray-500 uppercase font-semibold">Sq. Ft.</p>
+                    <p id="listing-sqft" class="text-xl font-bold text-gray-800">N/A</p>
+                </div>
+                <div class="p-2 flex-1 min-w-[150px]">
+                    <p class="text-xs text-gray-500 uppercase font-semibold">Location</p>
+                    <p id="listing-location-bar" class="text-xl font-bold text-gray-800 truncate">N/A</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 info-card">
+                    <h3 class="section-heading">
+                        <span>Photos & Videos</span>
+                        <button onclick="openMediaUploadModal()" class="text-sm font-medium text-orange-600 hover:text-orange-800">
+                            Edit
+                        </button>
+                    </h3>
+                    <div id="media-carousel" class="bg-gray-100 h-56 rounded-lg border-2 border-dashed border-gray-300 flex items-center">
+                        <p class="text-gray-500" id="media-placeholder">Click Edit to upload photos/videos</p>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3 class="section-heading">
+                        <span>Key Information</span>
+                        <button onclick="openEditModal('Key Information')" class="text-sm font-medium text-orange-600 hover:text-orange-800">
+                            Edit
+                        </button>
+                    </h3>
+                    <div id="key-info-table" class="space-y-3">
+                        <p class="text-sm text-gray-500">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="info-card">
+                    <h3 class="section-heading">
+                        <span>Overview & Features</span>
+                        <button onclick="openEditModal('Overview & Features')" class="text-sm font-medium text-orange-600 hover:text-orange-800">
+                            Edit
+                        </button>
+                    </h3>
+                    <div id="overview-info" class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                        <p class="text-sm text-gray-500 col-span-2">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3 class="section-heading">
+                        <span>Listing Activity</span>
+                        <button disabled class="text-sm font-medium text-gray-400 cursor-not-allowed">
+                            View Log
+                        </button>
+                    </h3>
+                    <div id="activity-tracker" class="grid grid-cols-2 gap-6 text-center">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-blue-600" id="activity-views">0</p>
+                            <p class="text-sm text-gray-600">Unique Views</p>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-red-600" id="activity-shortlists">0</p>
+                            <p class="text-sm text-gray-600">Shortlists</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-green-600" id="activity-contacted">0</p>
+                            <p class="text-sm text-gray-600">Contacted</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-purple-600" id="activity-visited">0</p>
+                            <p class="text-sm text-gray-600">Site Visits</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3 class="section-heading">
+                    <span>Property Description</span>
+                    <button onclick="openEditModal('Property Description')" class="text-sm font-medium text-orange-600 hover:text-orange-800">
+                        Edit
+                    </button>
+                </h3>
+                <p id="listing-description" class="text-gray-700 leading-relaxed italic">
+                    Loading property description...
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3 class="section-heading">
+                    <span>Amenities</span>
+                    <button onclick="openEditModal('Amenities')" class="text-sm font-medium text-orange-600 hover:text-orange-800">
+                        Edit
+                    </button>
+                </h3>
+                <div id="amenities-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+                    <p class="text-sm text-gray-500 col-span-5">Loading...</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Media Upload Modal -->
+<div id="mediaUploadModal" class="modal-overlay fixed inset-0 hidden items-center justify-center">
+    <div class="modal-content bg-white p-8 rounded-lg shadow-2xl max-w-lg w-full">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">Upload Photos & Videos</h3>
+        
+        <form id="media-upload-form" onsubmit="event.preventDefault(); handleMediaUpload(event);">
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Select Files (Photos/Videos)</label>
+                <input type="file" id="media-files" name="files" multiple accept="image/*,video/*"
+                       class="block w-full border border-gray-300 rounded-md p-2" required>
+                <p class="text-xs text-gray-500 mt-1">You can select multiple files at once.</p>
+            </div>
+
+            <!-- Preview Section -->
+            <div id="previewSection" class="mb-6 hidden">
+                <label class="block text-sm font-bold text-gray-700 mb-3">Preview</label>
+                <div id="previewContainer" class="grid grid-cols-3 gap-4 max-h-64 overflow-y-auto p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <!-- Previews will be inserted here -->
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeMediaUploadModal()"
+                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition duration-150">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition duration-150">
+                    Upload
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+    <div id="editModal" class="modal-overlay fixed inset-0 hidden items-center justify-center">
+        <div class="modal-content bg-white p-8 rounded-lg shadow-2xl max-w-xl w-full">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-6">Edit Data</h3>
+            
+            <form id="edit-form" onsubmit="return handleEditSubmission(event)">
+                <input type="hidden" id="edit-section-name">
+                <div id="edit-form-fields" class="space-y-4 mb-6">
+                    </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition duration-150">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-600 transition duration-150">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- All Media Modal -->
+<div id="allMediaModal" class="modal-overlay fixed inset-0 hidden items-center justify-center">
+    <div class="modal-content bg-white p-8 rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <h3 class="text-xl font-bold text-gray-800 mb-6 flex justify-between items-center">
+            All Photos & Videos
+            <button onclick="closeAllMediaModal()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+        </h3>
+        <div id="allMediaContainer" class="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <!-- All media thumbnails will be inserted here -->
+        </div>
+    </div>
+</div>
+    
+    // --- Start of Revised Script Block ---
+<script>
+
+
+    // Global variables (Unchanged)
+    let currentListingData = null; // Holds core CSV data
+    let mockData = {}; // Holds mock fields and overrides for rendering
+    let listingTimestamp = null;
+    const editorUsername = sessionStorage.getItem('loggedInUserUsername');
+
+    // Preview selected files before upload
+function generatePreview() {
+    const fileInput = document.getElementById('media-files');
+    const previewSection = document.getElementById('previewSection');
+    const previewContainer = document.getElementById('previewContainer');
+    const files = fileInput.files;
+
+    if (files.length === 0) {
+        previewSection.classList.add('hidden');
+        return;
+    }
+
+    previewContainer.innerHTML = '';
+    previewSection.classList.remove('hidden');
+
+    Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            const isVideo = ['mp4', 'webm', 'avi', 'mov', 'mkv'].includes(fileExtension);
+            const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension);
+
+            let previewHtml = '';
+
+            if (isImage) {
+                previewHtml = `
+                    <div class="relative group">
+                        <img src="${e.target.result}" alt="${file.name}" class="w-full h-24 object-cover rounded-lg">
+                        <p class="text-xs text-gray-600 mt-1 truncate" title="${file.name}">${file.name}</p>
+                        <button type="button" onclick="removeFromPreview(${index})" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-150 text-xs">
+                            ✕
+                        </button>
+                    </div>
+                `;
+            } else if (isVideo) {
+                previewHtml = `
+                    <div class="relative group">
+                        <div class="w-full h-24 bg-gray-900 rounded-lg flex items-center justify-center">
+                            <span class="text-white text-xl">▶</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1 truncate" title="${file.name}">${file.name}</p>
+                        <button type="button" onclick="removeFromPreview(${index})" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-150 text-xs">
+                            ✕
+                        </button>
+                    </div>
+                `;
+            }
+
+            previewContainer.insertAdjacentHTML('beforeend', previewHtml);
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+function openAllMediaModal() {
+    const savedMedia = localStorage.getItem(`media_${listingTimestamp}`);
+    if (!savedMedia) return;
+    const mediaFiles = JSON.parse(savedMedia);
+    const container = document.getElementById('allMediaContainer');
+    container.innerHTML = '';
+    mediaFiles.forEach(file => {
+        const fileExtension = file.filename.split('.').pop().toLowerCase();
+        const isVideo = ['mp4', 'webm', 'avi', 'mov', 'mkv'].includes(fileExtension);
+        const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension);
+        const fileUrl = `http://127.0.0.1:5000${file.url}`;
+        container.innerHTML += `
+            <div class="relative group">
+                ${isImage ? `<img src="${fileUrl}" alt="Uploaded photo" class="max-h-60 w-full object-cover rounded-lg shadow-md">` : `
+                <video class="max-h-60 w-full object-cover rounded-lg shadow-md" controls>
+                    <source src="${fileUrl}" type="video/${fileExtension}">
+                </video>`}
+            </div>
+        `;
+    });
+    document.getElementById('allMediaModal').style.display = 'flex';
+}
+function closeAllMediaModal() {
+    document.getElementById('allMediaModal').style.display = 'none';
+}
+
+// Remove file from preview before upload
+function removeFromPreview(index) {
+    const fileInput = document.getElementById('media-files');
+    const dataTransfer = new DataTransfer();
+
+    Array.from(fileInput.files).forEach((file, i) => {
+        if (i !== index) {
+            dataTransfer.items.add(file);
+        }
+    });
+
+    fileInput.files = dataTransfer.files;
+    generatePreview();
+}
+
+// Attach preview generation to file input change
+document.getElementById('media-files').addEventListener('change', generatePreview);
+
+        function openMediaUploadModal() {
+        if (!editorUsername) {
+            alert("Session expired. Please log in.");
+            return;
+        }
+        document.getElementById('mediaUploadModal').style.display = 'flex';
+    }
+
+    function closeMediaUploadModal() {
+        document.getElementById('mediaUploadModal').style.display = 'none';
+        document.getElementById('media-upload-form').reset();
+    }
+
+    async function handleMediaUpload(event) {
+        event.preventDefault();
+
+        const fileInput = document.getElementById('media-files');
+        const files = fileInput.files;
+
+        if (files.length === 0) {
+            alert("Please select at least one file.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('listing_timestamp', listingTimestamp);
+        formData.append('editor_username', editorUsername);
+        
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
+        try {
+            const response = await fetch("http://127.0.0.1:5000/upload_media", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                //alert(`✓ Successfully uploaded ${result.uploaded_files.length} file(s)!`);
+                closeMediaUploadModal();
+                displayUploadedMedia(result.uploaded_files);
+                return;
+            } else {
+                alert(`Upload failed: ${result.message}`);
+                return;
+            }
+        } catch (error) {
+            console.error("Error during media upload:", error);
+            alert("Network error during upload. Please try again.");
+            return;
+        }
+    }
+
+    function displayUploadedMedia(uploadedFiles) {
+    const mediaCarousel = document.getElementById('media-carousel');
+    mediaCarousel.classList.remove('border-2', 'border-dashed', 'border-gray-300');
+    let mediaHtml = '';
+    const maxThumbs = 5;
+    const total = uploadedFiles.length;
+
+    // Show up to maxThumbs thumbnails
+    uploadedFiles.slice(0, maxThumbs).forEach((file, idx) => {
+        const fileExtension = file.filename.split('.').pop().toLowerCase();
+        const isVideo = ['mp4', 'webm', 'avi', 'mov', 'mkv'].includes(fileExtension);
+        const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension);
+        const fileUrl = `http://127.0.0.1:5000${file.url}`;
+
+        // If this is the last thumbnail and there are more images, show "+N" overlay
+        if (idx === maxThumbs - 1 && total > maxThumbs) {
+            mediaHtml += `
+                <div class="relative inline-block group cursor-pointer" onclick="openAllMediaModal()">
+                    <img src="${fileUrl}" alt="More media" class="h-40 w-40 object-cover rounded-lg shadow-md opacity-60">
+                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                        <span class="text-white text-2xl font-bold">+${total - maxThumbs + 1}</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            mediaHtml += `
+                <div class="relative inline-block group">
+                    ${isImage ? `<img src="${fileUrl}" alt="Uploaded photo" class="h-40 w-40 object-cover rounded-lg shadow-md">` : `
+                    <video class="h-40 w-40 object-cover rounded-lg shadow-md" controls>
+                        <source src="${fileUrl}" type="video/${fileExtension}">
+                    </video>`}
+                    <button type="button" onclick="deleteMedia('${file.filename}', this)" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-150" title="Delete">
+                        ✕
+                    </button>
+                    <span class="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">New</span>
+                </div>
+            `;
+        }
+    });
+
+    mediaCarousel.innerHTML = `<div class="flex gap-4 p-4 w-full">${mediaHtml}</div>`;
+
+    // Save to localStorage
+    const existingData = localStorage.getItem(`media_${listingTimestamp}`);
+    let allMedia = [];
+    if (existingData) {
+        try { allMedia = JSON.parse(existingData); } catch (e) {}
+    }
+    uploadedFiles.forEach(newFile => {
+        const exists = allMedia.some(m => m.filename === newFile.filename);
+        if (!exists) {
+            allMedia.push({
+                filename: newFile.filename,
+                url: newFile.url,
+                timestamp: new Date().toISOString()
+            });
+        }
+    });
+    localStorage.setItem(`media_${listingTimestamp}`, JSON.stringify(allMedia));
+    }
+
+        function loadSavedMedia() {
+        const savedMedia = localStorage.getItem(`media_${listingTimestamp}`);
+        if (savedMedia) {
+            try {
+                const mediaFiles = JSON.parse(savedMedia);
+                displayUploadedMedia(mediaFiles);
+                console.log("Loaded saved media from localStorage");
+            } catch (e) {
+                console.log("Could not load saved media:", e);
+            }
+        }
+    }
+
+    // --- DELETE UPLOADED IMAGE/VIDEO ---
+    function deleteMedia(filename, buttonElement) {
+        if (!confirm(`Delete "${filename}"?`)) {
+            return;
+        }
+
+        // Get the media container (parent div with class 'relative')
+        const mediaContainer = buttonElement.closest('.relative');
+        
+        // Remove from DOM immediately
+        if (mediaContainer) {
+            mediaContainer.remove();
+            console.log(`Removed ${filename} from UI`);
+        }
+
+        // Remove from localStorage
+        const existingData = localStorage.getItem(`media_${listingTimestamp}`);
+        if (existingData) {
+            try {
+                let allMedia = JSON.parse(existingData);
+                allMedia = allMedia.filter(m => m.filename !== filename);
+                localStorage.setItem(`media_${listingTimestamp}`, JSON.stringify(allMedia));
+                console.log(`Deleted ${filename} from localStorage`);
+            } catch (e) {
+                console.log("Could not update localStorage:", e);
+            }
+        }
+    }
+    
+    // --- Utility Functions (Unchanged) ---
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+
+    function formatDate(isoString) {
+        if (!isoString) return 'N/A';
+        
+        // Handle "Ready Possession" as a special case
+        if (isoString === 'Ready Possession') return 'Ready Possession';
+        
+        try {
+            if (isoString.length === 10 && isoString.includes('-')) {
+                const parts = isoString.split('-');
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            const date = new Date(isoString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        } catch (e) { return 'Invalid Date'; }
+    }
+
+    function getStatusBadgeClasses(status) {
+        switch(status) {
+            case 'Active': return 'bg-green-100 text-green-800';
+            case 'Draft': return 'bg-yellow-100 text-yellow-800';
+            case 'Sold': return 'bg-red-100 text-red-800';
+            case 'Inactive': return 'bg-gray-100 text-gray-800';
+            case 'Deleted': return 'bg-black text-white';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    }
+    
+    // --- Data Definitions (MOCK/PLACEHOLDER DATA) ---
+    const initialMockData = {
+        sq_ft: "1450", num_bedrooms: "3", num_bathrooms: "3", num_balcony: "2", possession_on: "2026-03-01", 
+        apartment_name: "The Lakeview Grand", parking: "Bike and Car", power_backup: "Full", 
+        age_of_building: "New Construction", ownership_type: "Freehold", maintenance_charges: "3500", 
+        flooring: "Vitrified Tiles", built_up_area: "1600 sq.ft.", carpet_area: "1350 sq.ft.", 
+        furnishing_status: "Semi-Furnished", facing: "North-East", floor: "12th of 25", 
+        gated_security: "Yes", 
+        description: "A meticulously planned residential project offering breathtaking lake views, premium amenities, and strategic location close to the IT hub. Experience luxury living with spacious layouts and modern infrastructure.", 
+        unique_views: 450, shortlists: 12, contacted: 8, visited: 3,
+        amenities: [
+            { name: "Lift", icon: "↑↓" }, { name: "Internet Provider", icon: "🌐" }, { name: "Club House", icon: "🍹" }, 
+            { name: "Children's Play Area", icon: "🎠" }, { name: "Fire Safety", icon: "🔥" }, { name: "Security", icon: "🔒" }, 
+            { name: "Gas Pipeline", icon: "⛽" }, { name: "Park", icon: "🌳" }, { name: "Visitor Parking", icon: "🅿️" }, 
+            { name: "EV Chargers", icon: "⚡" }, { name: "Swimming Pool", icon: "🏊" },
+        ]
+    };
+
+    // Static list of ALL AVAILABLE amenities for the checklist (we will update this list dynamically)
+    let ALL_AMENITIES = [
+        { name: "Lift", icon: "↑↓" }, { name: "Internet Provider", icon: "🌐" }, { name: "Club House", icon: "🍹" }, 
+        { name: "Children's Play Area", icon: "🎠" }, { name: "Fire Safety", icon: "🔥" }, { name: "Security", icon: "🔒" }, 
+        { name: "Gas Pipeline", icon: "⛽" }, { name: "Park", icon: "🌳" }, { name: "Visitor Parking", icon: "🅿️" }, 
+        { name: "EV Chargers", icon: "⚡" }, { name: "Swimming Pool", icon: "🏊" },
+        { name: "Gymnasium", icon: "💪" }, { name: "Rain Water Harvesting", icon: "💧" }, { name: "Intercom Facility", icon: "📞" },
+        { name: "Vaastu Compliant", icon: "🕉️" }, { name: "Jogging Track", icon: "🏃" }, { name: "Sewage Treatment Plant", icon: "🧪" }
+    ];
+
+    const fieldConfigurations = {
+        'Core Info': [
+            { id: 'property_name', label: 'Property Name', type: 'text' },
+            { id: 'location', label: 'Location', type: 'text' },
+            { id: 'listing_price', label: 'Listing Price (₹)', type: 'number' },
+            { id: 'unit_type', label: 'Unit Type', type: 'text' },
+            { id: 'status', label: 'Status', type: 'select', options: ['Active', 'Draft', 'Sold', 'Inactive'] },
+            { id: 'expiry_date', label: 'Expiry Date', type: 'date' },
+        ],
+        'Key Information': [
+            { id: 'num_bedrooms', label: 'Number of Bedrooms', type: 'number' },
+            { id: 'num_bathrooms', label: 'Number of Bathrooms', type: 'number' },
+            { id: 'num_balcony', label: 'Number of Balcony', type: 'number' },
+            { id: 'possession_on', label: 'Possession Date', type: 'date' },
+            { id: 'apartment_name', label: 'Apartment/Project Name', type: 'text' },
+            { id: 'parking', label: 'Parking Available', type: 'text' },
+            { id: 'power_backup', label: 'Power Backup Status', type: 'text' },
+        ],
+        'Overview & Features': [
+            { id: 'sq_ft', label: 'Super Built-Up Area (sq. ft.)', type: 'number' },
+            { id: 'built_up_area', label: 'Built-Up Area (sq. ft.)', type: 'text' },
+            { id: 'carpet_area', label: 'Carpet Area (sq. ft.)', type: 'text' },
+            { id: 'age_of_building', label: 'Age of Building', type: 'text' },
+            { id: 'ownership_type', label: 'Ownership Type', type: 'text' },
+            { id: 'maintenance_charges', label: 'Maintenance Charges (₹)', type: 'number' },
+            { id: 'flooring', label: 'Flooring Type', type: 'text' },
+            { id: 'furnishing_status', label: 'Furnishing Status', type: 'text' },
+            { id: 'facing', label: 'Property Facing', type: 'text' },
+            { id: 'floor', label: 'Floor (e.g., 12th of 25)', type: 'text' },
+            { id: 'gated_security', label: 'Gated Security', type: 'select', options: ['Yes', 'No'] },
+        ],
+        'Property Description': [
+            { id: 'description', label: 'Full Description', type: 'textarea' }
+        ],
+    };
+
+    // --- MODAL HANDLING (Unchanged) ---
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    // --- NEW AMENITY LOGIC (Updated to add to ALL_AMENITIES) ---
+    function addNewAmenity() {
+        const newAmenityInput = document.getElementById('new_amenity_name');
+        const amenityName = newAmenityInput.value.trim();
+        const amenityListContainer = document.getElementById('amenity-list-checkboxes');
+
+        if (!amenityName) {
+            alert("Please enter a name for the new amenity.");
+            return;
+        }
+
+        const normalizedName = amenityName.charAt(0).toUpperCase() + amenityName.slice(1).toLowerCase();
+        
+        // Check if amenity is already in the global list or currently displayed
+        if (ALL_AMENITIES.some(a => a.name.toLowerCase() === normalizedName.toLowerCase())) {
+            alert(`Amenity "${normalizedName}" already exists.`);
+            newAmenityInput.value = '';
+            return;
+        }
+        
+        // 1. **CRITICAL FIX:** Add the new amenity to the global list for reusability (session-based)
+        const newAmenity = { name: normalizedName, icon: '⭐' };
+        ALL_AMENITIES.push(newAmenity);
+        
+        // 2. Create and insert the new checkbox, marked as checked
+        const id = `amenity-${normalizedName.replace(/[\s&/]/g, '_')}`; 
+        const newAmenityHtml = `
+            <div class="flex items-center space-x-2 p-2 border border-gray-200 rounded-md added-item">
+                <input type="checkbox" id="${id}" name="amenity" value="${normalizedName}" class="text-orange-600 focus:ring-orange-500 h-4 w-4" checked>
+                <label for="${id}" class="text-sm font-medium text-gray-700">⭐ ${normalizedName}</label>
+            </div>
+        `;
+        
+        // Append the new amenity to the checklist container
+        amenityListContainer.insertAdjacentHTML('beforeend', newAmenityHtml);
+
+        // Clear the input field after adding
+        newAmenityInput.value = '';
+    }
+
+    // --- Function to set Ready Possession ---
+    function setReadyPossession(event) {
+        if (event) event.preventDefault(); // Prevent any form submission or default behavior
+        
+        const possessionInput = document.getElementById('possession_on');
+        if (possessionInput) {
+            possessionInput.value = 'Ready Possession';
+            possessionInput.type = 'text';
+            possessionInput.readOnly = true;
+            possessionInput.classList.add('bg-green-50', 'text-green-700', 'font-semibold');
+            
+            // Show the clear button
+            const clearBtn = document.getElementById('clear-ready-possession');
+            if (clearBtn) clearBtn.classList.remove('hidden');
+            
+            // Update the help text
+            const helpText = possessionInput.parentElement.nextElementSibling;
+            if (helpText && helpText.tagName === 'P') {
+                helpText.textContent = '✓ Set to Ready Possession (Click ✕ to change)';
+                helpText.className = 'text-xs text-green-600 mt-1';
+            } else {
+                possessionInput.parentElement.insertAdjacentHTML('afterend', '<p class="text-xs text-green-600 mt-1">✓ Set to Ready Possession (Click ✕ to change)</p>');
+            }
+        }
+    }
+
+    // --- Function to clear Ready Possession and revert to date picker ---
+    function clearReadyPossession(event) {
+        if (event) event.preventDefault(); // Prevent any form submission or default behavior
+        
+        const possessionInput = document.getElementById('possession_on');
+        if (possessionInput) {
+            possessionInput.value = '';
+            possessionInput.type = 'date';
+            possessionInput.readOnly = false;
+            possessionInput.classList.remove('bg-green-50', 'text-green-700', 'font-semibold');
+            
+            // Hide the clear button
+            const clearBtn = document.getElementById('clear-ready-possession');
+            if (clearBtn) clearBtn.classList.add('hidden');
+            
+            // Remove the help text
+            const helpText = possessionInput.parentElement.nextElementSibling;
+            if (helpText && helpText.tagName === 'P') {
+                helpText.remove();
+            }
+        }
+    }
+
+
+    // --- UPDATED AMENITIES MODAL GENERATION ---
+    function generateAmenitiesModal(formFieldsContainer) {
+        const currentAmenities = mockData.amenities.map(a => a.name);
+        
+        // Create a map including all existing and all potential amenities
+        const displayAmenitiesMap = new Map();
+        [...ALL_AMENITIES, ...mockData.amenities].forEach(amenity => {
+            if (!displayAmenitiesMap.has(amenity.name)) {
+                // Use the icon from ALL_AMENITIES if available, otherwise use the saved icon or default.
+                const source = ALL_AMENITIES.find(a => a.name === amenity.name) || amenity;
+                displayAmenitiesMap.set(amenity.name, { name: amenity.name, icon: source.icon || '⭐' });
+            }
+        });
+        const displayAmenities = Array.from(displayAmenitiesMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+
+        // Generate Checkbox HTML
+        const amenitiesHtml = displayAmenities.map(amenity => {
+            const checked = currentAmenities.includes(amenity.name) ? 'checked' : '';
+            const id = `amenity-${amenity.name.replace(/[\s&/]/g, '_')}`; 
+            return `
+                <div class="flex items-center space-x-2 p-2 border border-gray-200 rounded-md">
+                    <input type="checkbox" id="${id}" name="amenity" value="${amenity.name}" class="text-orange-600 focus:ring-orange-500 h-4 w-4" ${checked}>
+                    <label for="${id}" class="text-sm font-medium text-gray-700">${amenity.icon} ${amenity.name}</label>
+                </div>
+            `;
+        }).join('');
+
+        // Update the input field generation (HTML structure unchanged)
+        formFieldsContainer.innerHTML = `
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Select Amenities</label>
+                <div id="amenity-list-checkboxes" class="grid grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 border rounded-md">
+                    ${amenitiesHtml}
+                </div>
+            </div>
+            <div class="mb-4 pt-4 border-t">
+                <label for="new_amenity_name" class="block text-sm font-bold text-gray-700 mb-2">Add New Amenity</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="new_amenity_name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" placeholder="Enter new amenity name">
+                    <button type="button" onclick="addNewAmenity()" class="flex-shrink-0 px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 transition duration-150">
+                        + Add Amenity
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">
+                    Enter a name and click "+ Add Amenity" to see it in the selection list above.
+                </p>
+            </div>
+        `;
+    }
+    // --- END OF AMENITIES MODAL GENERATION ---
+
+    function openEditModal(sectionName) {
+        if (!editorUsername) {
+            alert("Session expired. Please log in.");
+            return;
+        }
+
+        document.getElementById('modal-title').textContent = `Edit: ${sectionName}`;
+        document.getElementById('edit-section-name').value = sectionName;
+        const formFieldsContainer = document.getElementById('edit-form-fields');
+        formFieldsContainer.innerHTML = '';
+        
+        if (sectionName === 'Amenities') {
+            generateAmenitiesModal(formFieldsContainer);
+        } else {
+            let fieldsToDisplay = [];
+            let currentSection = sectionName;
+
+            if (currentSection === 'Key Information' || currentSection === 'Overview & Features' || currentSection === 'Property Description') {
+                fieldsToDisplay = fieldConfigurations[currentSection];
+                if (currentSection === 'Key Information') {
+                    fieldsToDisplay = fieldsToDisplay.concat(fieldConfigurations['Core Info']);
+                }
+            }
+            
+            // Build the form for standard fields (Unchanged)
+            fieldsToDisplay.forEach(field => {
+                const fieldId = field.id;
+                let currentValue = mockData[fieldId] || '';
+                let inputHtml = '';
+                
+                if (field.type === 'textarea') {
+                    inputHtml = `<textarea id="${fieldId}" name="${fieldId}" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">${currentValue}</textarea>`;
+                } else if (field.type === 'select') {
+                    const optionsHtml = field.options.map(option => 
+                        `<option value="${option}" ${currentValue === option ? 'selected' : ''}>${option}</option>`
+                    ).join('');
+                    inputHtml = `<select id="${fieldId}" name="${fieldId}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">${optionsHtml}</select>`;
+                } else if (field.type === 'date' && fieldId === 'possession_on') {
+                    // Special handling for possession date with "Ready Possession" button
+                    const isReadyPossession = currentValue === 'Ready Possession';
+                    inputHtml = `
+                        <div class="flex gap-2">
+                            <input type="${isReadyPossession ? 'text' : field.type}" id="${fieldId}" name="${fieldId}" 
+                                   value="${currentValue}" 
+                                   ${isReadyPossession ? 'readonly' : ''}
+                                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 ${isReadyPossession ? 'bg-green-50 text-green-700 font-semibold' : ''}">
+                            <button type="button" onclick="setReadyPossession()" class="mt-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-md whitespace-nowrap transition duration-150">
+                                Ready Possession
+                            </button>
+                            <button type="button" id="clear-ready-possession" onclick="clearReadyPossession()" 
+                                    class="mt-1 px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-md transition duration-150 ${isReadyPossession ? '' : 'hidden'}" 
+                                    title="Clear Ready Possession">
+                                ✕
+                            </button>
+                        </div>
+                        ${isReadyPossession ? '<p class="text-xs text-green-600 mt-1">✓ Set to Ready Possession (Click ✕ to change)</p>' : ''}
+                    `;
+                } else { // text, number, date
+                    inputHtml = `<input type="${field.type}" id="${fieldId}" name="${fieldId}" value="${currentValue}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">`;
+                }
+
+                formFieldsContainer.innerHTML += `
+                    <div class="mb-4">
+                        <label for="${fieldId}" class="block text-sm font-medium text-gray-700">${field.label}</label>
+                        ${inputHtml}
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    async function handleEditSubmission(event) {
+        event.preventDefault();
+
+        const sectionName = document.getElementById('edit-section-name').value;
+        let updates = {};
+        let isChanged = false;
+
+        if (sectionName === 'Amenities') {
+            const currentAmenitiesNames = mockData.amenities.map(a => a.name).sort().join(',');
+            
+            // Collect all checked amenities from the dynamic list
+            const checkboxes = document.querySelectorAll('#amenity-list-checkboxes input[name="amenity"]:checked');
+            
+            let finalAmenitiesNames = Array.from(checkboxes).map(cb => cb.value);
+            
+            // Create the new amenity structure (name and icon)
+            let newAmenities = finalAmenitiesNames.map(name => {
+                // Look up the icon from the global list, or default to '⭐'
+                const existing = ALL_AMENITIES.find(a => a.name === name); 
+                return { name: name, icon: existing ? existing.icon : '⭐' };
+            });
+            
+            // Check if the final list has changed
+            const newAmenitiesNames = finalAmenitiesNames.sort().join(',');
+            
+            if (currentAmenitiesNames !== newAmenitiesNames) {
+                isChanged = true;
+                // **CRITICAL FIX:** Optimistic update of the local mockData and global ALL_AMENITIES list
+                mockData.amenities = newAmenities;
+                
+                // Ensure ALL_AMENITIES is fully up-to-date with any new items just added
+                newAmenities.filter(a => a.icon === '⭐' && !ALL_AMENITIES.some(existing => existing.name === a.name))
+                            .forEach(newA => ALL_AMENITIES.push(newA));
+                
+                // Send structured data for saving and a string for logging
+                updates['amenities_update_text'] = newAmenitiesNames; 
+                updates['amenities'] = newAmenities; // THIS sends the structured array to app.py
+            }
+        } else {
+            // Logic for standard fields
+            const formFields = document.getElementById('edit-form-fields').querySelectorAll('input, select, textarea');
+            
+            formFields.forEach(field => {
+                const fieldName = field.id;
+                let newValue = field.value;
+                let oldValue = mockData[fieldName];
+
+                // Special handling for possession_on field
+                if (fieldName === 'possession_on') {
+                    // Normalize comparison - both should be strings
+                    const normalizedOld = String(oldValue || '');
+                    const normalizedNew = String(newValue || '');
+                    
+                    if (normalizedOld !== normalizedNew) {
+                        updates[fieldName] = newValue;
+                        isChanged = true;
+                        console.log(`Possession changed from "${normalizedOld}" to "${normalizedNew}"`);
+                    }
+                } else if (String(oldValue) !== String(newValue)) {
+                    updates[fieldName] = newValue;
+                    isChanged = true;
+                }
+            });
+            
+            // Update the local mockData immediately (optimistic update)
+            for (const key in updates) {
+                mockData[key] = updates[key];
+            }
+        }
+
+
+        if (!isChanged) {
+            alert("No changes detected.");
+            closeEditModal();
+            return false;
+        }
+
+        // Send request to Flask API (Unchanged)
+        try {
+            const requestData = {
+                listing_timestamp: listingTimestamp,
+                editor_username: editorUsername,
+                section: sectionName,
+                updates: updates
+            };
+
+            const response = await fetch("http://127.0.0.1:5000/update_profile_data", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(requestData)
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(result.message);
+                closeEditModal();
+                // Re-render the page using the updated local mockData (CRITICAL for immediate display)
+                renderProfile(currentListingData, mockData);
+            } else {
+                alert(`Server Error: ${result.message}. Please refresh.`);
+            }
+        } catch (error) {
+            console.error("Error during update request:", error);
+            alert("A network error occurred while trying to save changes.");
+        }
+
+        return false;
+    }
+
+    // --- RENDERING LOGIC ---
+
+    function renderKeyInfo(data) {
+        const possessionValue = data.possession_on || 'N/A';
+        const formattedPossession = formatDate(possessionValue);
+        const isReadyPossession = possessionValue === 'Ready Possession';
+        
+        const info = [
+            { label: "Number of Bedrooms", value: data.num_bedrooms || 'N/A', special: false },
+            { label: "Posted On", value: formatDate(data.created_timestamp), special: false },
+            { label: "Number of Bathrooms", value: data.num_bathrooms || 'N/A', special: false },
+            { label: "Possession On", value: formattedPossession, special: isReadyPossession },
+            { label: "Number of Balcony", value: data.num_balcony || 'N/A', special: false },
+            { label: "Apartment Name", value: data.apartment_name || 'N/A', special: false },
+            { label: "Parking", value: data.parking || 'N/A', special: false },
+            { label: "Power Backup", value: data.power_backup || 'N/A', special: false },
+            { label: "Unit Type", value: data.unit_type || 'N/A', special: false },
+            { label: "Location", value: data.location || 'N/A', special: false },
+        ];
+
+        const tableHtml = info.map(item => `
+            <div class="flex justify-between items-start border-b border-gray-100 pb-1">
+                <span class="text-sm font-medium text-gray-500">${item.label}</span>
+                <span class="text-sm font-semibold ${item.special ? 'text-green-600' : 'text-gray-800'}">${item.value}</span>
+            </div>
+        `).join('');
+        document.getElementById('key-info-table').innerHTML = tableHtml;
+    }
+
+    function renderOverview(data) {
+        // Helper function to add sq.ft. suffix if value is numeric
+        const formatArea = (value) => {
+            if (!value || value === 'N/A') return 'N/A';
+            // If value already contains 'sq.ft.' or 'sq ft', return as is
+            if (value.toString().toLowerCase().includes('sq')) return value;
+            // If value is numeric, add sq.ft. suffix
+            if (!isNaN(value)) return `${value} sq.ft.`;
+            return value;
+        };
+        
+        const overview = [
+            { label: "Super Built-Up Area", value: data.sq_ft ? `${data.sq_ft} sq.ft.` : 'N/A' },
+            { label: "Built Up Area", value: formatArea(data.built_up_area) },
+            { label: "Carpet Area", value: formatArea(data.carpet_area) },
+            { label: "Age of Building", value: data.age_of_building || 'N/A' },
+            { label: "Ownership Type", value: data.ownership_type || 'N/A' },
+            { label: "Maintenance Charges", value: data.maintenance_charges ? `₹${parseInt(data.maintenance_charges).toLocaleString('en-IN')}` : 'N/A' },
+            { label: "Flooring", value: data.flooring || 'N/A' },
+            { label: "Furnishing Status", value: data.furnishing_status || 'N/A' },
+            { label: "Facing", value: data.facing || 'N/A' },
+            { label: "Floor", value: data.floor || 'N/A' },
+            { label: "Gated Security", value: data.gated_security || 'N/A' },
+        ];
+        
+        const tableHtml = overview.map(item => `
+            <div class="flex flex-col">
+                <span class="text-xs text-gray-500">${item.label}</span>
+                <span class="text-sm font-semibold text-gray-800">${item.value}</span>
+            </div>
+        `).join('');
+        document.getElementById('overview-info').innerHTML = tableHtml;
+    }
+
+    // **CRITICAL FIX:** Complete and verified renderAmenities function
+    function renderAmenities(amenities) {
+        if (!amenities || amenities.length === 0) {
+            document.getElementById('amenities-list').innerHTML = '<p class="text-sm text-gray-500 col-span-5 italic">No amenities listed.</p>';
+            return;
+        }
+        const amenitiesHtml = amenities.map(amenity => `
+            <div class="flex flex-col items-center p-3 border border-gray-200 rounded-lg transition duration-150 hover:bg-orange-50">
+                <div class="icon-square">
+                    <span class="text-xl">${amenity.icon || '⭐'}</span>
+                </div>
+                <p class="mt-2 text-xs font-medium text-gray-700 text-center">${amenity.name}</p>
+            </div>
+        `).join('');
+        document.getElementById('amenities-list').innerHTML = amenitiesHtml;
+    }
+
+    function renderProfile(coreListing, mockData) {
+        const data = { ...coreListing, ...mockData };
+        
+        // --- Section 1: Info Bar ---
+        const priceDisplay = `₹${parseFloat(data.listing_price).toLocaleString('en-IN')}`;
+        
+        document.getElementById('page-title').textContent = `${data.property_name} Profile`;
+        document.getElementById('listing-name').textContent = data.property_name;
+        document.getElementById('listing-location-bar').textContent = data.location;
+        document.getElementById('listing-price-bar').textContent = priceDisplay;
+        document.getElementById('listing-sqft').textContent = `${data.sq_ft} sq.ft.`;
+        
+        const statusBadge = document.getElementById('status-badge');
+        statusBadge.textContent = data.status;
+        statusBadge.className = getStatusBadgeClasses(data.status) + ' px-3 py-1 text-sm font-semibold rounded-full';
+
+        // --- Section 2-5 ---
+        renderKeyInfo(data);
+        renderOverview(data);
+        document.getElementById('activity-views').textContent = data.unique_views.toLocaleString();
+        document.getElementById('activity-shortlists').textContent = data.shortlists.toLocaleString();
+        document.getElementById('activity-contacted').textContent = data.contacted.toLocaleString();
+        document.getElementById('activity-visited').textContent = data.visited.toLocaleString();
+        document.getElementById('listing-description').textContent = data.description || "No detailed description provided for this property.";
+        renderAmenities(data.amenities || []);
+    }
+
+
+    async function fetchListingDetails(timestamp) {
+        listingTimestamp = timestamp;
+
+        try {
+            // 1. Fetch Core Listing Data from Flask API
+            const response = await fetch(`http://127.0.0.1:5000/get_listing_by_timestamp/${timestamp}`);
+            const result = await response.json();
+
+            if (result.success) {
+                currentListingData = result.listing;
+            } else {
+                throw new Error(result.message || 'Listing not found.');
+            }
+        } catch (error) {
+            console.error("Error fetching listing details:", error);
+            document.getElementById('profile-container').innerHTML = '<p class="p-4 text-center text-red-500 info-card">Error loading property details. Listing may not exist or network failed.</p>';
+            return;
+        }
+        
+        // 2. Initialize mockData by merging core data and initial mock data
+        // Order: initialMockData (defaults) < coreListingData (CSV)
+        mockData = { ...initialMockData, ...currentListingData };
+        
+        // 3. IMPORTANT: Update ALL_AMENITIES with any custom amenities loaded from CSV
+        if (mockData.amenities && Array.isArray(mockData.amenities)) {
+            mockData.amenities.forEach(amenity => {
+                if (!ALL_AMENITIES.some(a => a.name === amenity.name)) {
+                    // Add saved custom amenity (with its icon) to the global list for reusability in the current session
+                    ALL_AMENITIES.push(amenity); 
+                }
+            });
+        }
+        
+        // 4. Load contacted count from localStorage
+        const contactedKey = `propertyContacted_${timestamp}`;
+        const contactedCount = parseInt(localStorage.getItem(contactedKey) || '0');
+        if (contactedCount > 0) {
+            mockData.contacted = (mockData.contacted || 0) + contactedCount;
+        }
+        
+        // Load shortlists count from localStorage
+        const shortlistKey = `propertyShortlists_${timestamp}`;
+        const shortlistCount = parseInt(localStorage.getItem(shortlistKey) || '0');
+        if (shortlistCount > 0) {
+            mockData.shortlists = (mockData.shortlists || 0) + shortlistCount;
+        }
+        
+        // Load unique views count from localStorage
+        const viewKey = `propertyUniqueViews_${timestamp}`;
+        const uniqueViewCount = parseInt(localStorage.getItem(viewKey) || '0');
+        if (uniqueViewCount > 0) {
+            mockData.unique_views = (mockData.unique_views || 0) + uniqueViewCount;
+        }
+        
+        // Load visited count from localStorage
+        const visitedKey = `propertyVisited_${timestamp}`;
+        const visitedCount = parseInt(localStorage.getItem(visitedKey) || '0');
+        if (visitedCount > 0) {
+            mockData.visited = (mockData.visited || 0) + visitedCount;
+        }
+        
+        // 5. Initial Render
+        renderProfile(currentListingData, mockData);
+
+        // 6. Load saved media from localStorage
+        loadSavedMedia();
+    }
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', function() {
+        displayUserName();
+        if (!editorUsername) {
+            alert("You must be logged in to view this page.");
+            window.history.back(); // Or redirect to login
+            return;
+        }
+        const timestamp = getQueryParam('timestamp');
+        if (timestamp) {
+            fetchListingDetails(timestamp);
+        } else {
+            document.getElementById('profile-container').innerHTML = '<p class="p-8 text-center text-red-500 info-card">Error: Cannot load listing details. Missing unique timestamp.</p>';
+        }
+    });
+
+    function displayUserName() {
+        const firstName = sessionStorage.getItem('loggedInUserFirstName');
+        const lastName = sessionStorage.getItem('loggedInUserLastName');
+        const userDisplayElement = document.getElementById('user-display');
+
+        if (userDisplayElement) {
+            if (firstName && lastName) {
+                userDisplayElement.textContent = `Welcome, ${firstName} ${lastName}!`;
+                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                document.getElementById('profile-initials').textContent = initials;
+                document.getElementById('profile-name').textContent = `${firstName} ${lastName}`;
+                
+                const username = sessionStorage.getItem('loggedInUserUsername');
+                if (username) loadProfilePhoto(username);
+            } else {
+                userDisplayElement.textContent = 'Welcome, Builder!';
+                document.getElementById('profile-initials').textContent = 'U';
+                document.getElementById('profile-name').textContent = 'Builder';
+            }
+        }
+    }
+
+    function loadProfilePhoto(username) {
+        const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+        if (savedPhoto) {
+            const profileIcon = document.getElementById('profile-icon');
+            const profileImage = document.getElementById('profile-image');
+            const profileInitials = document.getElementById('profile-initials');
+            
+            if (profileImage && profileInitials && profileIcon) {
+                profileImage.src = savedPhoto;
+                profileImage.style.display = 'block';
+                profileInitials.style.display = 'none';
+                profileIcon.style.background = 'white';
+            }
+        }
+    }
+
+    function toggleProfileMenu() {
+        const menu = document.getElementById('profile-menu');
+        menu.classList.toggle('show');
+    }
+
+    function viewProfile() {
+        window.location.href = 'manage_profile.html';
+    }
+
+    function viewSettings() {
+        alert('Settings page coming soon!');
+    }
+
+    document.addEventListener('click', function(event) {
+        const dropdown = document.querySelector('.profile-dropdown');
+        const menu = document.getElementById('profile-menu');
+        if (dropdown && !dropdown.contains(event.target)) {
+            menu.classList.remove('show');
+        }
+    });
+</script>
+</body>
+</html>

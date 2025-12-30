@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Builder Listings Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(to bottom, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0.05)),
+                repeating-linear-gradient(0deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px),
+                repeating-linear-gradient(90deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px);
+            background-size: 100% 100%, 80px 80px, 80px 80px;
+            min-height: 100vh;
+        }
+        
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+        .listing-row:hover { background-color: #f0f4f8; }
+        /* Modal Styles */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 50;
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            z-index: 51;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .filter-container {
+            position: relative;
+            display: inline-block;
+        }
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            border: 1px solid #ccc;
+            z-index: 60;
+            padding: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-lg border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center shadow-md">
+                <span class="text-white font-bold text-lg">R</span>
+            </div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">Builder Listings</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome, Builder!</span>
+            
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown">
+                <div class="profile-icon" onclick="toggleProfileMenu()" id="profile-icon">
+                    <span id="profile-initials">U</span>
+                    <img id="profile-image" style="display: none;" alt="Profile">
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="window.location.href='builder_dashboard.html'" style="color: #dc2626;">
+                        <span>🚪 Dashboard</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="openCreateListingModal()" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                + Create New Listing
+            </button>
+            <button onclick="window.location.href='builder_dashboard.html'" class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                ← Dashboard
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 md:p-10">
+        <h2 class="text-3xl font-extrabold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent mb-8 pb-2">Property Portfolio</h2>
+        
+        <!-- Portfolio Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-2xl shadow-xl text-white">
+                <div class="flex items-center justify-between mb-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+                <div class="text-4xl font-bold" id="total-properties">0</div>
+                <div class="text-sm opacity-90">Total Properties</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl shadow-xl text-white">
+                <div class="flex items-center justify-between mb-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="text-4xl font-bold" id="active-properties">0</div>
+                <div class="text-sm opacity-90">Active Listings</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-2xl shadow-xl text-white">
+                <div class="flex items-center justify-between mb-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="text-4xl font-bold" id="total-value">₹0</div>
+                <div class="text-sm opacity-90">Portfolio Value</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-2xl shadow-xl text-white">
+                <div class="flex items-center justify-between mb-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                </div>
+                <div class="text-4xl font-bold" id="total-views">0</div>
+                <div class="text-sm opacity-90">Total Views</div>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-2xl rounded-2xl overflow-hidden border-2 border-gray-200">
+            <table id="listings-table" class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <span class="inline-flex items-center">
+                                Property Name
+                                <div class="filter-container ml-2">
+                                    <button onclick="toggleFilterDropdown('property_name')" class="text-gray-400 hover:text-gray-600 focus:outline-none">▼</button>
+                                    <div id="filter-property_name" class="filter-dropdown hidden"></div>
+                                </div>
+                            </span>
+                        </th>
+                        
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <span class="inline-flex items-center">
+                                Location
+                                <div class="filter-container ml-2">
+                                    <button onclick="toggleFilterDropdown('location')" class="text-gray-400 hover:text-gray-600 focus:outline-none">▼</button>
+                                    <div id="filter-location" class="filter-dropdown hidden"></div>
+                                </div>
+                            </span>
+                        </th>
+                        
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <span class="inline-flex items-center">
+                                Unit Type
+                                <div class="filter-container ml-2">
+                                    <button onclick="toggleFilterDropdown('unit_type')" class="text-gray-400 hover:text-gray-600 focus:outline-none">▼</button>
+                                    <div id="filter-unit_type" class="filter-dropdown hidden"></div>
+                                </div>
+                            </span>
+                        </th>
+                        
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created On</th>
+                        
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Till</th>
+                        
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listing Price</th>
+                        
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <span class="inline-flex items-center">
+                                Status
+                                <div class="filter-container ml-2">
+                                    <button onclick="toggleFilterDropdown('status')" class="text-gray-400 hover:text-gray-600 focus:outline-none">▼</button>
+                                    <div id="filter-status" class="filter-dropdown hidden"></div>
+                                </div>
+                            </span>
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="listings-table-body" class="bg-white divide-y divide-gray-200">
+                    <tr><td colspan="8" class="p-4 text-center text-gray-500">Loading listings...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    
+    <div id="listingModal" class="modal-overlay fixed inset-0 hidden items-center justify-center">
+        <div class="modal-content bg-white p-8 rounded-lg shadow-2xl max-w-lg w-full">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-6">Create New Listing</h3>
+            
+            <input type="hidden" id="original_timestamp">
+            
+            <form id="listing-form" onsubmit="return handleFormSubmission(event)">
+                
+                <div class="mb-4">
+                    <label for="property_name" class="block text-sm font-medium text-gray-700">Property Name<span class="text-red-500">*</span></label>
+                    <input type="text" id="property_name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="location" class="block text-sm font-medium text-gray-700">Location<span class="text-red-500">*</span></label>
+                    <input type="text" id="location" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="unit_type" class="block text-sm font-medium text-gray-700">Unit Type (e.g., 2 BHK Apartment)<span class="text-red-500">*</span></label>
+                    <input type="text" id="unit_type" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="listing_price" class="block text-sm font-medium text-gray-700">Listing Price (₹)<span class="text-red-500">*</span></label>
+                    <input type="number" id="listing_price" required min="1" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="expiry_date" class="block text-sm font-medium text-gray-700">Expiry Date (Optional)</label>
+                    <input type="date" id="expiry_date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="status" class="block text-sm font-medium text-gray-700">Status<span class="text-red-500">*</span></label>
+                    <select id="status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <option value="Active">Active</option>
+                        <option value="Draft">Draft</option>
+                        <option value="Sold">Sold</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeListingModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition duration-150">Cancel</button>
+                    <button type="submit" id="save-button" class="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-600 transition duration-150">Save Listing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global array to store all listings for easy access during edit and filtering
+        let allListingsData = [];
+        // Object to store the currently active filters for each column
+        let activeFilters = {
+            property_name: [],
+            location: [],
+            unit_type: [],
+            status: []
+        };
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayUserName();
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            if (!username) {
+                alert("Session expired or user not logged in. Redirecting to home.");
+                window.location.href = '../index.html';
+                return;
+            }
+            fetchListings(username);
+        });
+
+        function displayUserName() {
+            const firstName = sessionStorage.getItem('loggedInUserFirstName');
+            const lastName = sessionStorage.getItem('loggedInUserLastName');
+            const userDisplayElement = document.getElementById('user-display');
+
+            if (userDisplayElement) {
+                if (firstName && lastName) {
+                    userDisplayElement.textContent = `Welcome, ${firstName} ${lastName}!`;
+                    const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                    document.getElementById('profile-initials').textContent = initials;
+                    document.getElementById('profile-name').textContent = `${firstName} ${lastName}`;
+                    
+                    const username = sessionStorage.getItem('loggedInUserUsername');
+                    if (username) loadProfilePhoto(username);
+                } else {
+                    userDisplayElement.textContent = 'Welcome, Builder!';
+                    document.getElementById('profile-initials').textContent = 'U';
+                    document.getElementById('profile-name').textContent = 'Builder';
+                }
+            }
+        }
+
+        function loadProfilePhoto(username) {
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            if (savedPhoto) {
+                const profileIcon = document.getElementById('profile-icon');
+                const profileImage = document.getElementById('profile-image');
+                const profileInitials = document.getElementById('profile-initials');
+                
+                if (profileImage && profileInitials && profileIcon) {
+                    profileImage.src = savedPhoto;
+                    profileImage.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                    profileIcon.style.background = 'white';
+                }
+            }
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            menu.classList.toggle('show');
+        }
+
+        function viewProfile() {
+            window.location.href = 'manage_profile.html';
+        }
+
+        function viewSettings() {
+            alert('Settings page coming soon!');
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+        
+        // Formats ISO/YYYY-MM-DD date string to dd/mm/yyyy
+        function formatDate(isoString) {
+            if (!isoString) return 'N/A';
+            try {
+                if (isoString.length === 10 && isoString.includes('-')) {
+                    const parts = isoString.split('-');
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+                
+                const date = new Date(isoString);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            } catch (e) {
+                return 'Invalid Date';
+            }
+        }
+
+        // --- FILTER FUNCTIONS ---
+
+        // Closes all dropdowns except the one specified
+        function closeAllFilterDropdowns(keyToKeepOpen) {
+            const dropdowns = document.querySelectorAll('.filter-dropdown');
+            dropdowns.forEach(dropdown => {
+                if (dropdown.id !== `filter-${keyToKeepOpen}`) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Toggles a specific filter dropdown visibility
+        function toggleFilterDropdown(key) {
+            const dropdown = document.getElementById(`filter-${key}`);
+            
+            // Close all others first
+            closeAllFilterDropdowns(key);
+
+            if (dropdown.classList.contains('hidden')) {
+                // Generate and display options if opening
+                generateFilterOptions(key);
+                dropdown.classList.remove('hidden');
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        }
+
+        // Generates the checkbox options inside the dropdown
+        function generateFilterOptions(key) {
+            const dropdown = document.getElementById(`filter-${key}`);
+            dropdown.innerHTML = '';
+            
+            const values = new Set();
+            allListingsData.forEach(listing => {
+                // Collect all statuses, even those of deleted/inactive listings
+                values.add(listing[key]);
+            });
+
+            // Convert Set to Array and sort
+            const sortedValues = Array.from(values).sort();
+
+            sortedValues.forEach(value => {
+                const isChecked = activeFilters[key].includes(value);
+                const checkbox = document.createElement('div');
+                checkbox.className = 'flex items-center mb-1';
+                checkbox.innerHTML = `
+                    <input type="checkbox" id="filter-${key}-${value}" value="${value}"
+                            ${isChecked ? 'checked' : ''}
+                            onchange="handleFilterChange('${key}', this.value, this.checked)"
+                            class="w-4 h-4 text-orange-600 border-gray-300 rounded">
+                    <label for="filter-${key}-${value}" class="ml-2 text-sm text-gray-700 whitespace-nowrap">${value}</label>
+                `;
+                dropdown.appendChild(checkbox);
+            });
+        }
+        
+        // Updates the activeFilters object and re-renders the table
+        function handleFilterChange(key, value, isChecked) {
+            if (isChecked) {
+                if (!activeFilters[key].includes(value)) {
+                    activeFilters[key].push(value);
+                }
+            } else {
+                activeFilters[key] = activeFilters[key].filter(v => v !== value);
+            }
+            
+            // Re-render the table based on the new filters
+            displayListings(allListingsData);
+        }
+
+        // Filters the listings and updates the table body
+        function applyFilters(listings) {
+            return listings.filter(listing => {
+                // Check each filter key (property_name, location, unit_type, status)
+                for (const key in activeFilters) {
+                    const selectedValues = activeFilters[key];
+                    
+                    // If no values are selected for this key, skip the filter
+                    if (selectedValues.length === 0) {
+                        continue;
+                    }
+
+                    // Check if the listing's value for this key is in the selected values
+                    if (!selectedValues.includes(listing[key])) {
+                        return false; // Listing does not match this filter
+                    }
+                }
+                return true; // Listing matches all active filters
+            });
+        }
+        
+        // --- Display Function (UPDATED to make property name clickable) ---
+        function displayListings(listings) {
+            const tbody = document.getElementById('listings-table-body');
+            tbody.innerHTML = '';
+            
+            // 1. EXPLICITLY FILTER OUT DELETED ENTRIES
+            const nonDeletedListings = listings.filter(listing => listing.status !== 'Deleted');
+            
+            // 2. Apply user-defined column filters (e.g., location, unit type)
+            const filteredListings = applyFilters(nonDeletedListings);
+            
+            if (filteredListings.length > 0) {
+                filteredListings.forEach(listing => {
+                    const statusClass = listing.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                         listing.status === 'Draft' ? 'bg-yellow-100 text-yellow-800' :
+                                         listing.status === 'Sold' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800';
+                    
+                    const priceDisplay = `₹${parseFloat(listing.listing_price).toLocaleString('en-IN')}`;
+                    const createdOn = formatDate(listing.created_timestamp);
+                    const activeTill = listing.expiry_date ? formatDate(listing.expiry_date) : 'N/A';
+                    
+                    const editDisabled = listing.status === 'Inactive' || listing.status === 'Sold' ? 'disabled' : '';
+                    const editClass = listing.status === 'Inactive' || listing.status === 'Sold' ? 'text-gray-400 cursor-not-allowed' : 'text-indigo-600 hover:text-indigo-900';
+
+                    // --- NEW: Property Name is now a link ---
+                    const propertyNameHtml = `
+                        <a href="listing_profile.html?timestamp=${listing.created_timestamp}" 
+                           class="text-indigo-600 hover:text-indigo-900 font-semibold transition duration-150"
+                           title="View Listing Details">
+                            ${listing.property_name}
+                        </a>
+                    `;
+
+                    const row = `
+                        <tr class="listing-row">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${propertyNameHtml}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${listing.location}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${listing.unit_type}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${createdOn}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${activeTill}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${priceDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                                    ${listing.status}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="#" onclick="if(!this.hasAttribute('disabled')) openEditListingModal('${listing.created_timestamp}')"
+                                    class="${editClass} mx-1" ${editDisabled}>Edit</a>
+                                <a href="#" onclick="handleDeleteListing('${listing.created_timestamp}', '${listing.property_name}')" class="text-red-600 hover:text-red-900 mx-1">Delete</a>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-gray-500">No properties match the current filters.</td></tr>';
+            }
+        }
+        
+        // --- Fetch Listings (Modified to call displayListings) ---
+        async function fetchListings(username) {
+            const tbody = document.getElementById('listings-table-body');
+            tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-gray-500">Fetching data...</td></tr>';
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/get_listings/${username}`);
+                const result = await response.json();
+                
+                // Store all data, including 'Deleted' entries, so the deletion handler can see them
+                allListingsData = result.listings;
+                
+                // The display function will filter out 'Deleted' entries
+                displayListings(allListingsData);
+
+            } catch (error) {
+                console.error("Error fetching listings:", error);
+                tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-red-500">Error loading data. Check server connection.</td></tr>';
+            }
+        }
+
+        // --- DELETE Function (New) ---
+        async function handleDeleteListing(timestamp, propertyName) {
+            if (!confirm(`Are you sure you want to delete (soft-delete) the listing for: ${propertyName}?`)) {
+                return;
+            }
+            
+            const builder_username = sessionStorage.getItem('loggedInUserUsername');
+            
+            if (!builder_username) {
+                alert("Session expired. Please log in again.");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/delete_listing", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        original_timestamp: timestamp,
+                        builder_username: builder_username
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`Listing "${propertyName}" has been successfully marked as Deleted.`);
+                    // Re-fetch data to reflect the deletion
+                    fetchListings(builder_username);
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+
+            } catch (error) {
+                console.error("Error during delete request:", error);
+                alert("A network error occurred while trying to delete the listing.");
+            }
+        }
+        
+        // --- Modal/Form Functions (Unchanged core logic) ---
+
+        function openCreateListingModal() {
+            document.getElementById('listingModal').style.display = 'flex';
+            document.getElementById('modal-title').textContent = 'Create New Listing';
+            document.getElementById('save-button').textContent = 'Save Listing';
+            document.getElementById('original_timestamp').value = '';
+            document.getElementById('listing-form').reset();
+            closeAllFilterDropdowns();
+        }
+
+        function closeListingModal() {
+            document.getElementById('listingModal').style.display = 'none';
+            document.getElementById('listing-form').reset();
+        }
+        
+        function openEditListingModal(timestamp) {
+            const listing = allListingsData.find(l => l.created_timestamp === timestamp);
+            if (!listing) {
+                alert('Listing not found.');
+                return;
+            }
+            
+            document.getElementById('modal-title').textContent = 'Edit Existing Listing';
+            document.getElementById('save-button').textContent = 'Update Listing';
+            document.getElementById('listingModal').style.display = 'flex';
+            
+            document.getElementById('original_timestamp').value = timestamp;
+
+            document.getElementById('property_name').value = listing.property_name;
+            document.getElementById('location').value = listing.location;
+            document.getElementById('unit_type').value = listing.unit_type;
+            document.getElementById('listing_price').value = listing.listing_price;
+            document.getElementById('status').value = listing.status;
+            
+            if (listing.expiry_date && listing.expiry_date.length > 0) {
+                document.getElementById('expiry_date').value = listing.expiry_date;
+            } else {
+                 document.getElementById('expiry_date').value = '';
+            }
+            closeAllFilterDropdowns();
+        }
+        
+        async function handleFormSubmission(event) {
+            event.preventDefault();
+            
+            const originalTimestamp = document.getElementById('original_timestamp').value;
+            
+            const formData = {
+                builder_username: sessionStorage.getItem('loggedInUserUsername'),
+                property_name: document.getElementById('property_name').value,
+                location: document.getElementById('location').value,
+                unit_type: document.getElementById('unit_type').value,
+                listing_price: document.getElementById('listing_price').value,
+                status: document.getElementById('status').value,
+                expiry_date: document.getElementById('expiry_date').value
+            };
+            
+            let endpoint = "http://127.0.0.1:5000/add_listing";
+            let requestData = formData;
+
+            if (originalTimestamp) {
+                endpoint = "http://127.0.0.1:5000/update_listing";
+                requestData = {
+                    original_timestamp: originalTimestamp,
+                    updated_data: formData
+                };
+            }
+            
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(requestData)
+            });
+
+            const result = await response.json();
+            alert(result.message);
+
+            if (result.success) {
+                closeListingModal();
+                // Clear filters on successful action and re-fetch/re-display
+                activeFilters = { property_name: [], location: [], unit_type: [], status: [] };
+                fetchListings(formData.builder_username);
+            }
+            return false;
+        }
+
+        // Global click listener to close dropdowns when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.filter-container') && !event.target.closest('.filter-dropdown')) {
+                closeAllFilterDropdowns();
+            }
+        });
+    </script>
+</body>
+</html>

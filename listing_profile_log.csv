@@ -1,0 +1,133 @@
+log_timestamp,listing_timestamp,section,field_name,old_value,new_value,editor_username
+2025-10-27T16:09:13.607237,2025-10-27T16:08:11.930365,Amenities,amenities,"Lift, Internet Provider, Club House, Children's Play Area, Fire Safety, Security, Gas Pipeline, Park, Visitor Parking, EV Chargers, Swimming Pool","Children's Play Area, Club House, EV Chargers, Fire Safety, Gas Pipeline, Internet Provider, Lift, Park, Security, Swimming Pool, Visitor Parking, Medical",Shapoorji
+2025-10-27T16:10:22.775438,2025-10-27T16:08:11.930365,Core,listing_price,123,6000000,Shapoorji
+2025-10-27T16:14:05.330047,2025-10-27T16:08:11.930365,Core,expiry_date,,2025-11-27,Shapoorji
+2025-12-06T12:31:34.538605,2025-10-27T16:08:11.930365,Core,status,Active,Sold,Shapoorji
+2025-12-06T13:42:36.977503,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765008756964_magicpattern-ixxjruC7Gg4-unsplash.jpg,Shapoorji
+2025-12-06T13:43:37.021920,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765008817018_882107326797454344_2048.jpg,Shapoorji
+2025-12-06T13:54:41.810103,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765009481796_ORIGINAL.jpg,Shapoorji
+2025-12-06T13:54:55.865532,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765009495860_13950279399037927271_2048.jpg,Shapoorji
+2025-12-06T13:58:07.437610,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765009687431_2509288256015493748_2048.jpg,Shapoorji
+2025-12-06T14:02:57.751344,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765009977746_11052941863357118027_2048.jpg,Shapoorji
+2025-12-06T14:07:05.978636,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765010225975_1928..png,Shapoorji
+2025-12-06T14:08:00.351372,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765010280346_8852256766765132711_2048.jpg,Shapoorji
+2025-12-06T14:11:50.904574,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765010510902_11717934896364209132_2048.jpg,Shapoorji
+2025-12-06T14:12:39.001145,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765010558995_16351962417334884716_2048.jpg,Shapoorji
+2025-12-06T14:20:29.722394,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765011029718_1689099853013374787_2048.jpg,Shapoorji
+2025-12-06T14:24:02.563243,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765011242558_4065805687611774065_2048.jpg,Shapoorji
+2025-12-06T14:24:55.012110,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765011295007_13950279399037927271_2048.jpg,Shapoorji
+2025-12-06T14:29:22.387986,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765011562358_usgs-hoS3dzgpHzw-unsplash.jpg,Shapoorji
+2025-12-06T14:30:56.728177,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765011656704_photo-boards-KZNTEn2r6tw-unsplash.jpg,Shapoorji
+2025-12-06T14:43:12.435060,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765012392425_ash-edmonds-azkczZ4rOgk-unsplash.jpg,Shapoorji
+2025-12-06T14:43:32.864223,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765012412854_Untitled design (13).png,Shapoorji
+2025-12-06T14:44:02.260654,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765012442255_Your paragraph text.png,Shapoorji
+2025-12-06T14:52:34.242466,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765012954231_Untitled design (7).png,Shapoorji
+2025-12-06T14:58:36.942730,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765013316932_Untitled design (9).png,Shapoorji
+2025-12-06T15:02:41.999625,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765013561986_Untitled design (14).png,Shapoorji
+2025-12-06T15:03:34.924918,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765013614914_Untitled design (7).png,Shapoorji
+2025-12-06T15:07:41.806770,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765013861795_Untitled design (10).png,Shapoorji
+2025-12-06T15:08:00.210685,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765013880202_Untitled design (1).png,Shapoorji
+2025-12-06T15:17:37.133108,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765014457117_Untitled design.png,Shapoorji
+2025-12-06T15:25:32.374621,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765014932369_Untitled design (6).png,Shapoorji
+2025-12-06T15:26:02.870084,2025-12-06T13:35:03.533613,Media,files_uploaded,4 file(s),"1765014962856_11052941863357118027_2048.jpg, 1765014962859_1041406730253876611_2048.jpg, 1765014962859_13950279399037927271_2048.jpg, 1765014962866_882107326797454344_2048.jpg",Shapoorji
+2025-12-06T15:26:19.747034,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765014979741_1476530764306485823_2048.jpg,Shapoorji
+2025-12-06T15:27:39.538781,2025-12-06T15:27:01.940019,Media,files_uploaded,1 file(s),1765015059527_Untitled design (14).png,Shapoorji
+2025-12-06T15:28:00.810802,2025-12-06T15:27:01.940019,Media,files_uploaded,3 file(s),"1765015080784_Untitled design (5).png, 1765015080796_Untitled design (3).png, 1765015080804_Untitled design (2).png",Shapoorji
+2025-12-06T15:32:26.010769,2025-12-06T15:27:01.940019,Media,files_uploaded,1 file(s),1765015346004_ash-edmonds-azkczZ4rOgk-unsplash.jpg,Shapoorji
+2025-12-06T15:33:01.128761,2025-12-06T15:27:01.940019,Media,files_uploaded,4 file(s),"1765015381073_photo-boards-KZNTEn2r6tw-unsplash.jpg, 1765015381093_usgs-hoS3dzgpHzw-unsplash.jpg, 1765015381114_Untitled design (10).png, 1765015381120_Untitled design (9).png",Shapoorji
+2025-12-06T19:28:29.290043,2025-12-06T13:35:03.533613,Media,files_uploaded,1 file(s),1765029509277_ORIGINAL.jpg,Shapoorji
+2025-12-06T19:42:39.833600,2025-12-06T15:27:01.940019,Media,files_uploaded,2 file(s),"1765030359825_15650674148762145361_2048.jpg, 1765030359829_419806101909573454_2048.jpg",Shapoorji
+2025-12-06T20:49:36.173363,2025-12-06T15:27:01.940019,Key Information,possession_on,2026-03-01,2026-03-26,Shapoorji
+2025-12-06T20:50:08.467895,2025-12-06T15:27:01.940019,Amenities,amenities,"Lift, Internet Provider, Club House, Children's Play Area, Fire Safety, Security, Gas Pipeline, Park, Visitor Parking, EV Chargers, Swimming Pool","Children's Play Area, Club House, EV Chargers, Fire Safety, Gas Pipeline, Internet Provider, Lift, Park, Rain Water Harvesting, Security, Swimming Pool, Visitor Parking",Shapoorji
+2025-12-06T21:12:32.857561,2025-12-06T13:35:03.533613,Media,files_uploaded,3 file(s),"1765035752851_882107326797454344_2048.jpg, 1765035752853_15650674148762145361_2048.jpg, 1765035752854_419806101909573454_2048.jpg",Shapoorji
+2025-12-06T21:15:39.286966,2025-12-06T13:35:03.533613,Media,files_uploaded,3 file(s),"1765035939263_ash-edmonds-azkczZ4rOgk-unsplash.jpg, 1765035939263_photo-boards-KZNTEn2r6tw-unsplash.jpg, 1765035939275_usgs-hoS3dzgpHzw-unsplash.jpg",Shapoorji
+2025-12-06T21:16:12.717783,2025-12-06T15:27:01.940019,Media,files_uploaded,5 file(s),"1765035972697_Untitled design (14).png, 1765035972697_Untitled design (9).png, 1765035972705_Untitled design (8).png, 1765035972707_Untitled design (7).png, 1765035972707_Untitled design (5).png",Shapoorji
+2025-12-06T21:39:48.874898,2025-12-06T21:39:09.286376,Media,files_uploaded,5 file(s),"1765037388841_Untitled design (13).png, 1765037388847_Untitled design (12).png, 1765037388858_Untitled design (11).png, 1765037388863_Untitled design (2).png, 1765037388868_Untitled design (1).png",Shapoorji
+2025-12-06T21:40:37.840714,2025-12-06T21:39:09.286376,Overview & Features,sq_ft,1450,,Shapoorji
+2025-12-06T21:40:51.255233,2025-12-06T21:39:09.286376,Overview & Features,sq_ft,,1450,Shapoorji
+2025-12-13T11:12:41.447804,2025-12-13T11:11:43.076175,Key Information,num_bedrooms,3,2,Godrej
+2025-12-13T11:12:41.449808,2025-12-13T11:11:43.076175,Key Information,num_bathrooms,3,2,Godrej
+2025-12-13T11:12:41.449808,2025-12-13T11:11:43.076175,Key Information,num_balcony,2,1,Godrej
+2025-12-13T11:12:41.451814,2025-12-13T11:11:43.076175,Key Information,apartment_name,The Lakeview Grand,Block A,Godrej
+2025-12-13T11:14:19.224588,2025-12-13T11:11:43.076175,Overview & Features,sq_ft,1450,1300,Godrej
+2025-12-13T11:14:19.225596,2025-12-13T11:11:43.076175,Overview & Features,built_up_area,1600 sq.ft.,1400,Godrej
+2025-12-13T11:14:19.225596,2025-12-13T11:11:43.076175,Overview & Features,carpet_area,1350 sq.ft.,1100,Godrej
+2025-12-13T11:14:19.227031,2025-12-13T11:11:43.076175,Overview & Features,age_of_building,New Construction,4 Years Old,Godrej
+2025-12-13T11:14:19.228488,2025-12-13T11:11:43.076175,Overview & Features,maintenance_charges,3500,5000,Godrej
+2025-12-13T11:14:19.228488,2025-12-13T11:11:43.076175,Overview & Features,furnishing_status,Semi-Furnished,Fully Furnished,Godrej
+2025-12-13T11:14:19.229494,2025-12-13T11:11:43.076175,Overview & Features,floor,12th of 25,2nd of 11,Godrej
+2025-12-13T11:23:15.609889,2025-12-13T11:11:43.076175,Key Information,possession_on,2026-03-01,,Godrej
+2025-12-13T11:23:33.618365,2025-12-13T11:11:43.076175,Key Information,possession_on,,Ready Possession,Godrej
+2025-12-13T11:25:14.028804,2025-12-13T11:11:43.076175,Key Information,possession_on,Ready Possession,,Godrej
+2025-12-13T11:50:13.281855,2025-12-13T11:11:43.076175,Key Information,possession_on,,Ready Possession,Godrej
+2025-12-14T10:48:26.352263,2025-12-13T11:11:43.076175,Media,files_uploaded,5 file(s),"1765689506318_pexels-eberhardgross-2098405.jpg, 1765689506329_pexels-expect-best-79873-323775.jpg, 1765689506334_pexels-falling4utah-1080696.jpg, 1765689506338_pexels-pixabay-210464.jpg, 1765689506343_pexels-emrecan-2079249.jpg",Godrej
+2025-12-14T10:50:24.734329,2025-12-14T10:49:24.930025,Media,files_uploaded,3 file(s),"1765689624716_pexels-julia-kuzenkov-442028-1974596.jpg, 1765689624722_pexels-pixabay-221540.jpg, 1765689624725_pexels-pixabay-280222.jpg",Godrej
+2025-12-14T10:51:00.320517,2025-12-14T10:49:24.930025,Amenities,amenities,"Lift, Internet Provider, Club House, Children's Play Area, Fire Safety, Security, Gas Pipeline, Park, Visitor Parking, EV Chargers, Swimming Pool","Children's Play Area, Club House, EV Chargers, Fire Safety, Gas Pipeline, Intercom Facility, Internet Provider, Jogging Track, Lift, Park, Security, Swimming Pool, Visitor Parking, Temple",Godrej
+2025-12-14T10:52:34.805658,2025-12-14T10:51:59.652640,Media,files_uploaded,2 file(s),"1765689754797_pexels-itsterrymag-2635038.jpg, 1765689754798_pexels-thgusstavo-2102587.jpg",Godrej
+2025-12-14T10:54:53.157173,2025-12-14T10:54:08.186757,Overview & Features,sq_ft,1450,1100,Godrej
+2025-12-14T10:54:53.157173,2025-12-14T10:54:08.186757,Overview & Features,built_up_area,1600 sq.ft.,1030,Godrej
+2025-12-14T10:54:53.158608,2025-12-14T10:54:08.186757,Overview & Features,carpet_area,1350 sq.ft.,950,Godrej
+2025-12-14T10:55:26.491478,2025-12-14T10:54:08.186757,Overview & Features,built_up_area,1030,1030 sq. ft.,Godrej
+2025-12-14T10:55:26.491478,2025-12-14T10:54:08.186757,Overview & Features,carpet_area,950,950 sq. ft.,Godrej
+2025-12-14T10:58:39.553789,2025-12-14T10:54:08.186757,Overview & Features,built_up_area,1030 sq. ft.,1030,Godrej
+2025-12-14T10:58:39.553789,2025-12-14T10:54:08.186757,Overview & Features,carpet_area,950 sq. ft.,950,Godrej
+2025-12-14T10:59:23.602899,2025-12-14T10:54:08.186757,Media,files_uploaded,4 file(s),"1765690163583_pexels-frans-van-heerden-201846-1438832.jpg, 1765690163588_pexels-pixabay-276724.jpg, 1765690163588_pexels-christa-grover-977018-2121121.jpg, 1765690163597_pexels-pixabay-259588.jpg",Godrej
+2025-12-14T11:00:03.487438,2025-12-14T10:53:20.304710,Key Information,possession_on,2026-03-01,Ready Possession,Godrej
+2025-12-14T11:00:57.522574,2025-12-14T10:53:20.304710,Overview & Features,sq_ft,1450,2300,Godrej
+2025-12-14T11:00:57.523591,2025-12-14T10:53:20.304710,Overview & Features,built_up_area,1600 sq.ft.,2000,Godrej
+2025-12-14T11:00:57.524599,2025-12-14T10:53:20.304710,Overview & Features,carpet_area,1350 sq.ft.,1800,Godrej
+2025-12-14T11:00:57.524599,2025-12-14T10:53:20.304710,Overview & Features,furnishing_status,Semi-Furnished,Furnished,Godrej
+2025-12-14T11:00:57.526053,2025-12-14T10:53:20.304710,Overview & Features,facing,North-East,South,Godrej
+2025-12-14T11:00:57.527285,2025-12-14T10:53:20.304710,Overview & Features,floor,12th of 25,12th of 12,Godrej
+2025-12-14T11:01:23.102518,2025-12-14T10:53:20.304710,Media,files_uploaded,5 file(s),"1765690283080_pexels-binyaminmellish-1396122.jpg, 1765690283080_pexels-scottwebb-1029599.jpg, 1765690283089_pexels-expect-best-79873-323780.jpg, 1765690283096_pexels-binyaminmellish-186077.jpg, 1765690283096_pexels-binyaminmellish-106399.jpg",Godrej
+2025-12-14T11:12:09.182341,2025-12-14T10:51:59.652640,Overview & Features,sq_ft,1450,600,Godrej
+2025-12-14T11:12:09.184373,2025-12-14T10:51:59.652640,Overview & Features,built_up_area,1600 sq.ft.,500,Godrej
+2025-12-14T11:12:09.185383,2025-12-14T10:51:59.652640,Overview & Features,carpet_area,1350 sq.ft.,450,Godrej
+2025-12-14T11:12:09.186380,2025-12-14T10:51:59.652640,Overview & Features,age_of_building,New Construction,2020,Godrej
+2025-12-14T11:12:09.187381,2025-12-14T10:51:59.652640,Overview & Features,maintenance_charges,3500,300,Godrej
+2025-12-14T11:12:09.187381,2025-12-14T10:51:59.652640,Overview & Features,furnishing_status,Semi-Furnished,Unfurnished,Godrej
+2025-12-14T11:12:09.190856,2025-12-14T10:51:59.652640,Overview & Features,facing,North-East,East,Godrej
+2025-12-14T11:12:09.192315,2025-12-14T10:51:59.652640,Overview & Features,floor,12th of 25,1st of 5,Godrej
+2025-12-14T11:12:09.193600,2025-12-14T10:51:59.652640,Overview & Features,gated_security,Yes,No,Godrej
+2025-12-14T11:13:09.477557,2025-12-14T10:51:59.652640,Key Information,num_bedrooms,3,1,Godrej
+2025-12-14T11:13:09.478616,2025-12-14T10:51:59.652640,Key Information,num_bathrooms,3,1,Godrej
+2025-12-14T11:13:09.479889,2025-12-14T10:51:59.652640,Key Information,num_balcony,2,0,Godrej
+2025-12-14T11:13:09.479889,2025-12-14T10:51:59.652640,Key Information,possession_on,2026-03-01,Ready Possession,Godrej
+2025-12-14T11:13:09.480903,2025-12-14T10:51:59.652640,Key Information,apartment_name,The Lakeview Grand,Block A,Godrej
+2025-12-14T11:13:09.482101,2025-12-14T10:51:59.652640,Key Information,parking,Bike and Car,Bike,Godrej
+2025-12-14T11:13:09.482101,2025-12-14T10:51:59.652640,Key Information,power_backup,Full,NA,Godrej
+2025-12-14T11:14:15.204016,2025-12-14T10:53:20.304710,Key Information,num_bedrooms,3,4,Godrej
+2025-12-15T12:50:58.498669,2025-12-15T12:43:56.868039,Key Information,num_bedrooms,3,6,Godrej
+2025-12-15T12:50:58.500723,2025-12-15T12:43:56.868039,Key Information,num_bathrooms,3,7,Godrej
+2025-12-15T12:50:58.502732,2025-12-15T12:43:56.868039,Key Information,num_balcony,2,5,Godrej
+2025-12-15T12:50:58.505248,2025-12-15T12:43:56.868039,Key Information,possession_on,2026-03-01,Ready Possession,Godrej
+2025-12-15T12:50:58.507258,2025-12-15T12:43:56.868039,Key Information,apartment_name,The Lakeview Grand,Individual Villa,Godrej
+2025-12-15T12:50:58.509266,2025-12-15T12:43:56.868039,Key Information,unit_type,2 BHK,6 BHK,Godrej
+2025-12-15T12:58:36.731796,2025-12-15T12:43:56.868039,Overview & Features,facing,North-East,South,Godrej
+2025-12-15T12:58:36.742334,2025-12-15T12:43:56.868039,Overview & Features,floor,12th of 25,Villa,Godrej
+2025-12-15T13:01:06.235107,2025-12-15T12:43:56.868039,Overview & Features,sq_ft,1450,7000,Godrej
+2025-12-15T13:01:06.242172,2025-12-15T12:43:56.868039,Overview & Features,built_up_area,1600 sq.ft.,6300,Godrej
+2025-12-15T13:01:06.244144,2025-12-15T12:43:56.868039,Overview & Features,carpet_area,1350 sq.ft.,5000,Godrej
+2025-12-15T13:01:06.246153,2025-12-15T12:43:56.868039,Overview & Features,age_of_building,New Construction,2020,Godrej
+2025-12-15T13:04:25.962637,2025-12-15T12:43:56.868039,Key Information,num_bedrooms,6,5,Godrej
+2025-12-15T13:04:25.964645,2025-12-15T12:43:56.868039,Key Information,num_balcony,5,4,Godrej
+2025-12-15T13:04:25.966154,2025-12-15T12:43:56.868039,Key Information,unit_type,6 BHK,5 BHK,Godrej
+2025-12-15T13:12:56.295517,2025-12-15T12:43:56.868039,Key Information,num_bedrooms,5,4,Godrej
+2025-12-15T13:12:56.299277,2025-12-15T12:43:56.868039,Key Information,num_bathrooms,7,3,Godrej
+2025-12-15T13:12:56.304599,2025-12-15T12:43:56.868039,Key Information,num_balcony,4,3,Godrej
+2025-12-15T13:12:56.306391,2025-12-15T12:43:56.868039,Key Information,unit_type,5 BHK,4 BHK,Godrej
+2025-12-15T13:17:03.691449,2025-12-15T12:43:56.868039,Core,unit_type,4 BHK,6 BHK,Godrej
+2025-12-15T13:17:36.218415,2025-12-15T12:43:56.868039,Key Information,num_bedrooms,4,6,Godrej
+2025-12-15T13:17:36.218415,2025-12-15T12:43:56.868039,Key Information,num_bathrooms,3,4,Godrej
+2025-12-15T13:17:36.224950,2025-12-15T12:43:56.868039,Key Information,num_balcony,3,4,Godrej
+2025-12-15T13:18:23.638391,2025-12-15T12:43:56.868039,Media,files_uploaded,6 file(s),"1765784903565_pexels-falling4utah-1080696.jpg, 1765784903587_pexels-pixabay-210464.jpg, 1765784903603_pexels-emrecan-2079249.jpg, 1765784903613_pexels-pixabay-276724.jpg, 1765784903621_pexels-christa-grover-977018-2121121.jpg, 1765784903638_pexels-binyaminmellish-1396122.jpg",Godrej
+2025-12-29T20:09:35.045158,2025-12-20T18:25:39.079363,Overview & Features,sq_ft,1450,2000,SUN
+2025-12-29T20:09:35.050667,2025-12-20T18:25:39.079363,Overview & Features,built_up_area,1600 sq.ft.,1900,SUN
+2025-12-29T20:09:35.051801,2025-12-20T18:25:39.079363,Overview & Features,carpet_area,1350 sq.ft.,1750,SUN
+2025-12-29T20:10:22.760761,2025-12-20T18:27:55.080766,Overview & Features,sq_ft,1450,2000,SUN
+2025-12-29T20:10:22.760761,2025-12-20T18:27:55.080766,Overview & Features,built_up_area,1600 sq.ft.,1900,SUN
+2025-12-29T20:10:22.761765,2025-12-20T18:27:55.080766,Overview & Features,carpet_area,1350 sq.ft.,1750,SUN
+2025-12-30T11:57:30.094631,2025-12-30T11:56:33.196201,Overview & Features,sq_ft,1450,4200,solankirealty
+2025-12-30T11:57:30.095858,2025-12-30T11:56:33.196201,Overview & Features,built_up_area,1600 sq.ft.,3390,solankirealty
+2025-12-30T11:57:30.095858,2025-12-30T11:56:33.196201,Overview & Features,carpet_area,1350 sq.ft.,3000,solankirealty
+2025-12-30T11:57:57.905407,2025-12-30T11:56:33.196201,Media,files_uploaded,6 file(s),"1767076077905_9.jpg, 1767076077905_8.jpg, 1767076077905_7.jpg, 1767076077905_6.jpg, 1767076077905_5.jpg, 1767076077905_4.jpg",solankirealty

@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Builder Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(to bottom, rgba(249, 115, 22, 0.05), rgba(249, 115, 22, 0.05)),
+                repeating-linear-gradient(0deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px),
+                repeating-linear-gradient(90deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px);
+            background-size: 100% 100%, 80px 80px, 80px 80px;
+            min-height: 100vh;
+        }
+        .dashboard-card { 
+            transition: transform 0.3s, box-shadow 0.3s; 
+            border: 2px solid #e2e8f0;
+        }
+        .dashboard-card:hover { 
+            transform: translateY(-6px); 
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            border-color: #f97316;
+        }
+        
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-lg border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-orange-600 to-red-500 rounded-lg flex items-center justify-center shadow-md">
+                <span class="text-white font-bold text-lg">R</span>
+            </div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-500 bg-clip-text text-transparent">RealEstate Partner</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome, Builder!</span> 
+            
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown">
+                <div class="profile-icon" onclick="toggleProfileMenu()" id="profile-icon">
+                    <span id="profile-initials">U</span>
+                    <img id="profile-image" style="display: none;" alt="Profile">
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="logout()" style="color: #dc2626;">
+                        <span>🚪 Logout</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 md:p-10">
+        <h2 class="text-3xl font-extrabold bg-gradient-to-r from-orange-600 to-red-500 bg-clip-text text-transparent mb-8 pb-2 border-b-4 border-gradient-to-r from-orange-400 to-red-400">Construction & Listing Hub</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            
+            <div class="dashboard-card bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl">
+                <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl mb-6 shadow-lg">
+                    <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-gray-800">View Task List</h3>
+                <p class="text-gray-600 mb-6 text-sm leading-relaxed">Review, assign, and update status for all active construction tasks and project deadlines.</p>
+                <button onclick="window.location.href='task_list.html'" class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 rounded-xl font-semibold transition duration-150 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    View Task List
+                </button>
+            </div>
+            
+            <div class="dashboard-card bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl">
+                <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl mb-6 shadow-lg">
+                    <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-gray-800">My Listings</h3>
+                <p class="text-gray-600 mb-6 text-sm leading-relaxed">Manage, add new, or update details and pricing for properties ready for sale.</p>
+                <button onclick="window.location.href='builder_listings.html'" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 rounded-xl font-semibold transition duration-150 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                    </svg>
+                    Manage Listings
+                </button>
+            </div>
+            
+        </div>
+    </main>
+
+    <script>
+        function logout() {
+            // Clear all user data from session storage upon logout
+            sessionStorage.removeItem('loggedInUserFirstName');
+            sessionStorage.removeItem('loggedInUserLastName');
+            sessionStorage.removeItem('loggedInUserUsername'); // <-- Important
+            window.location.href = '../index.html'; 
+        }
+
+        function displayUserName() {
+            const firstName = sessionStorage.getItem('loggedInUserFirstName');
+            const lastName = sessionStorage.getItem('loggedInUserLastName');
+            const role = "Builder";
+            
+            const userDisplayElement = document.getElementById('user-display');
+
+            if (userDisplayElement) {
+                if (firstName && lastName) {
+                    userDisplayElement.textContent = `Welcome, ${firstName} ${lastName}!`;
+                    
+                    // Update profile initials
+                    const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                    document.getElementById('profile-initials').textContent = initials;
+                    document.getElementById('profile-name').textContent = `${firstName} ${lastName}`;
+                    
+                    // Load profile photo if exists
+                    const username = sessionStorage.getItem('loggedInUserUsername');
+                    if (username) loadProfilePhoto(username);
+                } else {
+                    // Fallback to role if name data is missing
+                    userDisplayElement.textContent = `Welcome, ${role}!`;
+                    document.getElementById('profile-initials').textContent = 'U';
+                    document.getElementById('profile-name').textContent = role;
+                }
+            }
+        }
+
+        function loadProfilePhoto(username) {
+            if (!username) {
+                console.log('No username provided to loadProfilePhoto');
+                return;
+            }
+            console.log('Loading profile photo for:', username);
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            console.log('Saved photo found:', savedPhoto ? 'Yes' : 'No');
+            if (savedPhoto) {
+                const profileIcon = document.getElementById('profile-icon');
+                const profileImage = document.getElementById('profile-image');
+                const profileInitials = document.getElementById('profile-initials');
+                
+                if (profileImage && profileInitials && profileIcon) {
+                    profileImage.src = savedPhoto;
+                    profileImage.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                    profileIcon.style.background = 'white';
+                    console.log('Profile photo loaded successfully');
+                }
+            }
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            menu.classList.toggle('show');
+        }
+
+        function viewProfile() {
+            window.location.href = 'manage_profile.html';
+        }
+
+        function viewSettings() {
+            alert('Settings page coming soon!');
+            // TODO: Navigate to settings page
+            // window.location.href = 'settings.html';
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Run the function when the page loads
+        document.addEventListener('DOMContentLoaded', displayUserName);
+    </script>
+</body>
+</html>

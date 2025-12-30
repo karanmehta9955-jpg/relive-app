@@ -1,0 +1,17 @@
+builder_username,property_name,location,unit_type,listing_price,status,created_timestamp,expiry_date
+Shapoorji,Nyati,Bavdhan,2 BHK,6000000,Deleted,2025-10-27T16:08:11.930365,2025-11-27
+ANP,Gulmohar,Bavdhan,2 BHK,6000000,Active,2025-10-27T21:14:58.165186,
+ANP,Saffron,Bavdhan,3 BHK,9000000,Active,2025-10-28T16:55:11.881870,
+Shapoorji,Nyati,Bavdhan,2 BHK,10000000,Deleted,2025-12-06T13:35:03.533613,
+Shapoorji,Saffron,viman nagar,3 BHK,5000000,Deleted,2025-12-06T15:27:01.940019,
+Shapoorji,Mehta,Satellite,4 BHK,20000000,Deleted,2025-12-06T21:39:09.286376,
+Godrej,Saffron Avenue,Bavdhan,2 BHK,9000000,Active,2025-12-13T11:11:43.076175,
+Godrej,Pinnacle Gulmohar,Patil Nagar,3 BHK,8000000,Active,2025-12-14T10:49:24.930025,
+Godrej,Nyati,Viman Nagar,1 RK,5000000,Active,2025-12-14T10:51:59.652640,
+Godrej,Rohan Ishan,Kothrud,4 BHK,20000000,Active,2025-12-14T10:53:20.304710,
+Godrej,Niche Crown,Satellite,1 BHK,3000000,Active,2025-12-14T10:54:08.186757,
+Godrej,Passi Flora,Bavdhan,6 BHK,15000000,Active,2025-12-15T12:43:56.868039,
+SUN,Shyam Gokul,Shyamal,3 BHK,9000000,Active,2025-12-20T18:24:30.870522,
+SUN,Parshwa Towers,Satellite,2 BHK,8000000,Active,2025-12-20T18:25:39.079363,
+SUN,Prerna Society,Vastrapur,4 BHK,9500000,Active,2025-12-20T18:27:55.080766,
+solankirealty,Diamond Coast,Bavdhan,4 BHK,35000000,Active,2025-12-30T11:56:33.196201,

@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #f8fafc;
+            background-image: 
+                linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 80px 80px;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .dashboard-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .dashboard-card:hover { 
+            transform: translateY(-8px) scale(1.02); 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .dashboard-card:hover::before {
+            opacity: 1;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.95);
+            transition: all 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        
+        .icon-wrapper {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--icon-color-1), var(--icon-color-2));
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .icon-wrapper svg {
+            width: 36px;
+            height: 36px;
+            fill: white;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .feature-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-lg p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                R
+            </div>
+            <h1 class="text-2xl font-bold gradient-text">RealEstate Partner</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome, Customer!</span>
+            
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown">
+                <div class="profile-icon" onclick="toggleProfileMenu()" id="profile-icon">
+                    <span id="profile-initials">U</span>
+                    <img id="profile-image" style="display: none;" alt="Profile">
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="logout()" style="color: #dc2626;">
+                        <span>🚪 Logout</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 md:p-10">
+        <!-- Hero Welcome Section -->
+        <div class="hero-section rounded-3xl p-8 md:p-12 mb-10 text-white shadow-xl">
+            <div class="flex flex-col md:flex-row justify-between items-center relative z-10">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-extrabold mb-3">
+                        Welcome Back!
+                    </h2>
+                    <p class="text-xl opacity-90 mb-6">
+                        Find your dream property today
+                    </p>
+                    <button onclick="window.location.href='search_properties.html'" 
+                        class="bg-white text-blue-600 font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Start Exploring Properties
+                    </button>
+                </div>
+                <div class="mt-6 md:mt-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32 text-white opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="stat-card p-6 rounded-2xl shadow-lg cursor-pointer" onclick="window.location.href='my_favorites.html'">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold mb-1">Saved Properties</p>
+                        <p class="text-3xl font-bold text-gray-800" id="favorites-count">0</p>
+                    </div>
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card p-6 rounded-2xl shadow-lg cursor-pointer" onclick="window.location.href='my_appointments.html'">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold mb-1">Appointments</p>
+                        <p class="text-3xl font-bold text-gray-800" id="appointments-count">0</p>
+                    </div>
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card p-6 rounded-2xl shadow-lg cursor-pointer" onclick="window.location.href='my_appointments.html'">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold mb-1">Connect Requests</p>
+                        <p class="text-3xl font-bold text-gray-800" id="requests-count">0</p>
+                    </div>
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-8 flex items-center">
+            <span class="bg-white rounded-2xl px-6 py-3 shadow-md border border-gray-200 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span class="gradient-text">Quick Actions</span>
+            </span>
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="dashboard-card bg-white p-8 rounded-3xl shadow-xl border-2 border-transparent hover:border-blue-200">
+                <div class="icon-wrapper" style="--icon-color-1: #3b82f6; --icon-color-2: #2563eb;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-gray-800">Search Properties</h3>
+                <p class="text-gray-600 mb-6 text-sm leading-relaxed">Browse the latest listings for homes, apartments, and commercial spaces tailored to your preferences.</p>
+                <button onclick="window.location.href='search_properties.html'" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 rounded-xl font-semibold transition duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                    Explore Now →
+                </button>
+            </div>
+            
+            <div class="dashboard-card bg-white p-8 rounded-3xl shadow-xl border-2 border-transparent hover:border-green-200">
+                <span class="feature-badge">Popular</span>
+                <div class="icon-wrapper" style="--icon-color-1: #10b981; --icon-color-2: #059669;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-gray-800">My Favorites</h3>
+                <p class="text-gray-600 mb-6 text-sm leading-relaxed">View saved properties and receive instant updates on price changes or availability status.</p>
+                <button onclick="window.location.href='my_favorites.html'" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 rounded-xl font-semibold transition duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                    View Collection →
+                </button>
+            </div>
+            
+            <div class="dashboard-card bg-white p-8 rounded-3xl shadow-xl border-2 border-transparent hover:border-teal-200">
+                <div class="icon-wrapper" style="--icon-color-1: #14b8a6; --icon-color-2: #0d9488;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-gray-800">Browse Experts</h3>
+                <p class="text-gray-600 mb-6 text-sm leading-relaxed">Connect with experienced real estate consultants for professional guidance on your property journey.</p>
+                <button onclick="window.location.href='browse_experts.html'" class="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white py-3 rounded-xl font-semibold transition duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                    Find Experts →
+                </button>
+            </div>
+            
+            <div class="dashboard-card bg-white p-8 rounded-3xl shadow-xl border-2 border-transparent hover:border-purple-200">
+                <div class="icon-wrapper" style="--icon-color-1: #a855f7; --icon-color-2: #9333ea;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-gray-800">My Appointments</h3>
+                <p class="text-gray-600 mb-6 text-sm leading-relaxed">Manage all your scheduled property visits and consultant meetings in one convenient place.</p>
+                <button onclick="window.location.href='my_appointments.html'" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 rounded-xl font-semibold transition duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                    View Schedule →
+                </button>
+            </div>
+            
+            <div class="dashboard-card bg-white p-8 rounded-3xl shadow-xl border-2 border-transparent hover:border-indigo-200">
+                <div class="icon-wrapper" style="--icon-color-1: #6366f1; --icon-color-2: #4f46e5;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-gray-800">Schedule a Call</h3>
+                <p class="text-gray-600 mb-6 text-sm leading-relaxed">Get personalized assistance from our team to help you make informed property decisions.</p>
+                <button onclick="alert('Contact feature coming soon!')" class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white py-3 rounded-xl font-semibold transition duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                    Contact Us →
+                </button>
+            </div>
+            
+        </div>
+    </main>
+
+    <script>
+        function logout() {
+            // Clear session storage upon logout
+            sessionStorage.removeItem('loggedInUserFirstName');
+            sessionStorage.removeItem('loggedInUserLastName');
+            window.location.href = '../index.html'; // Redirect to the main index
+        }
+
+        function displayUserName() {
+            const firstName = sessionStorage.getItem('loggedInUserFirstName');
+            const lastName = sessionStorage.getItem('loggedInUserLastName');
+            const username = sessionStorage.getItem('loggedInUserUsername');
+            const role = "Customer"; // Role specific
+            
+            const userDisplayElement = document.getElementById('user-display');
+
+            if (userDisplayElement) {
+                if (firstName && lastName) {
+                    userDisplayElement.textContent = `Welcome, ${firstName} ${lastName}!`;
+                    
+                    // Update profile initials
+                    const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                    document.getElementById('profile-initials').textContent = initials;
+                    document.getElementById('profile-name').textContent = `${firstName} ${lastName}`;
+                    
+                    // Load profile photo if exists
+                    if (username) loadProfilePhoto(username);
+                } else {
+                    userDisplayElement.textContent = `Welcome, ${role}!`;
+                    document.getElementById('profile-initials').textContent = 'U';
+                    document.getElementById('profile-name').textContent = role;
+                }
+            }
+            
+            // Load stats
+            loadDashboardStats(username);
+        }
+
+        function loadDashboardStats(username) {
+            if (!username) return;
+            
+            // Get current customer's name and email
+            const customerFirstName = sessionStorage.getItem('loggedInUserFirstName') || '';
+            const customerLastName = sessionStorage.getItem('loggedInUserLastName') || '';
+            const currentCustomerName = `${customerFirstName} ${customerLastName}`.trim();
+            const customerEmail = sessionStorage.getItem('loggedInUserEmail') || '';
+            
+            // Load favorites count
+            const favorites = JSON.parse(localStorage.getItem(`favoriteProperties_${username}`) || '[]');
+            document.getElementById('favorites-count').textContent = favorites.length;
+            
+            // Load appointments count (visit bookings + expert assisted visits) - filtered by customer email
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            const customerDirectVisits = visitBookings.filter(visit => visit.customerEmail === customerEmail);
+            
+            const expertVisits = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            const customerExpertVisits = expertVisits.filter(visit => visit.customerEmail === customerEmail);
+            
+            const totalAppointments = customerDirectVisits.length + customerExpertVisits.length;
+            document.getElementById('appointments-count').textContent = totalAppointments;
+            
+            // Load requests count (connect requests + consultant requests) - filtered by current customer
+            const allConnectRequests = JSON.parse(localStorage.getItem('connectRequests') || '[]');
+            const customerConnectRequests = allConnectRequests.filter(r => r.customerName === currentCustomerName);
+            
+            const allConsultantRequests = JSON.parse(localStorage.getItem('consultantConnectRequests') || '[]');
+            const customerConsultantRequests = allConsultantRequests.filter(r => r.customerName === currentCustomerName);
+            
+            const totalRequests = customerConnectRequests.length + customerConsultantRequests.length;
+            document.getElementById('requests-count').textContent = totalRequests;
+        }
+
+        function loadProfilePhoto(username) {
+            if (!username) {
+                console.log('No username provided to loadProfilePhoto');
+                return;
+            }
+            console.log('Loading profile photo for:', username);
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            console.log('Saved photo found:', savedPhoto ? 'Yes' : 'No');
+            if (savedPhoto) {
+                const profileIcon = document.getElementById('profile-icon');
+                const profileImage = document.getElementById('profile-image');
+                const profileInitials = document.getElementById('profile-initials');
+                
+                if (profileImage && profileInitials && profileIcon) {
+                    profileImage.src = savedPhoto;
+                    profileImage.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                    profileIcon.style.background = 'white';
+                    console.log('Profile photo loaded successfully');
+                }
+            }
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            menu.classList.toggle('show');
+        }
+
+        function viewProfile() {
+            window.location.href = 'manage_profile.html';
+        }
+
+        function viewSettings() {
+            alert('Settings page coming soon!');
+            // TODO: Navigate to settings page
+            // window.location.href = 'settings.html';
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', displayUserName);
+    </script>
+</body>
+</html>

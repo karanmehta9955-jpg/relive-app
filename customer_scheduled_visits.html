@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Scheduled Visits - Customer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(to bottom, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.05)),
+                repeating-linear-gradient(0deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px),
+                repeating-linear-gradient(90deg, transparent, transparent 79px, #e2e8f0 79px, #e2e8f0 80px);
+            background-size: 100% 100%, 80px 80px, 80px 80px;
+            min-height: 100vh;
+        }
+
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-icon img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .profile-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        /* Calendar Styles */
+        .calendar-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .time-slot {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            position: relative;
+            min-height: 60px;
+        }
+
+        .time-slot:hover {
+            background-color: #f9fafb;
+        }
+
+        .visit-block {
+            position: relative;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .visit-block:hover {
+            transform: translateX(3px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Pending = Highlighted/Tentative */
+        .visit-pending {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            border-style: dashed;
+        }
+
+        /* Accepted = Solid */
+        .visit-accepted {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid #10b981;
+            border-style: solid;
+        }
+
+        /* Rejected = Red */
+        .visit-rejected {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left: 4px solid #ef4444;
+            border-style: solid;
+        }
+
+        .visit-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border: 2px solid #e2e8f0;
+        }
+
+        .visit-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+            border-color: #3b82f6;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-accepted {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .scrollable-list {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .scrollable-calendar {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar */
+        .scrollable-list::-webkit-scrollbar,
+        .scrollable-calendar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-track,
+        .scrollable-calendar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb,
+        .scrollable-calendar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb:hover,
+        .scrollable-calendar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Month View Styles */
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #e5e7eb;
+            border: 1px solid #e5e7eb;
+        }
+
+        .month-day-header {
+            background-color: #f3f4f6;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .month-day-cell {
+            background-color: white;
+            min-height: 100px;
+            padding: 0.5rem;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .month-day-cell.other-month {
+            background-color: #f9fafb;
+            color: #9ca3af;
+        }
+
+        .month-day-cell.today {
+            background-color: #dbeafe;
+        }
+
+        .month-day-number {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .month-visit-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 1px;
+        }
+
+        .month-visit-dot.pending {
+            background-color: #f59e0b;
+        }
+
+        .month-visit-dot.accepted {
+            background-color: #10b981;
+        }
+
+        .month-visit-dot.rejected {
+            background-color: #ef4444;
+        }
+
+        .view-toggle {
+            display: inline-flex;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+        }
+
+        .view-toggle button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .view-toggle button.active {
+            background-color: white;
+            color: #3b82f6;
+        }
+
+        .view-toggle button:not(.active) {
+            color: white;
+        }
+
+        .view-toggle button:not(.active):hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-lg border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center shadow-md">
+                <span class="text-white font-bold text-xl">R</span>
+            </div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">My Scheduled Visits</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="user-display" class="text-gray-600 font-medium">Welcome, Customer!</span>
+            
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown">
+                <div class="profile-icon" onclick="toggleProfileMenu()" id="profile-icon">
+                    <span id="profile-initials">U</span>
+                    <img id="profile-image" style="display: none;" alt="Profile">
+                </div>
+                <div class="dropdown-menu" id="profile-menu">
+                    <div class="dropdown-item" style="pointer-events: none; background: #f9fafb;">
+                        <span style="font-weight: 600; color: #1f2937;">👤 <span id="profile-name">User</span></span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="viewProfile()">
+                        <span>⚙️ Manage Profile</span>
+                    </div>
+                    <div class="dropdown-item" onclick="viewSettings()">
+                        <span>🔧 Settings</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="window.location.href='customer_dashboard.html'" style="color: #dc2626;">
+                        <span>🏠 Dashboard</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="window.history.back()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                ← Back
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6">
+        <!-- Stats Dashboard -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Total Visits</p>
+                <p id="total-visits" class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Pending</p>
+                <p id="pending-visits" class="text-3xl font-bold text-yellow-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Confirmed</p>
+                <p id="accepted-visits" class="text-3xl font-bold text-green-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Cancelled</p>
+                <p id="cancelled-visits" class="text-3xl font-bold text-red-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Completed</p>
+                <p id="completed-visits" class="text-3xl font-bold text-indigo-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="text-sm text-gray-500 mb-1">Upcoming</p>
+                <p id="upcoming-visits" class="text-3xl font-bold text-purple-600">0</p>
+            </div>
+        </div>
+
+        <!-- Main Layout: 70% Calendar + 30% Visit List -->
+        <div class="grid grid-cols-1 lg:grid-cols-10 gap-6">
+            
+            <!-- Left Side: Calendar (70%) -->
+            <div class="lg:col-span-7">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-1">Visit Calendar</h2>
+                                <p id="calendar-date" class="text-blue-200">My Schedule</p>
+                            </div>
+                            <div class="view-toggle">
+                                <button id="day-view-btn" onclick="switchView('day')" class="active">
+                                    Day View
+                                </button>
+                                <button id="month-view-btn" onclick="switchView('month')">
+                                    Month View
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-center space-x-2">
+                            <button onclick="previousPeriod()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition">
+                                ← <span id="prev-label">Prev</span>
+                            </button>
+                            <button onclick="today()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition">
+                                Today
+                            </button>
+                            <button onclick="nextPeriod()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition">
+                                <span id="next-label">Next</span> →
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="scrollable-calendar p-4">
+                        <div id="calendar-grid">
+                            <!-- Time slots will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="p-4 bg-gray-50 border-t border-gray-200">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Status Legend:</p>
+                        <div class="flex space-x-4">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded bg-yellow-200 border-2 border-dashed border-yellow-500 mr-2"></div>
+                                <span class="text-sm text-gray-600">Pending Confirmation</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded bg-green-200 border-2 border-solid border-green-500 mr-2"></div>
+                                <span class="text-sm text-gray-600">Confirmed</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded bg-red-200 border-2 border-solid border-red-500 mr-2"></div>
+                                <span class="text-sm text-gray-600">Rejected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: All Visits List (30%) -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">My Visits</h3>
+                    
+                    <!-- Visit Type Toggles -->
+                    <div class="grid grid-cols-3 gap-2 mb-4 bg-gray-100 p-1 rounded-lg">
+                        <button onclick="switchVisitType('all')" id="type-all" class="px-3 py-2 text-sm font-semibold rounded-md bg-white text-blue-700 shadow-sm">
+                            <div class="text-xs text-gray-500">All</div>
+                            <div id="all-visits-count" class="text-lg font-bold">0</div>
+                        </button>
+                        <button onclick="switchVisitType('direct')" id="type-direct" class="px-3 py-2 text-sm font-semibold rounded-md text-gray-600 hover:bg-gray-50">
+                            <div class="text-xs">Direct</div>
+                            <div id="direct-visits-count" class="text-lg font-bold">0</div>
+                        </button>
+                        <button onclick="switchVisitType('expert')" id="type-expert" class="px-3 py-2 text-sm font-semibold rounded-md text-gray-600 hover:bg-gray-50">
+                            <div class="text-xs">Expert</div>
+                            <div id="expert-visits-count" class="text-lg font-bold">0</div>
+                        </button>
+                    </div>
+                    
+                    <!-- Status Filter Tabs -->
+                    <div class="flex space-x-2 mb-4">
+                        <button onclick="filterVisits('all')" id="filter-all" class="flex-1 px-3 py-2 text-sm font-semibold rounded-lg bg-blue-100 text-blue-700">
+                            All
+                        </button>
+                        <button onclick="filterVisits('Pending')" id="filter-pending" class="flex-1 px-3 py-2 text-sm font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200">
+                            Pending
+                        </button>
+                        <button onclick="filterVisits('Accepted')" id="filter-accepted" class="flex-1 px-3 py-2 text-sm font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200">
+                            Confirmed
+                        </button>
+                    </div>
+                    
+                    <div class="scrollable-list" id="visits-container">
+                        <!-- Visit cards will be loaded here -->
+                    </div>
+
+                    <div id="no-visits" class="hidden text-center py-8">
+                        <div class="text-gray-300 text-5xl mb-3">📅</div>
+                        <p class="text-gray-500 text-sm">No visits found</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Visit Details Modal -->
+    <div id="visit-details-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Visit Details</h3>
+                <button onclick="closeVisitDetailsModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <div id="modal-visit-content">
+                <!-- Visit details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancellation Reason Modal -->
+    <div id="cancellation-reason-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Cancellation Reason</h2>
+                <button onclick="closeCancellationReasonModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold leading-none">&times;</button>
+            </div>
+            
+            <!-- Property Info -->
+            <div class="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 p-4 rounded-lg mb-6">
+                <p class="text-xs text-red-700 font-semibold mb-1">🚫 Visit Cancelled</p>
+                <p class="font-bold text-gray-800" id="cancelled-property-name">Property Name</p>
+                <p class="text-sm text-gray-600" id="cancelled-property-location">Location</p>
+            </div>
+            
+            <!-- Cancellation Date -->
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <p class="text-xs text-gray-600 font-semibold mb-1">Cancelled On</p>
+                <p class="text-sm text-gray-800" id="cancellation-date">-</p>
+            </div>
+            
+            <!-- Builder's Reason -->
+            <div class="bg-white border-2 border-gray-200 p-4 rounded-lg mb-6">
+                <p class="text-sm font-semibold text-gray-700 mb-2">Builder's Message:</p>
+                <p class="text-gray-800" id="cancellation-reason-text" style="white-space: pre-wrap;">Loading...</p>
+            </div>
+            
+            <!-- Suggestion -->
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 p-4 rounded-lg">
+                <p class="text-sm text-blue-800">
+                    <strong>💡 Suggestion:</strong> You can create a new visit request for a different date and time. The builder might have multiple site visits scheduled during your preferred slot.
+                </p>
+            </div>
+            
+            <div class="mt-6">
+                <button onclick="closeCancellationReasonModal()" 
+                    class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reschedule Visit Modal -->
+    <div id="reschedule-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">📅 Reschedule Visit</h3>
+                <button onclick="closeRescheduleModal()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <!-- Current Visit Info -->
+            <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-yellow-500 p-4 rounded-lg mb-6">
+                <h4 class="font-semibold text-gray-800 mb-2">Current Schedule</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <p class="text-xs text-gray-600">Date</p>
+                        <p class="font-bold text-gray-800" id="current-visit-date">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-600">Time</p>
+                        <p class="font-bold text-gray-800" id="current-visit-time">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Info -->
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 p-4 rounded-lg mb-6">
+                <h4 class="font-semibold text-gray-800 mb-2">Property</h4>
+                <p class="font-bold text-gray-800" id="reschedule-property-name">-</p>
+                <p class="text-sm text-gray-600" id="reschedule-property-location">-</p>
+            </div>
+            
+            <!-- New Schedule Form -->
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📅 New Visit Date</label>
+                    <input type="date" id="reschedule-date" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">⏰ New Visit Time</label>
+                    <select id="reschedule-time" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="">Select a time</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📝 Reason for Rescheduling (Optional)</label>
+                    <textarea id="reschedule-reason" rows="3" 
+                              placeholder="Please mention why you need to reschedule..."
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"></textarea>
+                </div>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p class="text-sm text-blue-800">
+                        <span class="font-semibold">ℹ️ Note:</span> The builder will need to approve your reschedule request.
+                    </p>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button onclick="closeRescheduleModal()" 
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-150">
+                        Cancel
+                    </button>
+                    <button onclick="confirmReschedule()" 
+                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150">
+                        Submit Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let allVisits = [];
+        let currentView = 'day'; // 'day' or 'month'
+        let currentFilter = 'all'; // 'all', 'Pending', 'Accepted'
+        let currentVisitType = 'all'; // 'all', 'direct', 'expert'
+        const loggedInEmail = sessionStorage.getItem('loggedInUserEmail');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayUserName();
+            loadVisits();
+        });
+
+        function displayUserName() {
+            const firstName = sessionStorage.getItem('loggedInUserFirstName');
+            const lastName = sessionStorage.getItem('loggedInUserLastName');
+            const userDisplayElement = document.getElementById('user-display');
+
+            if (userDisplayElement && firstName && lastName) {
+                userDisplayElement.textContent = `Welcome, ${firstName} ${lastName}!`;
+                
+                // Update profile initials
+                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                document.getElementById('profile-initials').textContent = initials;
+                document.getElementById('profile-name').textContent = `${firstName} ${lastName}`;
+                
+                const username = sessionStorage.getItem('loggedInUserUsername');
+                if (username) loadProfilePhoto(username);
+            } else if (userDisplayElement) {
+                document.getElementById('profile-initials').textContent = 'U';
+                document.getElementById('profile-name').textContent = 'Customer';
+            }
+        }
+
+        function loadProfilePhoto(username) {
+            const savedPhoto = localStorage.getItem(`profilePhoto_${username}`);
+            if (savedPhoto) {
+                const profileIcon = document.getElementById('profile-icon');
+                const profileImage = document.getElementById('profile-image');
+                const profileInitials = document.getElementById('profile-initials');
+                
+                if (profileImage && profileInitials && profileIcon) {
+                    profileImage.src = savedPhoto;
+                    profileImage.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                    profileIcon.style.background = 'white';
+                }
+            }
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            menu.classList.toggle('show');
+        }
+
+        function viewProfile() {
+            window.location.href = 'manage_profile.html';
+        }
+
+        function viewSettings() {
+            alert('Settings page coming soon!');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profile-menu');
+            if (dropdown && !dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        function loadVisits() {
+            // Load direct visit bookings from localStorage
+            const visitBookings = JSON.parse(localStorage.getItem('visitBookings') || '[]');
+            
+            const directVisits = visitBookings.filter(visit => visit.customerEmail === loggedInEmail)
+                .map(visit => ({
+                    ...visit,
+                    visitType: 'Direct Visit',
+                    propertyDetails: {
+                        name: visit.propertyDetails?.name || visit.propertyName || 'N/A',
+                        apartmentName: visit.propertyDetails?.apartmentName || 'N/A',
+                        location: visit.propertyDetails?.location || 'N/A',
+                        bhk: visit.propertyDetails?.bhk || visit.propertyDetails?.num_bedrooms || 'N/A',
+                        sqft: visit.propertyDetails?.sqft || visit.propertyDetails?.sq_ft || 'N/A',
+                        price: visit.propertyDetails?.price || visit.propertyDetails?.listing_price || 0
+                    }
+                }));
+            
+            // Load expert-assisted visit bookings from localStorage
+            const expertVisitBookings = JSON.parse(localStorage.getItem('expertAssistedVisitRequests') || '[]');
+            
+            const expertVisits = expertVisitBookings.filter(visit => visit.customerEmail === loggedInEmail)
+                .map(visit => {
+                    const pd = visit.propertyDetails || {};
+                    // Handle multiple possible field name variations
+                    const bhkValue = pd.bhk || pd.numBedrooms || pd.num_bedrooms || visit.bhk || 'N/A';
+                    const sqftValue = pd.sqft || pd.sqFt || pd.sq_ft || visit.sqft || 'N/A';
+                    const priceValue = pd.price || pd.listing_price || visit.price || 0;
+                    
+                    return {
+                        ...visit,
+                        visitType: 'Expert Assisted Visit',
+                        propertyDetails: {
+                            name: pd.name || pd.propertyName || 'N/A',
+                            apartmentName: pd.apartmentName || 'N/A',
+                            location: pd.location || 'N/A',
+                            bhk: bhkValue,
+                            sqft: sqftValue,
+                            price: priceValue
+                        }
+                    };
+                });
+            
+            // Combine all visits
+            allVisits = [...directVisits, ...expertVisits];
+            
+            updateStats();
+            renderCalendar();
+            renderVisitsList();
+        }
+
+        function updateStats() {
+            const total = allVisits.length;
+            const directCount = allVisits.filter(v => v.visitType === 'Direct Visit').length;
+            const expertCount = allVisits.filter(v => v.visitType === 'Expert Assisted Visit').length;
+            const pending = allVisits.filter(v => v.status === 'Pending' || v.status === 'pending').length;
+            const accepted = allVisits.filter(v => v.status === 'Accepted' || v.status === 'accepted').length;
+            const cancelled = allVisits.filter(v => v.status === 'Cancelled by Builder').length;
+            const completed = allVisits.filter(v => v.status === 'Completed').length;
+            
+            // Count upcoming visits (accepted visits in the future)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const upcoming = allVisits.filter(v => {
+                const visitDate = new Date(v.visitDate);
+                return (v.status === 'Accepted' || v.status === 'accepted') && visitDate >= today;
+            }).length;
+            
+            document.getElementById('total-visits').textContent = total;
+            document.getElementById('pending-visits').textContent = pending;
+            document.getElementById('accepted-visits').textContent = accepted;
+            document.getElementById('cancelled-visits').textContent = cancelled;
+            document.getElementById('completed-visits').textContent = completed;
+            document.getElementById('upcoming-visits').textContent = upcoming;
+            document.getElementById('all-visits-count').textContent = total;
+            document.getElementById('direct-visits-count').textContent = directCount;
+            document.getElementById('expert-visits-count').textContent = expertCount;
+        }
+
+        function renderCalendar() {
+            if (currentView === 'day') {
+                renderDayView();
+            } else {
+                renderMonthView();
+            }
+        }
+
+        function renderDayView() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            
+            // Format date as YYYY-MM-DD to match the stored format
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+            
+            // Update calendar header date
+            document.getElementById('calendar-date').textContent = currentDate.toLocaleDateString('en-IN', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // Filter visits for the selected date and visit type
+            let dayVisits = allVisits.filter(visit => visit.visitDate === dateStr);
+            if (currentVisitType !== 'all') {
+                dayVisits = dayVisits.filter(visit => 
+                    currentVisitType === 'direct' ? visit.visitType === 'Direct Visit' : visit.visitType === 'Expert Assisted Visit'
+                );
+            }
+            
+            // Generate time slots from 9 AM to 6 PM
+            const timeSlots = generateTimeSlots();
+            
+            let html = '';
+            timeSlots.forEach(slot => {
+                const visitsInSlot = dayVisits.filter(visit => visit.visitTime === slot);
+                
+                html += `
+                    <div class="time-slot">
+                        <div class="flex">
+                            <div class="w-24 text-sm font-semibold text-gray-600">${slot}</div>
+                            <div class="flex-1">
+                                ${visitsInSlot.map(visit => createVisitBlock(visit)).join('')}
+                                ${visitsInSlot.length === 0 ? '<span class="text-xs text-gray-400">No visits scheduled</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            calendarGrid.innerHTML = html;
+        }
+
+        function renderMonthView() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            
+            // Update calendar header to show month and year
+            document.getElementById('calendar-date').textContent = currentDate.toLocaleDateString('en-IN', { 
+                year: 'numeric', 
+                month: 'long' 
+            });
+            
+            // Get first day of month and number of days in month
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday
+            
+            // Days of week headers
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            let html = '<div class="month-grid">';
+            
+            // Add day headers
+            dayNames.forEach(day => {
+                html += `<div class="month-day-header">${day}</div>`;
+            });
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const prevMonthDate = new Date(year, month, -(startingDayOfWeek - i - 1));
+                html += `<div class="month-day-cell other-month">
+                    <div class="month-day-number">${prevMonthDate.getDate()}</div>
+                </div>`;
+            }
+            
+            // Add days of the month
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                let dayVisits = allVisits.filter(visit => visit.visitDate === dateStr);
+                if (currentVisitType !== 'all') {
+                    dayVisits = dayVisits.filter(visit => 
+                        currentVisitType === 'direct' ? visit.visitType === 'Direct Visit' : visit.visitType === 'Expert Assisted Visit'
+                    );
+                }
+                const isToday = dateStr === todayStr;
+                
+                html += `<div class="month-day-cell ${isToday ? 'today' : ''}" onclick="viewDayFromMonth('${dateStr}')">
+                    <div class="month-day-number">${day}</div>`;
+                
+                if (dayVisits.length > 0) {
+                    const pending = dayVisits.filter(v => v.status === 'Pending').length;
+                    const accepted = dayVisits.filter(v => v.status === 'Accepted').length;
+                    const rejected = dayVisits.filter(v => v.status === 'Rejected').length;
+                    
+                    html += '<div class="mt-1">';
+                    for (let i = 0; i < pending; i++) {
+                        html += '<span class="month-visit-dot pending"></span>';
+                    }
+                    for (let i = 0; i < accepted; i++) {
+                        html += '<span class="month-visit-dot accepted"></span>';
+                    }
+                    for (let i = 0; i < rejected; i++) {
+                        html += '<span class="month-visit-dot rejected"></span>';
+                    }
+                    html += '</div>';
+                    html += `<div class="text-xs text-gray-600 mt-1">${dayVisits.length} visit${dayVisits.length > 1 ? 's' : ''}</div>`;
+                }
+                
+                html += '</div>';
+            }
+            
+            // Add empty cells for days after month ends
+            const totalCells = startingDayOfWeek + daysInMonth;
+            const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let i = 1; i <= remainingCells; i++) {
+                html += `<div class="month-day-cell other-month">
+                    <div class="month-day-number">${i}</div>
+                </div>`;
+            }
+            
+            html += '</div>';
+            calendarGrid.innerHTML = html;
+        }
+
+        function viewDayFromMonth(dateStr) {
+            // Parse the date string (format: YYYY-MM-DD)
+            const [year, month, day] = dateStr.split('-').map(num => parseInt(num));
+            currentDate = new Date(year, month - 1, day);
+            switchView('day');
+        }
+
+        function generateTimeSlots() {
+            const slots = [];
+            const times = [
+                '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+                '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM', '02:00 PM', '02:30 PM',
+                '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM'
+            ];
+            return times;
+        }
+
+        function createVisitBlock(visit) {
+            let statusClass = 'visit-pending';
+            let statusIcon = '⏳';
+            const status = (visit.status || '').toLowerCase();
+            
+            if (status === 'accepted') {
+                statusClass = 'visit-accepted';
+                statusIcon = '✓';
+            } else if (status === 'rejected') {
+                statusClass = 'visit-rejected';
+                statusIcon = '✗';
+            }
+            
+            const visitTypeIcon = visit.visitType === 'Expert Assisted Visit' ? '👨‍💼' : '🏠';
+            const propertyName = visit.propertyDetails?.name || visit.propertyDetails?.propertyName || 'Property';
+            
+            return `
+                <div class="visit-block ${statusClass}" onclick="viewVisitDetails(${visit.id})">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="font-semibold text-sm">${statusIcon} ${visitTypeIcon} ${propertyName}</p>
+                            <p class="text-xs text-gray-600">${visit.builderName}</p>
+                            <p class="text-xs text-gray-500">${visit.propertyDetails?.location}</p>
+                        </div>
+                        <span class="badge badge-${status}">
+                            ${visit.status}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderVisitsList() {
+            const container = document.getElementById('visits-container');
+            const noVisits = document.getElementById('no-visits');
+            
+            let visitsToShow = allVisits;
+            
+            // Filter by visit type
+            if (currentVisitType !== 'all') {
+                visitsToShow = visitsToShow.filter(visit => 
+                    currentVisitType === 'direct' ? visit.visitType === 'Direct Visit' : visit.visitType === 'Expert Assisted Visit'
+                );
+            }
+            
+            // Filter by status
+            if (currentFilter !== 'all') {
+                visitsToShow = visitsToShow.filter(visit => 
+                    (visit.status || '').toLowerCase() === currentFilter.toLowerCase()
+                );
+            }
+            
+            // Sort by date (most recent first)
+            visitsToShow.sort((a, b) => {
+                const dateA = new Date(a.visitDate + ' ' + a.visitTime);
+                const dateB = new Date(b.visitDate + ' ' + b.visitTime);
+                return dateB - dateA;
+            });
+            
+            if (visitsToShow.length === 0) {
+                container.classList.add('hidden');
+                noVisits.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noVisits.classList.add('hidden');
+            
+            container.innerHTML = visitsToShow.map(visit => createVisitCard(visit)).join('');
+        }
+
+        function createVisitCard(visit) {
+            const visitDateFormatted = visit.visitDate 
+                ? new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                })
+                : 'To Be Coordinated';
+            
+            const visitTimeDisplay = visit.visitTime || 'TBD';
+            
+            const status = (visit.status || '').toLowerCase();
+            let borderColor = 'border-yellow-500';
+            let badgeClass = 'badge-pending';
+            
+            if (status === 'accepted') {
+                borderColor = 'border-green-500';
+                badgeClass = 'badge-accepted';
+            } else if (status === 'rejected') {
+                borderColor = 'border-red-500';
+                badgeClass = 'badge-rejected';
+            }
+            
+            const propertyName = visit.propertyDetails?.name || visit.propertyDetails?.propertyName || 'Property';
+            const visitTypeIcon = visit.visitType === 'Expert Assisted Visit' ? '👨‍💼' : '🏠';
+            const visitTypeLabel = visit.visitType === 'Expert Assisted Visit' ? 'Expert Assisted' : 'Direct Visit';
+            
+            // Check reschedule eligibility
+            const timeInfo = getTimeUntilVisit(visit.visitDate, visit.visitTime);
+            const canReschedule = timeInfo.canReschedule && !timeInfo.isPast && status !== 'rejected' && visit.status !== 'Cancelled by Builder' && visit.status !== 'Completed';
+            const timeRemainingText = formatTimeRemaining(timeInfo.hours, status);
+            
+            // Expert details section (only for expert-assisted visits)
+            const expertSection = visit.visitType === 'Expert Assisted Visit' && visit.expertName ? `
+                <div class="bg-teal-50 p-3 rounded-lg mb-3">
+                    <p class="text-xs text-teal-600 font-semibold mb-1">Expert Consultant</p>
+                    <p class="font-semibold text-sm text-gray-800">${visit.expertName}</p>
+                    ${visit.expertPhone ? `<p class="text-xs text-gray-600">📞 ${visit.expertPhone}</p>` : ''}
+                </div>
+            ` : '';
+            
+            return `
+                <div class="visit-card border-l-4 ${borderColor}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">${visitTypeIcon} ${visitTypeLabel}</span>
+                            </div>
+                            <p class="font-bold text-gray-800">${propertyName}</p>
+                            <p class="text-sm text-gray-600">${visit.propertyDetails?.location}</p>
+                        </div>
+                        <span class="badge ${badgeClass}">${visit.status}</span>
+                    </div>
+                    
+                    <!-- Visit Date & Time -->
+                    <div class="bg-blue-50 border border-blue-200 p-2 rounded-lg mb-3">
+                        <p class="text-xs text-blue-700 font-semibold mb-1">Visit Scheduled</p>
+                        <div class="flex items-center space-x-3">
+                            <p class="text-sm font-bold text-gray-800">📅 ${visitDateFormatted}</p>
+                            <p class="text-sm font-bold text-gray-800">🕐 ${visitTimeDisplay}</p>
+                        </div>
+                    </div>
+                    
+                    ${expertSection}
+                    
+                    <!-- Builder Details -->
+                    <div class="bg-purple-50 p-3 rounded-lg mb-3">
+                        <p class="text-xs text-purple-600 font-semibold mb-1">Builder</p>
+                        <p class="font-semibold text-sm text-gray-800">${visit.builderName}</p>
+                    </div>
+                    
+                    <!-- Property Details -->
+                    <div class="text-xs text-gray-600 space-y-1">
+                        <p>🏠 ${visit.propertyDetails?.bhk || 'N/A'} BHK • ${visit.propertyDetails?.sqft || 'N/A'} sq.ft.</p>
+                        <p>💰 ${formatPrice(visit.propertyDetails?.price)}</p>
+                        <p>📍 ${visit.propertyDetails?.location}</p>
+                    </div>
+                    
+                    <!-- Reschedule Timer / Visit Status Message -->
+                    ${status === 'pending' && timeInfo.isPast ? `
+                        <div class="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 p-2 rounded-lg mb-3">
+                            <p class="text-xs font-semibold text-red-800">
+                                ⚠️ Visit time has passed - ${visit.visitType === 'Expert Assisted Visit' ? 'Expert' : 'Builder'} has not responded to this request
+                            </p>
+                        </div>
+                    ` : status === 'pending' && !timeInfo.canReschedule && !timeInfo.isPast ? `
+                        <div class="bg-gradient-to-r from-orange-50 to-orange-100 border-l-4 border-orange-500 p-2 rounded-lg mb-3">
+                            <p class="text-xs font-semibold text-orange-800">
+                                🔒 Reschedule window closed - Awaiting ${visit.visitType === 'Expert Assisted Visit' ? 'Expert' : 'Builder'} confirmation
+                            </p>
+                            <p class="text-xs text-orange-600 mt-1">Visit is within 24 hours. Contact ${visit.visitType === 'Expert Assisted Visit' ? 'Expert' : 'Builder'} directly for changes.</p>
+                        </div>
+                    ` : !timeInfo.isPast && status !== 'rejected' && visit.status !== 'Cancelled by Builder' && visit.status !== 'Completed' && visit.status !== 'Rescheduled - Awaiting Customer' ? `
+                        <div class="bg-gradient-to-r from-${canReschedule ? 'green' : 'orange'}-50 to-${canReschedule ? 'green' : 'orange'}-100 border-l-4 border-${canReschedule ? 'green' : 'orange'}-500 p-2 rounded-lg mb-3">
+                            <p class="text-xs font-semibold text-${canReschedule ? 'green' : 'orange'}-800">
+                                ${canReschedule ? '⏰' : '⚠️'} ${timeRemainingText}
+                            </p>
+                            ${!canReschedule && timeInfo.hours > 0 ? '<p class="text-xs text-gray-600 mt-1">Reschedule not available within 24 hours of visit</p>' : ''}
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Cancelled Notice -->
+                    ${visit.status === 'Cancelled by Builder' ? `
+                        <div class="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 p-3 rounded-lg mb-3">
+                            <p class="text-sm font-semibold text-red-800">🚫 Visit Cancelled by Builder</p>
+                            <p class="text-xs text-red-600 mt-1">This visit has been cancelled and cannot be rescheduled.</p>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Completed Notice -->
+                    ${visit.status === 'Completed' ? `
+                        <div class="bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 p-3 rounded-lg mb-3">
+                            <p class="text-sm font-semibold text-green-800">✅ Visit Completed</p>
+                            <p class="text-xs text-green-600 mt-1">This visit has been successfully completed.</p>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Proposed Time Notice -->
+                    ${visit.status === 'Rescheduled - Awaiting Customer' ? `
+                        <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 p-4 rounded-lg mb-3">
+                            <p class="text-sm font-semibold text-blue-800 mb-2">🔄 ${visit.visitType === 'Expert Assisted Visit' ? 'Consultant' : 'Builder'} Proposed New Time</p>
+                            <p class="text-xs text-blue-700 mb-3">The ${visit.visitType === 'Expert Assisted Visit' ? 'consultant' : 'builder'} has suggested a new schedule for your visit. Please review and respond.</p>
+                            <div class="bg-white p-3 rounded-lg">
+                                <p class="text-xs text-gray-600 mb-1">Proposed Schedule:</p>
+                                <div class="flex items-center space-x-3">
+                                    <p class="text-sm font-bold text-gray-800">📅 ${new Date(visit.proposedDate).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                    <p class="text-sm font-bold text-gray-800">🕐 ${visit.proposedTime}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Action Buttons -->
+                    <div class="mt-3 flex gap-2">
+                        ${visit.status === 'Rescheduled - Awaiting Customer' ? `
+                            <button onclick="acceptProposedTime(${visit.id})" 
+                                class="flex-1 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                ✓ Accept
+                            </button>
+                            <button onclick="rejectProposedTime(${visit.id})" 
+                                class="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                ✗ Reject
+                            </button>
+                        ` : `
+                            <button onclick="viewVisitDetails(${visit.id})" 
+                                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                View Details
+                            </button>
+                            ${visit.status === 'Cancelled by Builder' ? `
+                                <button onclick="viewCancellationReason(${visit.id})" 
+                                    class="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150">
+                                    📋 Cancellation Reason
+                                </button>
+                            ` : visit.status !== 'Completed' ? `
+                                <button onclick="openRescheduleModal(${visit.id})" 
+                                    class="flex-1 bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold py-2 px-3 rounded-lg transition duration-150 ${!canReschedule ? 'opacity-50 cursor-not-allowed' : ''}" 
+                                    ${!canReschedule ? `disabled title="${timeInfo.isPast ? 'Visit has passed' : status === 'rejected' ? 'Rejected visits cannot be rescheduled' : 'Reschedule not available within 24 hours of visit'}"` : ''}>
+                                    📅 Reschedule
+                                </button>
+                            ` : ''}
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterVisits(status) {
+            currentFilter = status;
+            
+            // Update button styles
+            document.getElementById('filter-all').className = 'flex-1 px-3 py-2 text-sm font-semibold rounded-lg ' + 
+                (status === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200');
+            document.getElementById('filter-pending').className = 'flex-1 px-3 py-2 text-sm font-semibold rounded-lg ' + 
+                (status === 'Pending' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200');
+            document.getElementById('filter-accepted').className = 'flex-1 px-3 py-2 text-sm font-semibold rounded-lg ' + 
+                (status === 'Accepted' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200');
+            
+            renderVisitsList();
+        }
+
+        function viewVisitDetails(visitId) {
+            const visit = allVisits.find(v => v.id == visitId);
+            if (!visit) return;
+            
+            const visitDate = new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            
+            const status = (visit.status || '').toLowerCase();
+            let statusBadge = '';
+            let statusMessage = '';
+            
+            if (status === 'pending') {
+                statusBadge = '<span class="badge badge-pending">Awaiting Confirmation</span>';
+                statusMessage = 'Your visit request is pending confirmation from the builder.';
+            } else if (status === 'accepted') {
+                statusBadge = '<span class="badge badge-accepted">Confirmed</span>';
+                statusMessage = 'Your visit has been confirmed! See you there!';
+            } else if (status === 'rejected') {
+                statusBadge = '<span class="badge badge-rejected">Declined</span>';
+                statusMessage = 'Unfortunately, this visit request was declined by the builder.';
+            }
+            
+            const propertyName = visit.propertyDetails?.name || visit.propertyDetails?.propertyName || 'Property';
+            const visitTypeIcon = visit.visitType === 'Expert Assisted Visit' ? '👨‍💼' : '🏠';
+            
+            // Expert section for expert-assisted visits
+            const expertSection = visit.visitType === 'Expert Assisted Visit' && visit.expertName ? `
+                <div class="bg-gradient-to-r from-teal-50 to-teal-100 border-l-4 border-teal-500 p-4 rounded-lg mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                        <span>👨‍💼</span> Expert Consultant
+                    </h4>
+                    <p class="font-bold text-lg text-gray-800">${visit.expertName}</p>
+                    ${visit.expertPhone ? `<p class="text-sm text-gray-600 mt-1">📞 ${visit.expertPhone}</p>` : ''}
+                    ${visit.expertEmail ? `<p class="text-sm text-gray-600">📧 ${visit.expertEmail}</p>` : ''}
+                </div>
+            ` : '';
+            
+            const modalContent = `
+                <!-- Visit Type Badge -->
+                <div class="mb-4">
+                    <span class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                        ${visitTypeIcon} ${visit.visitType}
+                    </span>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="mb-4">
+                    ${statusBadge}
+                    <p class="text-sm text-gray-600 mt-2">${statusMessage}</p>
+                </div>
+
+                <!-- Visit Schedule -->
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-2">📅 Scheduled Visit</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <p class="text-xs text-gray-600">Date</p>
+                            <p class="font-bold text-gray-800">${visitDate}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-600">Time</p>
+                            <p class="font-bold text-gray-800">${visit.visitTime}</p>
+                        </div>
+                    </div>
+                </div>
+
+                ${expertSection}
+
+                <!-- Property Details -->
+                <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 p-4 rounded-lg mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <span>🏢</span> Property Details
+                    </h4>
+                    <div class="space-y-2">
+                        <div>
+                            <p class="text-xs text-purple-600 font-semibold">Property Name</p>
+                            <p class="font-bold text-lg text-gray-800">${propertyName}</p>
+                        </div>
+                        ${visit.propertyDetails?.apartmentName ? `
+                            <div>
+                                <p class="text-xs text-purple-600 font-semibold">Apartment</p>
+                                <p class="font-semibold text-gray-800">${visit.propertyDetails.apartmentName}</p>
+                            </div>
+                        ` : ''}
+                        <div>
+                            <p class="text-xs text-purple-600 font-semibold">Location</p>
+                            <p class="text-gray-800">📍 ${visit.propertyDetails?.location || 'N/A'}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <div>
+                                <p class="text-xs text-purple-600 font-semibold">Configuration</p>
+                                <p class="text-gray-800">🏠 ${visit.propertyDetails?.bhk || 'N/A'} BHK</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-purple-600 font-semibold">Area</p>
+                                <p class="text-gray-800">📐 ${visit.propertyDetails?.sqft || visit.propertyDetails?.sqFt || 'N/A'} sq.ft</p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs text-purple-600 font-semibold">Price</p>
+                            <p class="font-bold text-lg text-gray-800">💰 ${formatPrice(visit.propertyDetails?.price)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Builder Details -->
+                <div class="bg-gradient-to-r from-orange-50 to-orange-100 border-l-4 border-orange-500 p-4 rounded-lg mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                        <span>🏗️</span> Builder Information
+                    </h4>
+                    <p class="font-bold text-lg text-gray-800">${visit.builderName}</p>
+                </div>
+
+                ${visit.notes ? `
+                    <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+                        <h4 class="font-semibold text-gray-800 mb-2">📝 Your Notes</h4>
+                        <p class="text-gray-700 text-sm">${visit.notes}</p>
+                    </div>
+                ` : ''}
+
+                <!-- Close Button -->
+                <div class="mt-6">
+                    <button onclick="closeVisitDetailsModal()" 
+                        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('modal-visit-content').innerHTML = modalContent;
+            document.getElementById('visit-details-modal').classList.add('active');
+        }
+
+        function closeVisitDetailsModal() {
+            document.getElementById('visit-details-modal').classList.remove('active');
+        }
+
+        let currentRescheduleVisit = null;
+
+        function openRescheduleModal(visitId) {
+            const visit = allVisits.find(v => v.id == visitId);
+            if (!visit) return;
+
+            // Check if visit can be rescheduled (24 hours before visit)
+            const status = (visit.status || '').toLowerCase();
+            const timeInfo = getTimeUntilVisit(visit.visitDate, visit.visitTime);
+            
+            if (visit.status === 'Cancelled by Builder') {
+                alert('This visit has been cancelled by the builder. You cannot reschedule it.');
+                return;
+            }
+            
+            if (status === 'rejected') {
+                alert('Rejected visits cannot be rescheduled.');
+                return;
+            }
+            
+            if (timeInfo.isPast) {
+                alert('This visit has already passed and cannot be rescheduled.');
+                return;
+            }
+            
+            if (!timeInfo.canReschedule) {
+                const hoursLeft = Math.floor(timeInfo.hours);
+                const minutesLeft = Math.floor((timeInfo.hours % 1) * 60);
+                alert(`Reschedule not available within 24 hours of the visit.\n\nTime remaining: ${hoursLeft} hours ${minutesLeft} minutes\n\nPlease contact the builder or expert directly for urgent changes.`);
+                return;
+            }
+
+            currentRescheduleVisit = visit;
+
+            // Populate current schedule
+            const visitDate = new Date(visit.visitDate).toLocaleDateString('en-IN', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            document.getElementById('current-visit-date').textContent = visitDate;
+            document.getElementById('current-visit-time').textContent = visit.visitTime;
+
+            // Populate property info
+            const propertyName = visit.propertyDetails?.name || visit.propertyDetails?.propertyName || 'Property';
+            document.getElementById('reschedule-property-name').textContent = propertyName;
+            document.getElementById('reschedule-property-location').textContent = visit.propertyDetails?.location || 'N/A';
+
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reschedule-date').setAttribute('min', today);
+            document.getElementById('reschedule-date').value = '';
+            document.getElementById('reschedule-time').value = '';
+            document.getElementById('reschedule-reason').value = '';
+
+            // Open modal
+            document.getElementById('reschedule-modal').classList.add('active');
+        }
+
+        function closeRescheduleModal() {
+            document.getElementById('reschedule-modal').classList.remove('active');
+            currentRescheduleVisit = null;
+        }
+
+        function viewCancellationReason(visitId) {
+            const visit = allVisits.find(v => v.id == visitId);
+            if (!visit) return;
+
+            const propertyName = visit.propertyDetails?.name || visit.propertyDetails?.propertyName || 'Property';
+            document.getElementById('cancelled-property-name').textContent = propertyName;
+            document.getElementById('cancelled-property-location').textContent = visit.propertyDetails?.location || 'N/A';
+            
+            // Format cancellation date
+            if (visit.cancellationDate) {
+                const cancelDate = new Date(visit.cancellationDate);
+                const formattedDate = cancelDate.toLocaleDateString('en-IN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const formattedTime = cancelDate.toLocaleTimeString('en-IN', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                document.getElementById('cancellation-date').textContent = `${formattedDate} at ${formattedTime}`;
+            } else {
+                document.getElementById('cancellation-date').textContent = 'Date not available';
+            }
+            
+            // Display cancellation reason
+            const reasonElement = document.getElementById('cancellation-reason-text');
+            if (visit.cancellationReason && visit.cancellationReason.trim()) {
+                reasonElement.textContent = visit.cancellationReason;
+            } else {
+                reasonElement.innerHTML = '<em class="text-gray-500">No reason provided by the builder.</em><br><br>The builder might have cancelled the visit due to high surge in site visits at your preferred date/time slot. Please try creating a new visit at a different day/time.';
+            }
+            
+            document.getElementById('cancellation-reason-modal').classList.add('active');
+        }
+
+        function closeCancellationReasonModal() {
+            document.getElementById('cancellation-reason-modal').classList.remove('active');
+        }
+
+        function confirmReschedule() {
+            const newDate = document.getElementById('reschedule-date').value;
+            const newTime = document.getElementById('reschedule-time').value;
+            const reason = document.getElementById('reschedule-reason').value;
+
+            if (!newDate || !newTime) {
+                alert('Please select both new date and time.');
+                return;
+            }
+
+            if (!currentRescheduleVisit) return;
+
+            // Check if the new date/time is different from current
+            if (currentRescheduleVisit.visitDate === newDate && currentRescheduleVisit.visitTime === newTime) {
+                alert('Please select a different date or time.');
+                return;
+            }
+
+            // Update the visit in localStorage
+            const isDirectVisit = currentRescheduleVisit.visitType === 'Direct Visit';
+            const storageKey = isDirectVisit ? 'visitBookings' : 'expertAssistedVisitRequests';
+            const allStoredVisits = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            const visitIndex = allStoredVisits.findIndex(v => v.id == currentRescheduleVisit.id);
+            
+            if (visitIndex !== -1) {
+                // Update with new schedule and reset status to pending
+                allStoredVisits[visitIndex].visitDate = newDate;
+                allStoredVisits[visitIndex].visitTime = newTime;
+                allStoredVisits[visitIndex].status = 'Pending';
+                allStoredVisits[visitIndex].rescheduleReason = reason;
+                allStoredVisits[visitIndex].rescheduledOn = new Date().toISOString();
+                
+                localStorage.setItem(storageKey, JSON.stringify(allStoredVisits));
+                
+                closeRescheduleModal();
+                
+                const formattedDate = new Date(newDate).toLocaleDateString('en-IN', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                alert(`Visit rescheduled successfully!\n\nNew Schedule:\nDate: ${formattedDate}\nTime: ${newTime}\n\nThe builder will review and confirm your new schedule.`);
+                
+                // Reload visits
+                loadVisits();
+            }
+        }
+
+        function previousPeriod() {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            }
+            renderCalendar();
+        }
+
+        function today() {
+            currentDate = new Date();
+            renderCalendar();
+        }
+
+        function nextPeriod() {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() + 1);
+            } else {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+            renderCalendar();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            
+            // Update toggle buttons
+            document.getElementById('day-view-btn').classList.toggle('active', view === 'day');
+            document.getElementById('month-view-btn').classList.toggle('active', view === 'month');
+            
+            // Update navigation labels
+            if (view === 'day') {
+                document.getElementById('prev-label').textContent = 'Prev';
+                document.getElementById('next-label').textContent = 'Next';
+            } else {
+                document.getElementById('prev-label').textContent = 'Prev Month';
+                document.getElementById('next-label').textContent = 'Next Month';
+            }
+            
+            renderCalendar();
+        }
+
+        function switchVisitType(type) {
+            currentVisitType = type;
+            
+            // Update toggle button styles
+            document.getElementById('type-all').className = 'px-3 py-2 text-sm font-semibold rounded-md ' + 
+                (type === 'all' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50');
+            document.getElementById('type-direct').className = 'px-3 py-2 text-sm font-semibold rounded-md ' + 
+                (type === 'direct' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50');
+            document.getElementById('type-expert').className = 'px-3 py-2 text-sm font-semibold rounded-md ' + 
+                (type === 'expert' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50');
+            
+            renderCalendar();
+            renderVisitsList();
+        }
+
+        function acceptProposedTime(visitId) {
+            if (!confirm('Accept the new proposed time?')) return;
+            
+            const visit = allVisits.find(v => v.id == visitId);
+            if (!visit) return;
+            
+            // Determine which storage to use based on visit type
+            const isDirectVisit = visit.visitType === 'Direct Visit';
+            const storageKey = isDirectVisit ? 'visitBookings' : 'expertAssistedVisitRequests';
+            
+            const allStoredVisits = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const visitIndex = allStoredVisits.findIndex(v => v.id == visitId);
+            
+            if (visitIndex !== -1) {
+                // Update to the proposed time and change status to Accepted
+                allStoredVisits[visitIndex].visitDate = visit.proposedDate;
+                allStoredVisits[visitIndex].visitTime = visit.proposedTime;
+                allStoredVisits[visitIndex].status = 'accepted';
+                
+                // Clear the proposed time fields
+                delete allStoredVisits[visitIndex].proposedDate;
+                delete allStoredVisits[visitIndex].proposedTime;
+                delete allStoredVisits[visitIndex].originalDate;
+                delete allStoredVisits[visitIndex].originalTime;
+                
+                localStorage.setItem(storageKey, JSON.stringify(allStoredVisits));
+                
+                const formattedDate = new Date(visit.proposedDate).toLocaleDateString('en-IN', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                alert(`New time accepted!\n\nYour visit is now scheduled for:\n${formattedDate} at ${visit.proposedTime}`);
+                
+                loadVisits();
+            }
+        }
+
+        function rejectProposedTime(visitId) {
+            if (!confirm('Reject the proposed time?\n\nThe visit will revert to the original schedule and remain in Accepted status.')) return;
+            
+            const visit = allVisits.find(v => v.id == visitId);
+            if (!visit) return;
+            
+            // Determine which storage to use based on visit type
+            const isDirectVisit = visit.visitType === 'Direct Visit';
+            const storageKey = isDirectVisit ? 'visitBookings' : 'expertAssistedVisitRequests';
+            
+            const allStoredVisits = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const visitIndex = allStoredVisits.findIndex(v => v.id == visitId);
+            
+            if (visitIndex !== -1) {
+                // Revert to original schedule if available, otherwise keep current
+                if (visit.originalDate && visit.originalTime) {
+                    allStoredVisits[visitIndex].visitDate = visit.originalDate;
+                    allStoredVisits[visitIndex].visitTime = visit.originalTime;
+                }
+                
+                allStoredVisits[visitIndex].status = 'accepted';
+                
+                // Clear the proposed time fields
+                delete allStoredVisits[visitIndex].proposedDate;
+                delete allStoredVisits[visitIndex].proposedTime;
+                delete allStoredVisits[visitIndex].originalDate;
+                delete allStoredVisits[visitIndex].originalTime;
+                
+                localStorage.setItem(storageKey, JSON.stringify(allStoredVisits));
+                
+                alert('Proposed time rejected.\n\nThe visit remains at the original schedule.');
+                
+                loadVisits();
+            }
+        }
+        
+        function formatPrice(price) {
+            if (!price) return 'N/A';
+            const numPrice = parseFloat(price);
+            if (numPrice >= 10000000) {
+                return `₹${(numPrice / 10000000).toFixed(2)} Cr`;
+            } else if (numPrice >= 100000) {
+                return `₹${(numPrice / 100000).toFixed(2)} L`;
+            }
+            return `₹${numPrice.toLocaleString('en-IN')}`;
+        }
+
+        function getTimeUntilVisit(visitDate, visitTime) {
+            // Handle cases where date/time is not set (e.g., auto-assigned expert visits)
+            if (!visitDate || !visitTime) {
+                return {
+                    isPast: false,
+                    hours: 999, // Large number to indicate "TBD"
+                    canReschedule: false,
+                    isTBD: true
+                };
+            }
+            
+            // Parse visit date and time more robustly
+            // visitDate format: "2025-12-21"
+            // visitTime format: "09:00 AM"
+            
+            // Split the date
+            const [year, month, day] = visitDate.split('-').map(Number);
+            
+            // Parse time
+            let [time, period] = visitTime.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            
+            // Convert to 24-hour format
+            if (period === 'PM' && hours !== 12) {
+                hours += 12;
+            } else if (period === 'AM' && hours === 12) {
+                hours = 0;
+            }
+            
+            // Create date object with local timezone
+            const visitDateTime = new Date(year, month - 1, day, hours, minutes);
+            const now = new Date();
+            
+            // Calculate 24 hours before visit (the reschedule deadline)
+            const rescheduleDeadline = new Date(visitDateTime.getTime() - (24 * 60 * 60 * 1000));
+            
+            // Time remaining until the reschedule deadline
+            const timeUntilDeadline = rescheduleDeadline - now;
+            const hoursUntilDeadline = timeUntilDeadline / (1000 * 60 * 60);
+            
+            // Time until actual visit
+            const timeUntilVisit = visitDateTime - now;
+            
+            return {
+                milliseconds: timeUntilDeadline,
+                hours: hoursUntilDeadline,
+                canReschedule: hoursUntilDeadline > 0,
+                isPast: timeUntilVisit < 0
+            };
+        }
+
+        function formatTimeRemaining(hours, status) {
+            // Handle TBD case (auto-assigned visits without specific date/time)
+            if (hours >= 999) {
+                return 'Date & Time To Be Coordinated by Expert';
+            }
+            
+            if (hours < 0) {
+                // Only show "Visit has passed" for pending visits
+                if (status === 'pending') {
+                    return 'Visit time has passed - Awaiting builder response';
+                }
+                return 'Rescheduling not available';
+            }
+            if (hours < 1) {
+                const minutes = Math.floor(hours * 60);
+                return `Rescheduling closes in ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+            }
+            if (hours < 24) {
+                const wholeHours = Math.floor(hours);
+                return `${wholeHours} Hour${wholeHours !== 1 ? 's' : ''} Left to Reschedule`;
+            }
+            const days = Math.floor(hours / 24);
+            const remainingHours = Math.floor(hours % 24);
+            if (days === 0) {
+                return `${remainingHours} Hour${remainingHours !== 1 ? 's' : ''} Left to Reschedule`;
+            }
+            return `${days} Day${days !== 1 ? 's' : ''} ${remainingHours}h Left to Reschedule`;
+        }
+    </script>
+</body>
+</html>
