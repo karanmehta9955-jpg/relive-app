@@ -872,6 +872,18 @@ def change_password():
         return jsonify({"success": False, "message": str(e)}), 500
 
 
+# --- Serve Static Files (HTML, CSS, JS, Images) ---
+@app.route('/')
+def serve_index():
+    return send_from_directory('.', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    if os.path.exists(path):
+        return send_from_directory('.', path)
+    return send_from_directory('.', 'index.html')
+
+
 # --- Server Start ---
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
