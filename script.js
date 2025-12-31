@@ -116,7 +116,7 @@ async function handleUnifiedLogin() {
     };
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/unified-login", {
+        const response = await fetch("https://relive-app.onrender.com/unified-login", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(data)
@@ -174,7 +174,7 @@ async function handleUnifiedSignup() {
     };
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/signup", {
+        const response = await fetch("https://relive-app.onrender.com/signup", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(data)
@@ -285,7 +285,7 @@ async function handleSignup(role) {
         role: role // Pass the role to the backend
     };
 
-    const response = await fetch("http://127.0.0.1:5000/signup", {
+    const response = await fetch("https://relive-app.onrender.com/signup", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data)
@@ -311,7 +311,7 @@ async function handleLogin(role) {
         role: role // Pass the role to the backend
     };
 
-    const response = await fetch("http://127.0.0.1:5000/login", {
+    const response = await fetch("https://relive-app.onrender.com/login", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data)

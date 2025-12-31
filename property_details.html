@@ -1053,7 +1053,7 @@
 
             try {
                 // Use Flask API to get property details with properly parsed amenities
-                const response = await fetch(`http://127.0.0.1:5000/get_listing_by_timestamp/${timestamp}`);
+                const response = await fetch(`https://relive-app.onrender.com/get_listing_by_timestamp/${timestamp}`);
                 const result = await response.json();
 
                 if (!result.success) {

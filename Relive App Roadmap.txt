@@ -1,0 +1,92 @@
+
+Relive App Roadmap
+
+1. Create welcome window to choose role
+2. After choosing role, redirect to login / signup page.
+3. Create individual dashboard after login
+
+Builder Dashboard 
+
+1. On right top corner name of the user should be visible (Ex: Welcome VTP)
+2. Beside name, there should be an option to logout
+3. Create three tabs: 
+i) Manage my tasks, 
+ii) Manage my listings, 
+iii) Marketing Mix
+
+i) Manage my tasks:
+* Divide entire dashboard in split screen.
+* Create calendar on right side of screen. When user click on a particular day, task of that day should be visible on left screen.
+* Columns to display on left screen would be: Customer Name, Time Slot Booked, Listing Name, Unit Type, Individual/ Consultant, Source
+* The calendar should display visit booked by customer for respective listing of each builder. It should look like teams’ calendar when someone schedules a visit.
+* When a user clicks on any calendar event, it should show popup with three options: Cancel, Accept, Completed, Delete.
+o Until user take any action on any event it should show a little highlighted.
+o If user cancels the event, it should show cancel mark on that event and should be visible as highlighted only. A notification must be sent to the customer who has booked the slot, regarding cancellation.
+o If user accepts the event, it should show accepted mark on that event and should be visible bold and in solid colour. A notification must be sent to the customer who has booked the slot, regarding booking confirmation.
+o When a user clicks on completed, it should send OTP on customer’s registered mobile number, and the builder can mark this as completed only after entering that OTP.
+o If a user marks the event as completed, it should show completed mark and should be visible in bold but a highlighted colour pattern. And a notification to consumer must be sent with a message like “Congratulation’s on completing your first visit through Relive, please rate / review your experience”.
+o A user can delete the event only after performing one of the actions from Cancel, Accept and Completed.
+o When user clicks on delete button, it should delete the entry from calendar and should not send any notification to customer.
+
+ii) Manage my listings.
+* On top right corner, user should have an option to create listing.
+* When a user creates listing this fields should be visible Name of the Listing*, Type*, Listing Price*, Created on*, Active Till, Status*, Action*
+* Each column should have filter / sort option with below options
+o Type: All *Filter* options in Inventory
+o Listing Price: Sort option, Hight to Low and Low to High
+o Created On: Sort Option, Early to Late and Late to Early
+o Active Till: Sort Option, Early to Late and Late to Early
+o Status: Active, Inactive, Draft, Sold as Filter options in the inventory
+* Action column should have three options Run Campaign, Edit and Delete. Edit should open the same create listing form to update details and delete should delete the entire entry from the dashboard.
+* When user edit the listing and updates the details, it should not create new entry with updated details. It should update existing entry with new details.
+* When a user clicks on Run a campaign, the listing should automatically list that listing under marketing mix dashboard and redirect the consumer to marketing mix dashboard page.
+* All these actions should be entered in csv file as logs with created time stamp.
+* Run campaign should list the same listing in third tab (Marketing Mix)
+
+iii) Marketing Mix:
+* Marketing mix dashboard should be divided into two screens. 
+* Left screen should show overall spending with various sources like Instagram, Facebook etc.
+* Right screen should show the same dashboard as manage my listing dashboard, but only those entries should be visible on which user have clicked on Run Campaign button.
+* When a user clicks on listing it should expand with below options visible: connect Instagram, connect Facebook, connect X, Connect Other Sources.
+* If the user gets connected on the Instagram, instead of connect Instagram, it should show an option of Run Marketing Campaign on Instagram. Similarly for others.
+* When user clicks on Run Marketing Campaign on Instagram, in a new browser window it should redirect to Instagram ad page. Similarly for others.
+
+Customer Dashboard
+
+1. On right top corner name of the user should be visible (Ex: Welcome VTP)
+2. Beside name, there should be an option to logout
+3. Create three tabs: 
+i) Search Properties, 
+ii) My Favourites, 
+iii) Schedule a Call
+
+i) Search Properties
+
+* Dashboard should have a header where on top left corner, it should be a logo of the company.
+* On centre there should be a search bar, in which consumer can search for any property by location, listing name, price and type
+* On top right there should be 5 options: Profile icon with user’s name, favourites icon, notification bell icon, button to go back to dashboard, button to logout.
+o Profile Icon: It should expand with a drop-down list of three options: My Profile, My Chats, My Plan. 
+* My profile button click should open a user profile page, which consist of three different options on left side of the screen: Basic Profile, Your Shortlists, Slots you Booked, Properties you visited, Consultants you contacted, Your Payments, Your Properties. Left side panel should remain constant with all these options and rest of the page should change as per selected option.
+* Basic profile page should have following fields: Username, First Name, Last Name, Email Id, Phone Number, Government ID Proof.
+* Your shortlist should show same dashboard as on the My Favourites page
+* Slots you booked should show all the listings on which customer booked a visit slot by clicking on the Book a Slot button of any listing.
+* Properties you visited should show those listings on which customer booked a slot and builder marked that slot as completed on builder dashboard. 
+* Consultants you contacted should show the dashboard that’s consisting of 5 columns: Consultant, Listing, Action (With two Option chat and call).
+* Listings on consultants you contacted should show only those entries for which customer clicked “Connect with Expert” button on search properties dashboard 
+* My chats should show all the consultant list with whom the customer has started a chat. Like WhatsApp UI.
+* My Plan should show different expert assistance plan opted by customer.
+o Favourite Icon: Click on favourites icon should redirect the customer to “My Favourites page”
+o Notification Icon: Click on notification icon shod expand with dropdown menu with all the customer notifications. When a consumer clicks on any notification, it should open a separate notification page again with UI like WhatsApp, where on left panel all the notifications available and when customer clicks on any notification it is visible on the right screen.
+* Main dashboard should divide the page in two parts, 30% reserved for left panel which has its separate scroll bar and 70% for right panel.
+o Left panel should consist of 8 different filters: BHK Type, Price Range, Visit Slot Availability, Possession, Preferred Locality, Property Type, Furnishing, Parking.
+
+ii) My Favourites:
+
+* My favourites should open a dashboard with header consisting of logo on top left.
+* On top right there should be 4 options: Profile icon with user’s name, notification bell icon, button to go back to dashboard, button to logout.
+* On centre there should be a search bar, in which consumer can search for any property by location, listing name, price and type
+* Main dashboard should show all listings like search properties page but only with those listings on which consumer clicked heart button.
+ 
+iii) Schedule a Call:
+
+* Schedule a call tap should open a dashboard which has UI like search properties, but instead of property listings, it should be portfolios of consultants / cp firms.
